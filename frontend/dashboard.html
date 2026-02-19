@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - FinanTra</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <!-- <div class="sidebar-header">
+            <img src="image/FinanTra_logo (2).png" class="sidebar-logo" alt="Logo">
+            <h2>FinanTra</h2>
+            <p class="welcome">Welcome, User</p>
+        </div> -->
+
+    <div class="sidebar-header">
+        <div class="logo-circle">
+        <img src="image/FinanTra_logo (2).png" alt="Logo">
+        </div>
+        <div class="brand-text">
+        <h2>Finan<span>Tra</span></h2>
+        <p>Welcome, User</p>
+        </div>
+     </div>
+
+
+        <!-- Finance Core -->
+        <div class="nav-group">
+            <p class="group-title">Finance Core</p>
+            <a class="active">Dashboard</a>
+            <a>Add Transaction</a>
+            <a>Transactions</a>
+            <a>Analytics</a>
+        </div>
+
+        <!-- Smart Tools -->
+        <div class="nav-group">
+            <p class="group-title">Smart Tools</p>
+            <a>Budget Planner</a>
+            <a>Monthly Comparison</a>
+            <a>Financial Health</a>
+        </div>
+
+        <!-- Project Info -->
+        <div class="nav-group">
+            <p class="group-title">Project Info</p>
+            <a>Project Showcase</a>
+            <a>Technologies</a>
+            <a>Download Report</a>
+            <a>Contact</a>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Account Info</p>
+            <a>Profile</a>
+            <a>Sign Out</a>
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main">
+
+        <!-- TOP CONTROL BAR -->
+        <div class="top-bar">
+            <div class="filters">
+                <button class="filter active">Monthly</button>
+                <button class="filter">Weekly</button>
+                <button class="filter">Yearly</button>
+            </div>
+
+            <button class="add-btn">+ Add Transaction</button>
+        </div>
+
+        <!-- SUMMARY CARDS -->
+        <div class="summary">
+
+            <div class="card">
+                <h3>Total Income</h3>
+                <p class="income">₹ 60,000</p>
+            </div>
+
+            <div class="card">
+                <h3>Total Expenses</h3>
+                <p class="expense">₹ 17,650</p>
+            </div>
+
+            <div class="card">
+                <h3>Net Savings</h3>
+                <p>₹ 42,350</p>
+            </div>
+
+            <div class="card">
+                <h3>Savings Rate</h3>
+                <p>70%</p>
+            </div>
+
+        </div>
+
+        <!-- CHART PLACEHOLDER -->
+        <div class="charts">
+            <div class="chart-box">
+                <h3>Expense Breakdown</h3>
+                <div class="chart-placeholder">Pie Chart Area</div>
+            </div>
+
+            <div class="chart-box">
+                <h3>Income vs Expense</h3>
+                <div class="chart-placeholder">Bar Chart Area</div>
+            </div>
+        </div>
+
+        <!-- RECENT TRANSACTIONS -->
+        <div class="transactions">
+            <h3>Recent Transactions</h3>
+
+            <table>
+                <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                </tr>
+                <tr>
+                    <td>12 Feb</td>
+                    <td>Groceries</td>
+                    <td class="expense">- ₹800</td>
+                </tr>
+                <tr>
+                    <td>13 Feb</td>
+                    <td>Salary</td>
+                    <td class="income">+ ₹25,000</td>
+                </tr>
+            </table>
+        </div>
+
+    </main>
+
+</div>
+
+</body>
+</html>
