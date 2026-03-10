@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <title>Add Transaction - FinanTra</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="addTransaction.css">
+    <link rel="stylesheet" href="css/addTransaction.css">
 </head>
+
 <body>
 
 <div class="layout">
@@ -77,19 +78,25 @@
             <!-- FORM CARD -->
             <div class="card form-card">
 
-                <div class="toggle-group">
+                <!-- <div class="toggle-group">
                     <button class="toggle active">Income</button>
                     <button class="toggle expense-toggle">Expense</button>
-                </div>
+                </div> -->
+                <div class="toggle-group">
+    <button type="button" id="incomeBtn" class="toggle active">Income</button>
+    <button type="button" id="expenseBtn" class="toggle expense-toggle">Expense</button>
+</div>
 
                 <label>Amount</label>
                 <input type="number" placeholder="Enter amount" class="amount-input">
 
                 <label>Category</label>
-<select id="category">
-    <option value="">Select category</option>
+<!-- <select id="category">
+    <option value="">Select category</option> -->
+    <select id="category"></select>
+<input type="text" id="customCategory" placeholder="Enter custom category" style="display:none; margin-top:8px;">
 
-    <optgroup label="Income Categories">
+    <!-- <optgroup label="Income Categories">
         <option value="Salary">Salary</option>
         <option value="Freelancing">Freelancing</option>
         <option value="Business">Business</option>
@@ -106,8 +113,8 @@
         <option value="Entertainment">Entertainment</option>
         <option value="Health">Health</option>
         <option value="Other Expense">Other</option>
-    </optgroup>
-</select>
+    </optgroup> -->
+<!-- </select> -->
 
 
                 <label>Date</label>
@@ -133,22 +140,22 @@
 
                 <div class="preview-item">
                     <span>Amount:</span>
-                    <strong>₹ 0</strong>
+                    <strong id="previewAmount">₹ 0</strong>
                 </div>
 
                 <div class="preview-item">
                     <span>Type:</span>
-                    <strong>Income</strong>
+                    <strong id="previewType">Income</strong>
                 </div>
 
                 <div class="preview-item">
                     <span>Category:</span>
-                    <strong>—</strong>
+                    <strong id="previewCategory">—</strong>
                 </div>
 
                 <div class="preview-item">
                     <span>Date:</span>
-                    <strong>—</strong>
+                   <strong id="previewDate">—</strong>
                 </div>
 
             </div>
@@ -158,6 +165,6 @@
     </main>
 
 </div>
-
+<script src="js/addTransaction.js"></script>
 </body>
 </html>

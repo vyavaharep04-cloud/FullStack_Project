@@ -1,0 +1,297 @@
+/* RESET */
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+min-height:100vh;
+display:flex;
+flex-direction:column;
+background-color:#c4f8ff;
+font-family:'Segoe UI',sans-serif;
+overflow-x:hidden;
+}
+
+/* HEADER */
+.main-header{
+height:80px;
+background-color:#6cc7d1;
+display:flex;
+align-content:center;
+position:relative;
+}
+
+.logo{
+height:75px;
+margin-left:20px;
+margin-top:2px;
+border-radius:50%;
+}
+
+.brandtitle{
+position:absolute;
+left:50%;
+transform:translateX(-50%);
+font-size:58px;
+font-weight:800;
+font-family:Cambria,Cochin,Georgia,Times,'Times New Roman',serif;
+color:#1f82a6;
+letter-spacing:1px;
+}
+
+.brandtitle span{
+color:teal;
+}
+
+/* AUTH SECTION */
+.auth-section{
+flex:1;
+position:relative;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+gap:18px;
+overflow:hidden;
+}
+
+/* BACKGROUND GRAPH */
+.auth-section::before,
+.auth-section::after{
+content:"";
+position:absolute;
+width:500px;
+height:300px;
+background:url("../image/finance-line.svg") no-repeat;
+background-size:contain;
+opacity:0.35;
+z-index:0;
+}
+
+
+.auth-section::before{
+left:-120px;
+bottom:120px;
+}
+
+.auth-section::after{
+right:-120px;
+top:160px;
+transform:rotate(180deg);
+}
+
+/* CARD */
+.auth-card{
+position:relative;
+z-index:1;
+width:340px;
+/* background:white; */
+background:rgba(255,255,255,0.92);
+backdrop-filter:blur(4px);
+padding:28px;
+border-radius:14px;
+box-shadow:0 6px 18px rgba(0,0,0,0.12);
+}
+
+.auth-card h2{
+text-align:center;
+margin-bottom:15px;
+color:#0f91b5;
+}
+
+/* FORM */
+.auth-form{
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.auth-form label{
+font-size:14px;
+}
+
+.auth-form input{
+padding:10px;
+border-radius:6px;
+border:1px solid #ccc;
+font-size:14px;
+}
+
+.auth-form input:focus{
+outline:none;
+border-color:#1f82a6;
+}
+
+/* BUTTON */
+.auth-btn{
+margin-top:12px;
+padding:12px;
+border-radius:30px;
+border:none;
+background:#0f91b5;
+color:white;
+font-size:15px;
+font-weight:600;
+cursor:pointer;
+transition:background .3s ease;
+}
+
+.auth-btn:hover{
+background:#0b7a99;
+transform: translateY(-2px);
+}
+
+/* LINKS */
+.links{
+display:flex;
+justify-content:space-between;
+font-size:14px;
+margin-top:8px;
+}
+
+.links a{
+text-decoration:none;
+color:#0f91b5;
+}
+
+.links a:hover{
+text-decoration:underline;
+}
+
+/* SEPARATOR */
+.separator{
+display:flex;
+align-items:center;
+width:340px;
+}
+
+.separator::before,
+.separator::after{
+content:"";
+flex:1;
+height:1px;
+background:#ccc;
+}
+
+.separator span{
+padding:0 10px;
+font-size:14px;
+color:#777;
+}
+
+/* GUEST BUTTON */
+.guest-btn{
+width:340px;
+padding:12px;
+border-radius:30px;
+border:none;
+background:#e8f6f9;
+color:#0f91b5;
+font-size:15px;
+cursor:pointer;
+}
+
+.guest-btn:hover{
+background:#d6eef4;
+}
+
+/* TEXT */
+.quote{
+font-size:14px;
+color:#021222;
+margin-top:6px;
+text-align:center;
+}
+
+.info-text{
+font-size:14px;
+margin-bottom:15px;
+text-align:center;
+color:#555;
+}
+
+/* BOTTOM LINK */
+.bottom-link{
+margin-top:15px;
+text-align:center;
+}
+
+.bottom-link a{
+text-decoration:none;
+color:#0f91b5;
+font-size:14px;
+}
+
+.bottom-link a:hover{
+text-decoration:underline;
+}
+
+/* FOOTER */
+.main-footer{
+margin-top: auto;
+text-align:center;
+padding:12px;
+font-size:13px;
+background:#6cc7d1;
+color:#04313a;
+border-top:1px solid rgba(0,0,0,.05);
+}
+
+input:hover{
+border-color:#0f91b5;
+}
+
+/* RESPONSIVE */
+@media (max-width:768px){
+
+.brandtitle{
+font-size:36px;
+}
+
+.logo{
+height:55px;
+}
+
+.auth-card{
+width:90%;
+max-width:360px;
+}
+
+.separator,
+.guest-btn{
+width:90%;
+max-width:360px;
+}
+
+.auth-section::before,
+.auth-section::after{
+width:300px;
+height:200px;
+opacity:.15;
+}
+
+}
+
+@media (max-width:480px){
+
+.main-header{
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+.brandtitle{
+position:static;
+transform:none;
+font-size:26px;
+}
+
+.logo{
+position:absolute;
+left:10px;
+height:45px;
+}
+
+}
