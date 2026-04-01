@@ -1,0 +1,553 @@
+/* ================================
+   transactions.css
+   Page-specific styles only.
+   Sidebar handled by dashboard.css
+================================ */
+
+
+/* ================================
+   TOP BAR
+================================ */
+.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.page-header-text h1 {
+    font-size: 26px;
+    color: #1f82a6;
+    font-weight: 700;
+}
+
+.page-header-text .subtitle {
+    font-size: 14px;
+    color: #888;
+    margin-top: 2px;
+}
+
+.add-new-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #1f82a6;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background 0.2s;
+}
+
+.add-new-btn:hover { background: #186e8f; }
+
+
+/* ================================
+   SUMMARY CARDS
+================================ */
+.txn-summary {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.txn-summary-card {
+    flex: 1;
+    min-width: 160px;
+    background: white;
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    border-left: 4px solid transparent;
+    transition: transform 0.2s;
+}
+
+.txn-summary-card:hover { transform: translateY(-2px); }
+
+.income-card  { border-left-color: #28a745; }
+.expense-card { border-left-color: #dc3545; }
+.net-card     { border-left-color: #1f82a6; }
+.count-card   { border-left-color: teal; }
+
+.summary-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.income-card  .summary-icon { background: #e8f8ee; color: #28a745; }
+.expense-card .summary-icon { background: #fdecea; color: #dc3545; }
+.net-card     .summary-icon { background: #e6f4f7; color: #1f82a6; }
+.count-card   .summary-icon { background: #e0f7f7; color: teal; }
+
+.summary-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.summary-info span {
+    font-size: 12px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.summary-info strong {
+    font-size: 18px;
+    font-weight: 700;
+    color: #222;
+}
+
+
+/* ================================
+   CONTROLS BAR
+================================ */
+.controls-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    align-items: center;
+    background: white;
+    padding: 14px 18px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Search */
+.search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #1f82a6;
+    font-size: 13px;
+}
+
+.search-wrap input {
+    width: 100%;
+    padding: 9px 14px 9px 34px;
+    border: 1.5px solid #dde4ea;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'Segoe UI', sans-serif;
+    background: #f8fbfd;
+    color: #333;
+    outline: none;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+
+.search-wrap input:focus {
+    border-color: #1f82a6;
+    box-shadow: 0 0 0 3px rgba(31, 130, 166, 0.1);
+    background: white;
+}
+
+/* Selects */
+.filter-select {
+    padding: 9px 14px;
+    border: 1.5px solid #dde4ea;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'Segoe UI', sans-serif;
+    background: #f8fbfd;
+    color: #444;
+    cursor: pointer;
+    outline: none;
+    transition: border 0.2s;
+    min-width: 130px;
+}
+
+.filter-select:focus {
+    border-color: #1f82a6;
+}
+
+
+/* ================================
+   TRANSACTION LIST
+================================ */
+.txn-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+
+/* ================================
+   DATE GROUP HEADER
+================================ */
+.date-group {
+    margin-bottom: 4px;
+}
+
+.date-group-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 4px 6px;
+}
+
+.date-group-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #888;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.date-group-line {
+    flex: 1;
+    height: 1px;
+    background: #eee;
+}
+
+.date-group-total {
+    font-size: 12px;
+    color: #aaa;
+    white-space: nowrap;
+}
+
+
+/* ================================
+   TRANSACTION ITEM
+================================ */
+.txn-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: white;
+    padding: 14px 18px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f0f4f8;
+    transition: box-shadow 0.2s, transform 0.2s;
+    animation: itemFadeIn 0.2s ease;
+}
+
+@keyframes itemFadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.txn-item:hover {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.09);
+    transform: translateX(2px);
+}
+
+
+/* Emoji circle */
+.txn-emoji {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    background: #f0f4f8;
+}
+
+.txn-emoji.income-emoji  { background: #e8f8ee; }
+.txn-emoji.expense-emoji { background: #fdecea; }
+
+
+/* Transaction info */
+.txn-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.txn-category {
+    font-size: 15px;
+    font-weight: 600;
+    color: #222;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.txn-notes {
+    font-size: 12px;
+    color: #888;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* Payment badge */
+.txn-payment {
+    background: #f0f4f8;
+    color: #666;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+
+/* Amount + type */
+.txn-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.txn-amount {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.txn-amount.income  { color: #28a745; }
+.txn-amount.expense { color: #dc3545; }
+
+.txn-type-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 8px;
+}
+
+.txn-type-badge.income  {
+    background: #e8f8ee;
+    color: #28a745;
+}
+
+.txn-type-badge.expense {
+    background: #fdecea;
+    color: #dc3545;
+}
+
+
+/* Delete button */
+.txn-delete {
+    background: none;
+    border: none;
+    color: #ddd;
+    cursor: pointer;
+    font-size: 15px;
+    padding: 6px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    transition: color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.txn-delete:hover {
+    color: #dc3545;
+    background: #fdecea;
+}
+
+
+/* ================================
+   LOAD MORE BUTTON
+================================ */
+.load-more-wrap {
+    display: none;
+    justify-content: center;
+    margin: 16px 0 8px;
+}
+
+.load-more-wrap.visible { display: flex; }
+
+.load-more-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 30px;
+    border: 1.5px solid #1f82a6;
+    border-radius: 25px;
+    background: white;
+    color: #1f82a6;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.load-more-btn:hover {
+    background: #1f82a6;
+    color: white;
+}
+
+
+/* ================================
+   EMPTY STATE
+================================ */
+.empty-state {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.empty-state.visible { display: block; }
+
+.empty-icon {
+    font-size: 48px;
+    color: #ddd;
+    margin-bottom: 16px;
+    display: block;
+}
+
+.empty-state h3 {
+    font-size: 18px;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    font-size: 14px;
+    color: #aaa;
+    margin-bottom: 24px;
+}
+
+.empty-add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #1f82a6;
+    color: white;
+    padding: 11px 24px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.empty-add-btn:hover { background: #186e8f; }
+
+
+/* ================================
+   DELETE CONFIRM SNACKBAR
+================================ */
+.delete-confirm-bar {
+    display: none;
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 500;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    z-index: 999;
+    animation: snackIn 0.3s ease;
+    white-space: nowrap;
+}
+
+.delete-confirm-bar.visible { display: flex; }
+
+@keyframes snackIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+
+/* ================================
+   RESPONSIVE — 900px
+================================ */
+@media (max-width: 900px) {
+
+    .txn-summary-card {
+        min-width: calc(50% - 8px);
+    }
+
+}
+
+
+/* ================================
+   RESPONSIVE — 768px
+================================ */
+@media (max-width: 768px) {
+
+    .top-bar {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .controls-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .filter-select {
+        width: 100%;
+    }
+
+    .txn-payment {
+        display: none;
+    }
+
+    .txn-notes {
+        max-width: 140px;
+    }
+
+}
+
+
+/* ================================
+   RESPONSIVE — 480px
+================================ */
+@media (max-width: 480px) {
+
+    .txn-summary-card {
+        min-width: 100%;
+    }
+
+    .txn-item {
+        padding: 12px 14px;
+        gap: 10px;
+    }
+
+    .txn-emoji {
+        width: 38px;
+        height: 38px;
+        font-size: 17px;
+    }
+
+    .txn-amount {
+        font-size: 15px;
+    }
+
+}

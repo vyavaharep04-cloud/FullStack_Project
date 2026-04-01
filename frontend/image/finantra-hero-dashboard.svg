@@ -1,0 +1,103 @@
+<svg width="600" height="380" viewBox="0 0 600 380" xmlns="http://www.w3.org/2000/svg">
+
+<!-- Background Gradient -->
+
+<defs>
+
+<linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0%" stop-color="#e9f7fb"/>
+<stop offset="100%" stop-color="#d6f0f6"/>
+</linearGradient>
+
+<linearGradient id="cardGrad" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0%" stop-color="#ffffff"/>
+<stop offset="100%" stop-color="#f6fcfe"/>
+</linearGradient>
+
+<filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+<feDropShadow dx="0" dy="10" stdDeviation="8" flood-color="#00000022"/>
+</filter>
+
+</defs>
+
+<!-- Main Background -->
+
+<rect width="600" height="380" rx="24" fill="url(#bgGrad)"/>
+
+<!-- Decorative Dots -->
+
+<g opacity="0.15">
+<circle cx="40" cy="60" r="3" fill="#0f91b5"/>
+<circle cx="80" cy="90" r="3" fill="#0f91b5"/>
+<circle cx="120" cy="60" r="3" fill="#0f91b5"/>
+<circle cx="160" cy="90" r="3" fill="#0f91b5"/>
+<circle cx="200" cy="60" r="3" fill="#0f91b5"/>
+</g>
+
+<!-- Main Dashboard Card -->
+
+<rect x="110" y="80" width="380" height="220" rx="18"
+fill="url(#cardGrad)" filter="url(#shadow)"/>
+
+<!-- Balance Card -->
+
+<rect x="130" y="100" width="340" height="65" rx="12"
+fill="#eaf9fc"/>
+
+<text x="150" y="125" font-size="16" fill="#1f82a6">
+Total Balance
+</text>
+
+<text x="150" y="150" font-size="28" font-weight="bold" fill="#0f91b5">
+₹52,400
+</text>
+
+<!-- Income Card -->
+
+<rect x="130" y="185" width="160" height="95" rx="12"
+fill="#f8fdff"/>
+
+<text x="145" y="205" font-size="14" fill="#1f82a6">
+Income
+</text>
+
+<polyline
+points="145,250 170,230 195,235 220,210 245,220 275,200"
+fill="none"
+stroke="#0f91b5"
+stroke-width="3"
+/>
+
+<!-- Expense Card -->
+
+<rect x="310" y="185" width="160" height="95" rx="12"
+fill="#f8fdff"/>
+
+<text x="325" y="205" font-size="14" fill="#1f82a6">
+Expenses
+</text>
+
+<rect x="335" y="235" width="16" height="35" fill="#0f91b5"/>
+<rect x="365" y="220" width="16" height="50" fill="#0f91b5"/>
+<rect x="395" y="230" width="16" height="40" fill="#0f91b5"/>
+<rect x="425" y="210" width="16" height="60" fill="#0f91b5"/>
+
+<!-- Floating Savings Card -->
+
+<rect x="400" y="45" width="150" height="65" rx="14"
+fill="#ffffff" filter="url(#shadow)"/>
+
+<text x="420" y="75" font-size="15" fill="#1f82a6">
+Savings
+</text>
+
+<text x="420" y="95" font-size="20" fill="#28a745">
++12%
+</text>
+
+<!-- Small Finance Icon -->
+
+<circle cx="460" cy="70" r="10" fill="#e9f7fb"/>
+<text x="456" y="74" font-size="12" fill="#0f91b5">$</text>
+
+</svg>

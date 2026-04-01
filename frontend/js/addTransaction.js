@@ -1,78 +1,657 @@
-const incomeBtn = document.getElementById("incomeBtn");
-const expenseBtn = document.getElementById("expenseBtn");
-const categorySelect = document.getElementById("category");
-const customCategoryInput = document.getElementById("customCategory");
+// ================================
+// ELEMENT REFERENCES
+// ================================
 
-const amountInput = document.querySelector(".amount-input");
-const dateInput = document.querySelector("input[type='date']");
+const incomeBtn       = document.getElementById("incomeBtn");
+const expenseBtn      = document.getElementById("expenseBtn");
+const amountInput     = document.getElementById("amountInput");
+const dateInput       = document.getElementById("dateInput");
+const notesInput      = document.getElementById("notesInput");
+const notesCount      = document.getElementById("notesCount");
+const addToListBtn    = document.getElementById("addToListBtn");
+const balanceAmount   = document.getElementById("balanceAmount");
 
-const previewAmount = document.getElementById("previewAmount");
-const previewType = document.getElementById("previewType");
-const previewCategory = document.getElementById("previewCategory");
-const previewDate = document.getElementById("previewDate");
+// Dropdown
+const dropdownSelected = document.getElementById("dropdownSelected");
+const dropdownOptions  = document.getElementById("dropdownOptions");
+const dropdownArrow    = document.getElementById("dropdownArrow");
+const selectedText     = document.getElementById("selectedText");
 
-let currentType = "Income";
+// Payment pills
+const paymentPills = document.querySelectorAll(".payment-pill");
 
-const incomeCategories = ["Salary", "Freelancing", "Business", "Investment", "Gift", "Other", "+ Add Custom Category"];
-const expenseCategories = ["Food", "Travel", "Shopping", "Bills", "Entertainment", "Health", "Other", "+ Add Custom Category"];
+// Error elements
+const amountError   = document.getElementById("amountError");
+const categoryError = document.getElementById("categoryError");
+const dateError     = document.getElementById("dateError");
 
-// Load categories
-function loadCategories(type) {
-    categorySelect.innerHTML = "<option value=''>Select category</option>";
-    
-    const categories = type === "Income" ? incomeCategories : expenseCategories;
-    
-    categories.forEach(cat => {
-        const option = document.createElement("option");
-        option.value = cat;
-        option.textContent = cat;
-        categorySelect.appendChild(option);
-    });
+// Session elements
+const sessionCard  = document.getElementById("sessionCard");
+const sessionList  = document.getElementById("sessionList");
+const sessionCount = document.getElementById("sessionCount");
+const totalIncome  = document.getElementById("totalIncome");
+const totalExpense = document.getElementById("totalExpense");
+const netTotal     = document.getElementById("netTotal");
+
+// Custom category panel
+const customCatPanel   = document.getElementById("customCatPanel");
+const customEmojiInput = document.getElementById("customEmojiInput");
+const customNameInput  = document.getElementById("customNameInput");
+
+// Success banner
+const successBanner = document.getElementById("successBanner");
+const successText   = document.getElementById("successText");
+
+
+// ================================
+// STATE
+// ================================
+
+let currentType      = "Income";
+let selectedCategory = "";
+let selectedEmoji    = "";
+let selectedPayment  = "Cash";
+let sessionItems     = [];
+const MAX_NOTES      = 150;
+
+
+// ================================
+// DEFAULT CATEGORIES
+// ================================
+
+const incomeCategories = [
+    { emoji: "💼", label: "Salary" },
+    { emoji: "💻", label: "Freelance" },
+    { emoji: "📈", label: "Investment" },
+    { emoji: "🎁", label: "Gift" },
+    { emoji: "🏢", label: "Business" },
+    { emoji: "💰", label: "Other Income" }
+];
+
+const expenseCategories = [
+    { emoji: "🍕", label: "Food & Dining" },
+    { emoji: "🏠", label: "Rent & Bills" },
+    { emoji: "🚗", label: "Transport" },
+    { emoji: "🛍️", label: "Shopping" },
+    { emoji: "💊", label: "Health" },
+    { emoji: "🎓", label: "Education" },
+    { emoji: "🎬", label: "Entertainment" },
+    { emoji: "📦", label: "Others" }
+];
+
+
+// ================================
+// INIT
+// ================================
+
+function init() {
+    dateInput.value = new Date().toISOString().split("T")[0];
+    loadCategories("Income");
+    loadBalance();
 }
 
-loadCategories(currentType);
+init();
 
-// Toggle buttons
-incomeBtn.addEventListener("click", () => {
+
+// ================================
+// LOAD BALANCE
+// ================================
+
+
+function loadBalance() {
+    const transactions = JSON.parse(localStorage.getItem("finantra_transactions")) || [];
+    const prefs        = JSON.parse(localStorage.getItem("finantra_preferences")) || {};
+
+    // Start from user's saved starting balance
+    let balance = parseFloat(prefs.startingBalance) || 0;
+
+    transactions.forEach(function (t) {
+        balance += t.type === "Income" ? parseFloat(t.amount) : -parseFloat(t.amount);
+    });
+
+    balanceAmount.textContent = "₹ " + balance.toLocaleString("en-IN");
+}
+
+
+// ================================
+// INCOME / EXPENSE TOGGLE
+// ================================
+
+incomeBtn.addEventListener("click", function () {
     currentType = "Income";
-    incomeBtn.classList.add("active");
-    expenseBtn.classList.remove("active");
+    incomeBtn.classList.add("income-active");
     expenseBtn.classList.remove("expense-active");
+    resetCategorySelection();
     loadCategories("Income");
-    previewType.textContent = "Income";
 });
 
-expenseBtn.addEventListener("click", () => {
+expenseBtn.addEventListener("click", function () {
     currentType = "Expense";
-    expenseBtn.classList.add("active");
     expenseBtn.classList.add("expense-active");
-    incomeBtn.classList.remove("active");
+    incomeBtn.classList.remove("income-active");
+    resetCategorySelection();
     loadCategories("Expense");
-    previewType.textContent = "Expense";
 });
 
-// Category change
-categorySelect.addEventListener("change", () => {
-    if (categorySelect.value === "+ Add Custom Category") {
-        customCategoryInput.style.display = "block";
-        previewCategory.textContent = "Custom";
-    } else {
-        customCategoryInput.style.display = "none";
-        previewCategory.textContent = categorySelect.value || "—";
+function resetCategorySelection() {
+    selectedCategory = "";
+    selectedEmoji    = "";
+    selectedText.textContent = "Select category";
+    dropdownSelected.classList.remove("open", "invalid");
+    dropdownOptions.classList.remove("open");
+    dropdownArrow.classList.remove("rotated");
+    hideCustomPanel();
+}
+
+
+// ================================
+// LOAD CATEGORIES INTO DROPDOWN
+// ================================
+
+function loadCategories(type) {
+    const defaults = type === "Income" ? incomeCategories : expenseCategories;
+
+    const storageKey = type === "Income"
+        ? "finantra_custom_income"
+        : "finantra_custom_expense";
+
+    const customs = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+    dropdownOptions.innerHTML = "";
+
+    // ── DEFAULT categories (no delete button)
+    defaults.forEach(function (cat) {
+        const div = document.createElement("div");
+        div.classList.add("dropdown-option");
+        div.setAttribute("data-value", cat.label);
+        div.innerHTML = `
+            <span class="option-emoji">${cat.emoji}</span>
+            <span class="option-label">${cat.label}</span>
+        `;
+
+        div.addEventListener("click", function () {
+            selectCategory(cat.label, cat.emoji, div);
+        });
+
+        dropdownOptions.appendChild(div);
+    });
+
+    // ── Divider between defaults and customs (only if customs exist)
+    if (customs.length > 0) {
+        const dividerCustom = document.createElement("div");
+        dividerCustom.classList.add("dropdown-divider");
+        dropdownOptions.appendChild(dividerCustom);
+    }
+
+    // ── CUSTOM categories (with delete button)
+    customs.forEach(function (cat) {
+        const div = document.createElement("div");
+        div.classList.add("dropdown-option", "custom-option");
+        div.setAttribute("data-value", cat.label);
+        div.innerHTML = `
+            <span class="option-emoji">${cat.emoji}</span>
+            <span class="option-label">${cat.label}</span>
+            <button class="option-delete-btn" title="Delete this category" onclick="deleteCustomCategory(event, '${cat.label}', '${type}')">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        `;
+
+        // Click on the row (not the delete button) selects category
+        div.addEventListener("click", function (e) {
+            if (e.target.closest(".option-delete-btn")) return;
+            selectCategory(cat.label, cat.emoji, div);
+        });
+
+        dropdownOptions.appendChild(div);
+    });
+
+    // ── Divider before Add Custom
+    const divider = document.createElement("div");
+    divider.classList.add("dropdown-divider");
+    dropdownOptions.appendChild(divider);
+
+    // ── Add Custom option
+    const addCustomDiv = document.createElement("div");
+    addCustomDiv.classList.add("add-custom-option");
+    addCustomDiv.innerHTML = `<i class="fa-solid fa-plus"></i> Add Custom Category`;
+    addCustomDiv.addEventListener("click", function () {
+        closeDropdown();
+        showCustomPanel();
+    });
+    dropdownOptions.appendChild(addCustomDiv);
+}
+
+
+// ================================
+// SELECT CATEGORY (shared helper)
+// ================================
+
+function selectCategory(label, emoji, div) {
+    selectedCategory = label;
+    selectedEmoji    = emoji;
+    selectedText.textContent = emoji + "  " + label;
+
+    document.querySelectorAll(".dropdown-option").forEach(function (o) {
+        o.classList.remove("selected");
+    });
+    div.classList.add("selected");
+
+    closeDropdown();
+    hideCustomPanel();
+    clearError("category");
+}
+
+
+// ================================
+// DELETE CUSTOM CATEGORY
+// ================================
+
+function deleteCustomCategory(event, name, type) {
+    // Stop the click from selecting the category
+    event.stopPropagation();
+
+    const confirmed = confirm(`Delete custom category "${name}"?\n\nPast transactions using this category will not be affected.`);
+    if (!confirmed) return;
+
+    const storageKey = type === "Income"
+        ? "finantra_custom_income"
+        : "finantra_custom_expense";
+
+    let customs = JSON.parse(localStorage.getItem(storageKey)) || [];
+    customs = customs.filter(function (c) { return c.label !== name; });
+    localStorage.setItem(storageKey, JSON.stringify(customs));
+
+    // If deleted category was currently selected — reset selection
+    if (selectedCategory === name) {
+        selectedCategory = "";
+        selectedEmoji    = "";
+        selectedText.textContent = "Select category";
+        dropdownSelected.classList.remove("invalid");
+    }
+
+    // Reload dropdown
+    loadCategories(type);
+}
+
+
+// ================================
+// DROPDOWN OPEN / CLOSE
+// ================================
+
+function toggleDropdown() {
+    dropdownOptions.classList.contains("open") ? closeDropdown() : openDropdown();
+}
+
+function openDropdown() {
+    dropdownOptions.classList.add("open");
+    dropdownSelected.classList.add("open");
+    dropdownArrow.classList.add("rotated");
+}
+
+function closeDropdown() {
+    dropdownOptions.classList.remove("open");
+    dropdownSelected.classList.remove("open");
+    dropdownArrow.classList.remove("rotated");
+}
+
+document.addEventListener("click", function (e) {
+    const dropdown = document.getElementById("categoryDropdown");
+    if (!dropdown.contains(e.target)) {
+        closeDropdown();
     }
 });
 
-// Custom category typing
-customCategoryInput.addEventListener("input", () => {
-    previewCategory.textContent = customCategoryInput.value || "Custom";
+
+// ================================
+// CUSTOM CATEGORY PANEL
+// ================================
+
+function showCustomPanel() {
+    customCatPanel.classList.add("visible");
+    customEmojiInput.focus();
+}
+
+function hideCustomPanel() {
+    customCatPanel.classList.remove("visible");
+    customEmojiInput.value = "";
+    customNameInput.value  = "";
+}
+
+function saveCustomCategory() {
+    const emoji = customEmojiInput.value.trim();
+    const name  = customNameInput.value.trim();
+
+    if (!emoji) {
+        customEmojiInput.focus();
+        customEmojiInput.style.borderColor = "#dc3545";
+        setTimeout(function () { customEmojiInput.style.borderColor = ""; }, 1500);
+        return;
+    }
+
+    if (!name) {
+        customNameInput.focus();
+        customNameInput.style.borderColor = "#dc3545";
+        setTimeout(function () { customNameInput.style.borderColor = ""; }, 1500);
+        return;
+    }
+
+    const storageKey = currentType === "Income"
+        ? "finantra_custom_income"
+        : "finantra_custom_expense";
+
+    const customs = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+    const exists = customs.some(function (c) {
+        return c.label.toLowerCase() === name.toLowerCase();
+    });
+
+    if (exists) {
+        alert("A category with this name already exists.");
+        return;
+    }
+
+    customs.push({ emoji: emoji, label: name });
+    localStorage.setItem(storageKey, JSON.stringify(customs));
+
+    loadCategories(currentType);
+
+    selectedCategory = name;
+    selectedEmoji    = emoji;
+    selectedText.textContent = emoji + "  " + name;
+
+    hideCustomPanel();
+    clearError("category");
+}
+
+
+// ================================
+// PAYMENT PILLS
+// ================================
+
+paymentPills.forEach(function (pill) {
+    pill.addEventListener("click", function () {
+        paymentPills.forEach(function (p) { p.classList.remove("active"); });
+        pill.classList.add("active");
+        selectedPayment = pill.getAttribute("data-method");
+    });
 });
 
-// Amount update
-amountInput.addEventListener("input", () => {
-    previewAmount.textContent = "₹ " + (amountInput.value || "0");
+
+// ================================
+// NOTES CHARACTER COUNTER
+// ================================
+
+notesInput.addEventListener("input", function () {
+    if (notesInput.value.length > MAX_NOTES) {
+        notesInput.value = notesInput.value.substring(0, MAX_NOTES);
+    }
+
+    const length = notesInput.value.length;
+    notesCount.textContent = length;
+
+    notesCount.classList.remove("warn", "danger");
+    if (length >= 131)      notesCount.classList.add("danger");
+    else if (length >= 101) notesCount.classList.add("warn");
 });
 
-// Date update
-dateInput.addEventListener("change", () => {
-    previewDate.textContent = dateInput.value || "—";
+
+// ================================
+// VALIDATION
+// ================================
+
+function validateForm() {
+    let valid = true;
+
+    if (!amountInput.value || parseFloat(amountInput.value) <= 0) {
+        amountError.classList.add("visible");
+        amountInput.classList.add("invalid");
+        valid = false;
+    }
+
+    if (!selectedCategory) {
+        categoryError.classList.add("visible");
+        dropdownSelected.classList.add("invalid");
+        valid = false;
+    }
+
+    if (!dateInput.value) {
+        dateError.classList.add("visible");
+        dateInput.classList.add("invalid");
+        valid = false;
+    }
+
+    return valid;
+}
+
+function clearError(field) {
+    if (field === "amount") {
+        amountError.classList.remove("visible");
+        amountInput.classList.remove("invalid");
+    }
+    if (field === "category") {
+        categoryError.classList.remove("visible");
+        dropdownSelected.classList.remove("invalid");
+    }
+    if (field === "date") {
+        dateError.classList.remove("visible");
+        dateInput.classList.remove("invalid");
+    }
+}
+
+amountInput.addEventListener("input", function () { clearError("amount"); });
+dateInput.addEventListener("change", function () { clearError("date"); });
+
+
+// ================================
+// ADD TO LIST
+// ================================
+
+addToListBtn.addEventListener("click", function () {
+    if (!validateForm()) return;
+
+    const item = {
+        id:       Date.now(),
+        type:     currentType,
+        amount:   parseFloat(amountInput.value),
+        category: selectedCategory,
+        emoji:    selectedEmoji || "💰",
+        date:     dateInput.value,
+        payment:  selectedPayment,
+        notes:    notesInput.value.trim()
+    };
+
+    sessionItems.push(item);
+    renderSessionList();
+
+    sessionCard.classList.add("visible");
+    successBanner.classList.remove("visible");
+
+    resetForm();
+
+    sessionCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
 });
+
+
+// ================================
+// RENDER SESSION LIST
+// ================================
+
+function renderSessionList() {
+    sessionList.innerHTML = "";
+
+    sessionItems.forEach(function (item) {
+        const isIncome      = item.type === "Income";
+        const sign          = isIncome ? "+ ₹" : "- ₹";
+        const amtClass      = isIncome ? "income" : "expense";
+        const formattedDate = formatDate(item.date);
+
+        const div = document.createElement("div");
+        div.classList.add("session-item");
+        div.innerHTML = `
+            <div class="item-left">
+                <div class="item-emoji">${item.emoji}</div>
+                <div class="item-info">
+                    <span class="item-category">${item.category}</span>
+                    <span class="item-meta">
+                        <span>${item.type}</span>
+                        <span>•</span>
+                        <span>${item.payment}</span>
+                        <span>•</span>
+                        <span>${formattedDate}</span>
+                        ${item.notes ? `<span>•</span><span>${item.notes}</span>` : ""}
+                    </span>
+                </div>
+            </div>
+            <div class="item-right">
+                <span class="item-amount ${amtClass}">
+                    ${sign}${item.amount.toLocaleString("en-IN")}
+                </span>
+                <button class="item-remove" onclick="removeItem(${item.id})" title="Remove">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        `;
+
+        sessionList.appendChild(div);
+    });
+
+    updateSessionTotals();
+}
+
+
+// ================================
+// REMOVE ITEM FROM SESSION
+// ================================
+
+function removeItem(id) {
+    sessionItems = sessionItems.filter(function (item) { return item.id !== id; });
+    renderSessionList();
+
+    if (sessionItems.length === 0) {
+        sessionCard.classList.remove("visible");
+    }
+}
+
+
+// ================================
+// UPDATE SESSION TOTALS
+// ================================
+
+function updateSessionTotals() {
+    let incomeTotal  = 0;
+    let expenseTotal = 0;
+
+    sessionItems.forEach(function (item) {
+        if (item.type === "Income") incomeTotal  += item.amount;
+        else                        expenseTotal += item.amount;
+    });
+
+    const net = incomeTotal - expenseTotal;
+
+    sessionCount.textContent = sessionItems.length;
+    totalIncome.textContent  = "₹ " + incomeTotal.toLocaleString("en-IN");
+    totalExpense.textContent = "₹ " + expenseTotal.toLocaleString("en-IN");
+    netTotal.textContent     = (net >= 0 ? "+ ₹" : "- ₹") + Math.abs(net).toLocaleString("en-IN");
+    netTotal.style.color     = net >= 0 ? "#28a745" : "#dc3545";
+}
+
+
+// ================================
+// SAVE ALL
+// ================================
+
+function saveAll() {
+    if (sessionItems.length === 0) return;
+
+    const existing = JSON.parse(localStorage.getItem("finantra_transactions")) || [];
+    const updated  = [...existing, ...sessionItems];
+    localStorage.setItem("finantra_transactions", JSON.stringify(updated));
+
+    const count = sessionItems.length;
+    successText.textContent = count + " transaction" + (count > 1 ? "s" : "") + " saved successfully!";
+    successBanner.classList.add("visible");
+
+    sessionItems = [];
+    sessionCard.classList.remove("visible");
+
+    loadBalance();
+
+    successBanner.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+    setTimeout(function () {
+        successBanner.classList.remove("visible");
+    }, 4000);
+}
+
+
+// ================================
+// CLEAR ALL
+// ================================
+
+// function clearAll() {
+//     if (sessionItems.length === 0) return;
+
+//     if (confirm("Clear all " + sessionItems.length + " item(s) from the session?")) {
+//         sessionItems = [];
+//         sessionCard.classList.remove("visible");
+//     }
+// }
+function clearAll() {
+    if (sessionItems.length === 0) return;
+
+    openModal({
+        icon:         "🗑️",
+        title:        "Clear Session?",
+        message:      `You have <strong>${sessionItems.length} unsaved transaction${sessionItems.length > 1 ? "s" : ""}</strong>.<br><br>These will not be saved.`,
+        confirmText:  "Clear All",
+        confirmClass: "",
+        onConfirm: function () {
+            sessionItems = [];
+            sessionCard.classList.remove("visible");
+        }
+    });
+}
+
+
+// ================================
+// RESET FORM
+// ================================
+
+function resetForm() {
+    amountInput.value      = "";
+    notesInput.value       = "";
+    notesCount.textContent = "0";
+    notesCount.classList.remove("warn", "danger");
+
+    dateInput.value = new Date().toISOString().split("T")[0];
+
+    selectedCategory = "";
+    selectedEmoji    = "";
+    selectedText.textContent = "Select category";
+    document.querySelectorAll(".dropdown-option").forEach(function (o) {
+        o.classList.remove("selected");
+    });
+
+    paymentPills.forEach(function (p) { p.classList.remove("active"); });
+    document.querySelector('[data-method="Cash"]').classList.add("active");
+    selectedPayment = "Cash";
+
+    clearError("amount");
+    clearError("category");
+    clearError("date");
+
+    amountInput.focus();
+}
+
+
+// ================================
+// FORMAT DATE
+// ================================
+
+function formatDate(dateStr) {
+    if (!dateStr) return "—";
+    const [year, month, day] = dateStr.split("-");
+    const months = ["Jan","Feb","Mar","Apr","May","Jun",
+                    "Jul","Aug","Sep","Oct","Nov","Dec"];
+    return day + " " + months[parseInt(month) - 1] + " " + year;
+}

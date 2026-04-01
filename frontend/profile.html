@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile - FinanTra</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="image/FinanTra_logo (2).png" type="image/png">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div class="layout">
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+
+        <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="sidebar-header">
+            <div class="logo-circle">
+                <img src="image/FinanTra_logo (2).png" alt="Logo">
+            </div>
+            <div class="brand-text">
+                <h2>Finan<span>Tra</span></h2>
+                <p>Welcome, User</p>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Finance Core</p>
+            <a href="dashboard.html">
+                <i class="fa-solid fa-house"></i>
+                <span class="link-text">Dashboard</span>
+            </a>
+            <a href="addTransaction.html">
+                <i class="fa-solid fa-plus-circle"></i>
+                <span class="link-text">Add Transaction</span>
+            </a>
+            <a href="transactions.html">
+                <i class="fa-solid fa-list"></i>
+                <span class="link-text">Transactions</span>
+            </a>
+            <a href="analytics.html">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span class="link-text">Analytics</span>
+            </a>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Smart Tools</p>
+            <a href="budgetPlanner.html">
+                <i class="fa-solid fa-wallet"></i>
+                <span class="link-text">Budget Planner</span>
+            </a>
+            <a href="savinggoal.html">
+                <i class="fa-solid fa-piggy-bank"></i>
+                <span class="link-text">Savings Goal Planner</span>
+            </a>
+            <a href="financialHealth.html">
+                <i class="fa-solid fa-heart-pulse"></i>
+                <span class="link-text">Financial Health</span>
+            </a>
+            <a href="currencyConverter.html">
+                <i class="fa-solid fa-coins"></i>
+                <span class="link-text">Currency Converter</span>
+            </a>
+            <a href="statement.html">
+                <i class="fa-solid fa-file-invoice"></i>
+                <span class="link-text">SOA Statement</span>
+            </a>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Account Info</p>
+            <a href="profile.html" class="active">
+                <i class="fa-solid fa-user"></i>
+                <span class="link-text">Profile</span>
+            </a>
+            <a href="login.html" class="signout-link">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span class="link-text">Sign Out</span>
+            </a>
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main" id="mainContent">
+
+        <!-- TOP BAR -->
+        <div class="top-bar">
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="page-header-text">
+                <h1>Profile</h1>
+                <p class="subtitle">Manage your account and preferences</p>
+            </div>
+        </div>
+
+
+        <!-- SECTION 1 — PROFILE HEADER -->
+        <div class="profile-header-card">
+            <div class="avatar-circle" id="avatarCircle">
+                <span id="avatarInitials">?</span>
+            </div>
+            <div class="profile-identity">
+                <h2 id="profileDisplayName">Your Name</h2>
+                <div class="profile-id-row">
+                    <span class="profile-id" id="profileUserId">FT-2026-XXXX</span>
+                    <button class="copy-id-btn" id="copyIdBtn" title="Copy ID" onclick="copyUserId()">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                </div>
+                <p class="member-since" id="memberSince">Member since —</p>
+            </div>
+        </div>
+
+
+        <!-- SECTION 2 — PERSONAL INFO -->
+        <div class="profile-card">
+            <div class="card-section-header">
+                <i class="fa-solid fa-user-pen"></i>
+                <h3>Personal Information</h3>
+            </div>
+
+            <div class="profile-form">
+
+                <div class="form-row">
+                    <label for="inputName">
+                        <i class="fa-solid fa-user field-icon"></i> Full Name
+                    </label>
+                    <input
+                        type="text"
+                        id="inputName"
+                        placeholder="Enter your full name"
+                        oninput="updateAvatarLive()"
+                    >
+                </div>
+
+                <div class="form-row">
+                    <label for="inputEmail">
+                        <i class="fa-solid fa-envelope field-icon"></i> Email
+                    </label>
+                    <input
+                        type="email"
+                        id="inputEmail"
+                        placeholder="Enter your email"
+                    >
+                </div>
+
+                <div class="form-row">
+                    <label for="inputPhone">
+                        <i class="fa-solid fa-phone field-icon"></i> Phone
+                        <span class="optional-tag">optional</span>
+                    </label>
+                    <input
+                        type="tel"
+                        id="inputPhone"
+                        placeholder="+91 XXXXX XXXXX"
+                    >
+                </div>
+
+                <div class="form-actions">
+                    <button class="save-btn" onclick="savePersonalInfo()">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Changes
+                    </button>
+                    <span class="save-success" id="personalSaveMsg">
+                        <i class="fa-solid fa-circle-check"></i> Saved!
+                    </span>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- SECTION 3 — FINANCIAL SUMMARY -->
+        <div class="profile-card">
+            <div class="card-section-header">
+                <i class="fa-solid fa-chart-line"></i>
+                <h3>Financial Summary</h3>
+                <span class="header-subtitle">All time</span>
+            </div>
+
+            <div class="fin-summary-grid">
+                <div class="fin-card">
+                    <div class="fin-icon income-bg">
+                        <i class="fa-solid fa-arrow-trend-up"></i>
+                    </div>
+                    <div class="fin-info">
+                        <span>Total Income</span>
+                        <strong id="finIncome">₹ 0</strong>
+                    </div>
+                </div>
+                <div class="fin-card">
+                    <div class="fin-icon expense-bg">
+                        <i class="fa-solid fa-arrow-trend-down"></i>
+                    </div>
+                    <div class="fin-info">
+                        <span>Total Expenses</span>
+                        <strong id="finExpense">₹ 0</strong>
+                    </div>
+                </div>
+                <div class="fin-card">
+                    <div class="fin-icon savings-bg">
+                        <i class="fa-solid fa-piggy-bank"></i>
+                    </div>
+                    <div class="fin-info">
+                        <span>Net Savings</span>
+                        <strong id="finSavings">₹ 0</strong>
+                    </div>
+                </div>
+                <div class="fin-card">
+                    <div class="fin-icon count-bg">
+                        <i class="fa-solid fa-receipt"></i>
+                    </div>
+                    <div class="fin-info">
+                        <span>Transactions</span>
+                        <strong id="finCount">0</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- SECTION 4 — APP PREFERENCES -->
+        <div class="profile-card">
+            <div class="card-section-header">
+                <i class="fa-solid fa-sliders"></i>
+                <h3>App Preferences</h3>
+            </div>
+
+            <div class="profile-form">
+
+                <div class="form-row">
+                    <label for="prefFilter">
+                        <i class="fa-solid fa-filter field-icon"></i> Default Filter
+                    </label>
+                    <select id="prefFilter" class="pref-select">
+                        <option value="monthly">Monthly</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <label for="prefBalance">
+                        <i class="fa-solid fa-wallet field-icon"></i> Starting Balance
+                        <span class="optional-tag">base amount</span>
+                    </label>
+                    <div class="balance-input-wrap">
+                        <span class="rupee-prefix">₹</span>
+                        <input
+                            type="number"
+                            id="prefBalance"
+                            placeholder="0"
+                            min="0"
+                        >
+                    </div>
+                    <p class="field-hint">This is your balance before any tracked transactions.</p>
+                </div>
+
+                <div class="form-row">
+                    <label>
+                        <i class="fa-solid fa-moon field-icon"></i> Theme
+                    </label>
+                    <div class="theme-toggle-row">
+                        <button class="theme-btn active" id="lightBtn" onclick="setTheme('light')">
+                            <i class="fa-solid fa-sun"></i> Light
+                        </button>
+                        <button class="theme-btn" id="darkBtn" onclick="setTheme('dark')">
+                            <i class="fa-solid fa-moon"></i> Dark
+                        </button>
+                    </div>
+                    <p class="field-hint">Theme applies immediately and is saved automatically.</p>
+                </div>
+
+                <div class="form-actions">
+                    <button class="save-btn" onclick="savePreferences()">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Preferences
+                    </button>
+                    <span class="save-success" id="prefSaveMsg">
+                        <i class="fa-solid fa-circle-check"></i> Saved!
+                    </span>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- SECTION 5 — DATA MANAGEMENT -->
+        <div class="profile-card danger-card">
+            <div class="card-section-header">
+                <i class="fa-solid fa-triangle-exclamation danger-icon"></i>
+                <h3 class="danger-title">Danger Zone</h3>
+            </div>
+
+            <div class="danger-actions">
+
+                <div class="danger-item">
+                    <div class="danger-info">
+                        <strong>Clear All Transactions</strong>
+                        <p>Permanently delete all your saved transactions. This cannot be undone.</p>
+                    </div>
+                    <button class="danger-btn" onclick="clearTransactions()">
+                        <i class="fa-solid fa-trash"></i> Clear Transactions
+                    </button>
+                </div>
+
+                <div class="danger-divider"></div>
+
+                <div class="danger-item">
+                    <div class="danger-info">
+                        <strong>Reset App</strong>
+                        <p>Wipe everything — profile, transactions, preferences, categories. Complete fresh start.</p>
+                    </div>
+                    <button class="danger-btn reset-btn" onclick="resetApp()">
+                        <i class="fa-solid fa-rotate-left"></i> Reset App
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+    <!-- SHARED MODAL — Assignment 6 -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box" id="sharedModal">
+        <button class="modal-close" onclick="closeModal()">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <span class="modal-icon" id="modalIcon">⚠️</span>
+        <h3 class="modal-title" id="modalTitle">Are you sure?</h3>
+        <div class="modal-message" id="modalMessage"></div>
+        <div class="modal-actions">
+            <button class="modal-cancel-btn" onclick="closeModal()">Cancel</button>
+            <button class="modal-confirm-btn" id="modalConfirmBtn" onclick="confirmModal()">Confirm</button>
+        </div>
+    </div>
+</div>
+</div>
+
+<script src="js/dashboard.js"></script>
+<script src="js/profile.js"></script>
+
+</body>
+</html>

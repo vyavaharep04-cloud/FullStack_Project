@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SOA Statement - FinanTra</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="image/FinanTra_logo (2).png" type="image/png">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/statement.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- jsPDF CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+<div class="layout">
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+
+        <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="sidebar-header">
+            <div class="logo-circle">
+                <img src="image/FinanTra_logo (2).png" alt="Logo">
+            </div>
+            <div class="brand-text">
+                <h2>Finan<span>Tra</span></h2>
+                <p>Welcome, User</p>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Finance Core</p>
+            <a href="dashboard.html">
+                <i class="fa-solid fa-house"></i>
+                <span class="link-text">Dashboard</span>
+            </a>
+            <a href="addTransaction.html">
+                <i class="fa-solid fa-plus-circle"></i>
+                <span class="link-text">Add Transaction</span>
+            </a>
+            <a href="transactions.html">
+                <i class="fa-solid fa-list"></i>
+                <span class="link-text">Transactions</span>
+            </a>
+            <a href="analytics.html">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span class="link-text">Analytics</span>
+            </a>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Smart Tools</p>
+            <a href="budgetPlanner.html">
+                <i class="fa-solid fa-wallet"></i>
+                <span class="link-text">Budget Planner</span>
+            </a>
+            <a href="savinggoal.html">
+                <i class="fa-solid fa-piggy-bank"></i>
+                <span class="link-text">Savings Goal Planner</span>
+            </a>
+            <a href="financialHealth.html">
+                <i class="fa-solid fa-heart-pulse"></i>
+                <span class="link-text">Financial Health</span>
+            </a>
+            <a href="currencyConverter.html">
+                <i class="fa-solid fa-coins"></i>
+                <span class="link-text">Currency Converter</span>
+            </a>
+            <a href="statement.html" class="active">
+                <i class="fa-solid fa-file-invoice"></i>
+                <span class="link-text">SOA Statement</span>
+            </a>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Account Info</p>
+            <a href="profile.html">
+                <i class="fa-solid fa-user"></i>
+                <span class="link-text">Profile</span>
+            </a>
+            <a href="login.html" class="signout-link">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span class="link-text">Sign Out</span>
+            </a>
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main" id="mainContent">
+
+        <!-- TOP BAR -->
+        <div class="top-bar">
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="page-header-text">
+                <h1>SOA Statement</h1>
+                <p class="subtitle">Generate your Statement of Account</p>
+            </div>
+        </div>
+
+
+        <!-- PERIOD CONTROLS -->
+        <div class="soa-controls">
+
+            <div class="controls-top">
+                <span class="controls-label">
+                    <i class="fa-solid fa-calendar-days"></i> Select Period
+                </span>
+                <div class="preset-pills">
+                    <button class="preset-pill active" onclick="setPreset('month', this)">This Month</button>
+                    <button class="preset-pill" onclick="setPreset('lastmonth', this)">Last Month</button>
+                    <button class="preset-pill" onclick="setPreset('3months', this)">Last 3 Months</button>
+                    <button class="preset-pill" onclick="setPreset('year', this)">This Year</button>
+                    <button class="preset-pill" onclick="setPreset('custom', this)">Custom</button>
+                </div>
+            </div>
+
+            <div class="controls-bottom">
+                <div class="date-inputs">
+                    <div class="date-field">
+                        <label for="fromDate">From</label>
+                        <input type="date" id="fromDate">
+                    </div>
+                    <div class="date-separator">→</div>
+                    <div class="date-field">
+                        <label for="toDate">To</label>
+                        <input type="date" id="toDate">
+                    </div>
+                </div>
+                <div class="type-filter">
+                    <label>Type</label>
+                    <select id="typeFilter" class="type-select">
+                        <option value="all">All Transactions</option>
+                        <option value="Income">Income Only</option>
+                        <option value="Expense">Expense Only</option>
+                    </select>
+                </div>
+                <button class="generate-btn" onclick="generateStatement()">
+                    <i class="fa-solid fa-file-lines"></i> Generate Statement
+                </button>
+            </div>
+
+        </div>
+
+
+        <!-- STATEMENT PREVIEW -->
+        <div class="statement-preview" id="statementPreview">
+
+            <!-- STATEMENT DOCUMENT -->
+            <div class="statement-doc" id="statementDoc">
+
+                <!-- DOC HEADER -->
+                <div class="doc-header">
+                    <div class="doc-brand">
+                        <img src="image/FinanTra_logo (2).png" alt="FinanTra Logo" class="doc-logo">
+                        <div class="doc-brand-text">
+                            <h2>Finan<span>Tra</span></h2>
+                            <p>Personal Finance Tracker</p>
+                        </div>
+                    </div>
+                    <div class="doc-meta">
+                        <h3>Statement of Account</h3>
+                        <p>Account ID: <strong id="docUserId">—</strong></p>
+                        <p>Account Name: <strong id="docUserName">—</strong></p>
+                        <p>Period: <strong id="docPeriod">—</strong></p>
+                        <p>Generated: <strong id="docGenDate">—</strong></p>
+                    </div>
+                </div>
+
+                <!-- SUMMARY STRIP -->
+                <div class="doc-summary">
+                    <div class="doc-summary-item">
+                        <span>Opening Balance</span>
+                        <strong id="docOpenBal">₹ 0</strong>
+                    </div>
+                    <div class="doc-summary-item">
+                        <span>Total Credits</span>
+                        <strong class="credit-amt" id="docCredits">₹ 0</strong>
+                    </div>
+                    <div class="doc-summary-item">
+                        <span>Total Debits</span>
+                        <strong class="debit-amt" id="docDebits">₹ 0</strong>
+                    </div>
+                    <div class="doc-summary-item highlight">
+                        <span>Closing Balance</span>
+                        <strong id="docCloseBal">₹ 0</strong>
+                    </div>
+                </div>
+
+                <!-- CATEGORY SUMMARY SECTION -->
+<div class="doc-category-summary" id="docCategorySummary">
+    <div class="cat-summary-header">
+        <i class="fa-solid fa-chart-bar"></i>
+        Category-wise Spending Summary
+    </div>
+    <div class="cat-summary-list" id="catSummaryList"></div>
+    <div class="cat-summary-footer">
+        <span>Total Expense for Period</span>
+        <strong id="catTotalExpense">Rs. 0</strong>
+    </div>
+</div>
+
+                <!-- TRANSACTION TABLE -->
+                <div class="doc-table-wrap">
+                    <table class="doc-table" id="docTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Category</th>
+                                <th>Payment</th>
+                                <th>Credit (₹)</th>
+                                <th>Debit (₹)</th>
+                                <th>Balance (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="docTableBody"></tbody>
+                    </table>
+
+                    <!-- Empty state -->
+                    <div class="doc-empty" id="docEmpty">
+                        <i class="fa-solid fa-file-circle-xmark"></i>
+                        <p>No transactions found for this period.</p>
+                    </div>
+                </div>
+
+                <!-- DOC FOOTER -->
+                <div class="doc-footer">
+                    <div class="doc-footer-row">
+                        <div class="footer-item">
+                            <span>Total Credits</span>
+                            <strong class="credit-amt" id="footerCredits">₹ 0</strong>
+                        </div>
+                        <div class="footer-item">
+                            <span>Total Debits</span>
+                            <strong class="debit-amt" id="footerDebits">₹ 0</strong>
+                        </div>
+                        <div class="footer-item">
+                            <span>Net Change</span>
+                            <strong id="footerNet">₹ 0</strong>
+                        </div>
+                        <div class="footer-item">
+                            <span>Closing Balance</span>
+                            <strong id="footerClose">₹ 0</strong>
+                        </div>
+                    </div>
+                    <p class="doc-disclaimer">
+                        This statement is generated by FinanTra and reflects transactions recorded by the user.
+                        It is for personal reference only.
+                    </p>
+                </div>
+
+            </div>
+            <!-- END STATEMENT DOC -->
+
+            <!-- DOWNLOAD BUTTONS -->
+            <div class="download-bar">
+                <button class="download-btn pdf-btn" onclick="downloadPDF()">
+                    <i class="fa-solid fa-file-pdf"></i> Download PDF
+                </button>
+                <button class="download-btn print-btn" onclick="printStatement()">
+                    <i class="fa-solid fa-print"></i> Print Statement
+                </button>
+            </div>
+
+        </div>
+        <!-- END STATEMENT PREVIEW -->
+
+
+    </main>
+</div>
+
+<!-- SHARED MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box" id="sharedModal">
+        <button class="modal-close" onclick="closeModal()">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <span class="modal-icon" id="modalIcon">⚠️</span>
+        <h3 class="modal-title" id="modalTitle">Are you sure?</h3>
+        <div class="modal-message" id="modalMessage"></div>
+        <div class="modal-actions">
+            <button class="modal-cancel-btn" onclick="closeModal()">Cancel</button>
+            <button class="modal-confirm-btn" id="modalConfirmBtn" onclick="confirmModal()">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/dashboard.js"></script>
+<script src="js/statement.js"></script>
+
+</body>
+</html>

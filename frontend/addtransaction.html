@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Transaction - FinanTra</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="image/FinanTra_logo (2).png" type="image/png">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/addtransaction.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div class="layout">
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <aside class="sidebar" id="sidebar">
+
+        <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="sidebar-header">
+            <div class="logo-circle">
+                <img src="image/FinanTra_logo (2).png" alt="Logo">
+            </div>
+            <div class="brand-text">
+                <h2>Finan<span>Tra</span></h2>
+                <p>Welcome, User</p>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Finance Core</p>
+            <a href="dashboard.html">
+                <i class="fa-solid fa-house"></i>
+                <span class="link-text">Dashboard</span>
+            </a>
+            <a href="addtransaction.html" class="active">
+                <i class="fa-solid fa-plus-circle"></i>
+                <span class="link-text">Add Transaction</span>
+            </a>
+            <a href="transactions.html">
+                <i class="fa-solid fa-list"></i>
+                <span class="link-text">Transactions</span>
+            </a>
+            <a href="analytics.html">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span class="link-text">Analytics</span>
+            </a>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Smart Tools</p>
+            <a href="budgetPlanner.html">
+                <i class="fa-solid fa-wallet"></i>
+                <span class="link-text">Budget Planner</span>
+            </a>
+            <a href="savinggoal.html">
+                <i class="fa-solid fa-piggy-bank"></i>
+                <span class="link-text">Savings Goal Planner</span>
+            </a>
+            <a href="financialHealth.html">
+                <i class="fa-solid fa-heart-pulse"></i>
+                <span class="link-text">Financial Health</span>
+            </a>
+            <a href="currencyConverter.html">
+                <i class="fa-solid fa-coins"></i>
+                <span class="link-text">Currency Converter</span>
+            </a>
+            <a href="statement.html">
+                <i class="fa-solid fa-file-invoice"></i>
+                <span class="link-text">SOA Statement</span>
+            </a>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Account Info</p>
+            <a href="profile.html">
+                <i class="fa-solid fa-user"></i>
+                <span class="link-text">Profile</span>
+            </a>
+            <a href="login.html" class="signout-link">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span class="link-text">Sign Out</span>
+            </a>
+        </div>
+
+    </aside>
+
+
+    <main class="main" id="mainContent">
+
+        <!-- TOP BAR -->
+        <div class="top-bar">
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="page-header-text">
+                <h1>Add Transaction</h1>
+                <p class="subtitle">Record your income or expense</p>
+            </div>
+            <div class="balance-badge">
+                <i class="fa-solid fa-wallet"></i>
+                Current Balance: <span id="balanceAmount">₹ 42,350</span>
+            </div>
+        </div>
+
+
+        <!-- FORM CARD -->
+        <div class="form-card">
+
+            <!-- TOGGLE -->
+            <div class="toggle-group">
+                <button type="button" id="incomeBtn" class="toggle income-active">
+                    <i class="fa-solid fa-arrow-trend-up"></i> Income
+                </button>
+                <button type="button" id="expenseBtn" class="toggle">
+                    <i class="fa-solid fa-arrow-trend-down"></i> Expense
+                </button>
+            </div>
+
+            <!-- AMOUNT -->
+            <div class="field-group">
+                <label for="amountInput">
+                    <i class="fa-solid fa-indian-rupee-sign field-icon"></i> Amount
+                </label>
+                <div class="amount-wrapper">
+                    <span class="rupee-prefix">₹</span>
+                    <input type="number" id="amountInput" placeholder="0.00" min="0">
+                </div>
+                <span class="error-msg" id="amountError">Please enter a valid amount</span>
+            </div>
+
+            <!-- CATEGORY -->
+            <div class="field-group">
+                <label>
+                    <i class="fa-solid fa-tag field-icon"></i> Category
+                </label>
+                <div class="custom-dropdown" id="categoryDropdown">
+                    <div class="dropdown-selected" id="dropdownSelected" onclick="toggleDropdown()">
+                        <span id="selectedText">Select category</span>
+                        <i class="fa-solid fa-chevron-down dropdown-arrow" id="dropdownArrow"></i>
+                    </div>
+                    <div class="dropdown-options" id="dropdownOptions"></div>
+                </div>
+                <span class="error-msg" id="categoryError">Please select a category</span>
+
+                <!-- CUSTOM CATEGORY INLINE PANEL -->
+                <div class="custom-cat-panel" id="customCatPanel">
+                    <p class="custom-cat-title">
+                        <i class="fa-solid fa-plus-circle"></i> Create Custom Category
+                    </p>
+                    <div class="custom-cat-fields">
+                        <input type="text"
+                               id="customEmojiInput"
+                               class="custom-emoji-input"
+                               placeholder="😊"
+                               maxlength="2">
+                        <input type="text"
+                               id="customNameInput"
+                               class="custom-name-input"
+                               placeholder="Category name">
+                    </div>
+                    <p class="emoji-hint">
+                        💡 <kbd>Win + .</kbd> (Windows) &nbsp;|&nbsp;
+                        <kbd>Cmd + Ctrl + Space</kbd> (Mac) to open emoji picker
+                    </p>
+                    <div class="custom-cat-actions">
+                        <button type="button" class="custom-cat-cancel" onclick="hideCustomPanel()">
+                            Cancel
+                        </button>
+                        <button type="button" class="custom-cat-save" onclick="saveCustomCategory()">
+                            <i class="fa-solid fa-plus"></i> Add Category
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DATE -->
+            <div class="field-group">
+                <label for="dateInput">
+                    <i class="fa-solid fa-calendar field-icon"></i> Date
+                </label>
+                <input type="date" id="dateInput">
+                <span class="error-msg" id="dateError">Please select a date</span>
+            </div>
+
+            <!-- PAYMENT METHOD -->
+            <div class="field-group">
+                <label>
+                    <i class="fa-solid fa-credit-card field-icon"></i> Payment Method
+                </label>
+                <div class="payment-pills">
+                    <button type="button" class="payment-pill active" data-method="Cash">💵 Cash</button>
+                    <button type="button" class="payment-pill" data-method="UPI">📱 UPI</button>
+                    <button type="button" class="payment-pill" data-method="Card">💳 Card</button>
+                    <button type="button" class="payment-pill" data-method="Bank Transfer">🏦 Bank Transfer</button>
+                </div>
+            </div>
+
+            <!-- NOTES -->
+            <div class="field-group">
+                <label for="notesInput">
+                    <i class="fa-solid fa-pen-to-square field-icon"></i> Notes
+                    <span class="optional-tag">optional</span>
+                </label>
+                <textarea id="notesInput" placeholder="Add a short note..." rows="3"></textarea>
+                <div class="char-counter">
+                    <span id="notesCount">0</span> / 150 characters
+                </div>
+            </div>
+
+            <!-- ADD TO LIST BUTTON -->
+            <div class="action-area">
+                <button class="add-to-list-btn" id="addToListBtn" type="button">
+                    <i class="fa-solid fa-plus"></i> Add to List
+                </button>
+            </div>
+
+        </div>
+
+
+        <!-- SESSION LIST CARD -->
+        <div class="session-card" id="sessionCard">
+
+            <div class="session-header">
+                <div class="session-title">
+                    <i class="fa-solid fa-layer-group"></i>
+                    Today's Session
+                    <span class="session-count" id="sessionCount">0</span>
+                </div>
+                <button class="clear-all-btn" onclick="clearAll()">
+                    <i class="fa-solid fa-trash"></i> Clear All
+                </button>
+            </div>
+
+            <div class="session-list" id="sessionList"></div>
+
+            <div class="session-totals">
+                <div class="total-item">
+                    <span>Total Income</span>
+                    <strong class="income" id="totalIncome">₹ 0</strong>
+                </div>
+                <div class="total-item">
+                    <span>Total Expenses</span>
+                    <strong class="expense" id="totalExpense">₹ 0</strong>
+                </div>
+                <div class="total-item net-row">
+                    <span>Net</span>
+                    <strong id="netTotal">₹ 0</strong>
+                </div>
+            </div>
+
+            <button class="save-all-btn" onclick="saveAll()">
+                <i class="fa-solid fa-floppy-disk"></i> Save All Transactions
+            </button>
+
+        </div>
+
+
+        <!-- SUCCESS BANNER -->
+        <div class="success-banner" id="successBanner">
+            <i class="fa-solid fa-circle-check"></i>
+            <span id="successText">All transactions saved successfully!</span>
+        </div>
+
+    </main>
+    <!-- SHARED MODAL — Assignment 6 -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box" id="sharedModal">
+        <button class="modal-close" onclick="closeModal()">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <span class="modal-icon" id="modalIcon">⚠️</span>
+        <h3 class="modal-title" id="modalTitle">Are you sure?</h3>
+        <div class="modal-message" id="modalMessage"></div>
+        <div class="modal-actions">
+            <button class="modal-cancel-btn" onclick="closeModal()">Cancel</button>
+            <button class="modal-confirm-btn" id="modalConfirmBtn" onclick="confirmModal()">Confirm</button>
+        </div>
+    </div>
+</div>
+</div>
+
+<script src="js/dashboard.js"></script>
+<script src="js/addtransaction.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Budget Planner - FinanTra</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="image/FinanTra_logo (2).png" type="image/png">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/budgetplanner.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div class="layout">
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+
+        <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="sidebar-header">
+            <div class="logo-circle">
+                <img src="image/FinanTra_logo (2).png" alt="Logo">
+            </div>
+            <div class="brand-text">
+                <h2>Finan<span>Tra</span></h2>
+                <p>Welcome, User</p>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Finance Core</p>
+            <a href="dashboard.html">
+                <i class="fa-solid fa-house"></i>
+                <span class="link-text">Dashboard</span>
+            </a>
+            <a href="addTransaction.html">
+                <i class="fa-solid fa-plus-circle"></i>
+                <span class="link-text">Add Transaction</span>
+            </a>
+            <a href="transactions.html">
+                <i class="fa-solid fa-list"></i>
+                <span class="link-text">Transactions</span>
+            </a>
+            <a href="analytics.html">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span class="link-text">Analytics</span>
+            </a>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Smart Tools</p>
+            <a href="budgetPlanner.html" class="active">
+                <i class="fa-solid fa-wallet"></i>
+                <span class="link-text">Budget Planner</span>
+            </a>
+            <a href="savinggoal.html">
+                <i class="fa-solid fa-piggy-bank"></i>
+                <span class="link-text">Savings Goal Planner</span>
+            </a>
+            <a href="financialHealth.html">
+                <i class="fa-solid fa-heart-pulse"></i>
+                <span class="link-text">Financial Health</span>
+            </a>
+            <a href="currencyConverter.html">
+                <i class="fa-solid fa-coins"></i>
+                <span class="link-text">Currency Converter</span>
+            </a>
+            <a href="statement.html">
+                <i class="fa-solid fa-file-invoice"></i>
+                <span class="link-text">SOA Statement</span>
+            </a>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Account Info</p>
+            <a href="profile.html">
+                <i class="fa-solid fa-user"></i>
+                <span class="link-text">Profile</span>
+            </a>
+            <a href="login.html" class="signout-link">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span class="link-text">Sign Out</span>
+            </a>
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main" id="mainContent">
+
+        <!-- TOP BAR -->
+        <div class="top-bar">
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="page-header-text">
+                <h1>Budget Planner</h1>
+                <p class="subtitle">Set limits, track spending, stay in control</p>
+            </div>
+        </div>
+
+
+        <!-- MONTH SELECTOR -->
+        <div class="bp-month-bar">
+            <button class="bp-month-arrow" id="bpPrevMonth" title="Previous month">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <span class="bp-month-label" id="bpMonthLabel">March 2026</span>
+            <button class="bp-month-arrow" id="bpNextMonth" title="Next month">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+            <span class="bp-month-badge" id="bpMonthBadge">Current Month</span>
+        </div>
+
+
+        <!-- SUMMARY CARDS ROW -->
+        <div class="bp-summary-row">
+
+            <div class="bp-sum-card">
+                <div class="bp-sum-icon income-icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                <div class="bp-sum-info">
+                    <span>Total Income</span>
+                    <strong id="bpTotalIncome">₹ 0</strong>
+                </div>
+            </div>
+
+            <div class="bp-sum-card">
+                <div class="bp-sum-icon expense-icon"><i class="fa-solid fa-arrow-trend-down"></i></div>
+                <div class="bp-sum-info">
+                    <span>Total Spent</span>
+                    <strong id="bpTotalSpent">₹ 0</strong>
+                </div>
+            </div>
+
+            <div class="bp-sum-card">
+                <div class="bp-sum-icon budget-icon"><i class="fa-solid fa-wallet"></i></div>
+                <div class="bp-sum-info">
+                    <span>Total Budget</span>
+                    <strong id="bpTotalBudget">₹ 0</strong>
+                </div>
+            </div>
+
+            <div class="bp-sum-card">
+                <div class="bp-sum-icon remaining-icon"><i class="fa-solid fa-piggy-bank"></i></div>
+                <div class="bp-sum-info">
+                    <span>Remaining</span>
+                    <strong id="bpTotalRemaining">₹ 0</strong>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- TOTAL BUDGET CAP + DAILY GUIDANCE -->
+        <div class="bp-two-col">
+
+            <!-- Total Budget Cap -->
+            <div class="bp-card">
+                <div class="bp-card-header">
+                    <h3><i class="fa-solid fa-bullseye"></i> Monthly Budget Cap</h3>
+                    <span class="bp-card-sub">Overall spending limit</span>
+                </div>
+                <div class="bp-cap-body">
+                    <div class="bp-cap-input-row">
+                        <span class="bp-rupee">₹</span>
+                        <input type="number" class="bp-cap-input" id="bpCapInput"
+                               placeholder="Set total budget" min="0" step="100" />
+                        <button class="bp-cap-save-btn" id="bpCapSaveBtn">Set</button>
+                    </div>
+                    <div class="bp-cap-bar-wrap" id="bpCapBarWrap">
+                        <div class="bp-progress-bar">
+                            <div class="bp-progress-fill" id="bpCapFill"></div>
+                        </div>
+                        <div class="bp-cap-stats">
+                            <span id="bpCapSpent">Spent: ₹ 0</span>
+                            <span id="bpCapPct">0%</span>
+                            <span id="bpCapLeft">Left: ₹ 0</span>
+                        </div>
+                    </div>
+                    <div class="bp-alert" id="bpCapAlert"></div>
+                </div>
+            </div>
+
+            <!-- Daily Guidance -->
+            <div class="bp-card">
+                <div class="bp-card-header">
+                    <h3><i class="fa-solid fa-calendar-day"></i> Daily Spending Guidance</h3>
+                    <span class="bp-card-sub">Based on remaining budget</span>
+                </div>
+                <div class="bp-daily-body">
+                    <div class="bp-daily-main">
+                        <span class="bp-daily-label">Safe to spend today</span>
+                        <span class="bp-daily-amount" id="bpDailyAmount">₹ 0</span>
+                    </div>
+                    <div class="bp-daily-stats">
+                        <div class="bp-daily-stat">
+                            <span class="bp-ds-label">Days left</span>
+                            <span class="bp-ds-value" id="bpDaysLeft">—</span>
+                        </div>
+                        <div class="bp-daily-stat">
+                            <span class="bp-ds-label">Spent today</span>
+                            <span class="bp-ds-value" id="bpSpentToday">₹ 0</span>
+                        </div>
+                        <div class="bp-daily-stat">
+                            <span class="bp-ds-label">Avg daily spend</span>
+                            <span class="bp-ds-value" id="bpAvgDaily">₹ 0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- CATEGORY BUDGETS -->
+        <div class="bp-card">
+            <div class="bp-card-header">
+                <h3><i class="fa-solid fa-tags"></i> Category Budgets</h3>
+                <div class="bp-card-actions">
+                    <button class="bp-action-btn" id="bpBulkEditBtn">
+                        <i class="fa-solid fa-sliders"></i> Bulk Edit
+                    </button>
+                    <button class="bp-action-btn bp-action-primary" id="bpAddCatBtn">
+                        <i class="fa-solid fa-plus"></i> Add Category
+                    </button>
+                </div>
+            </div>
+
+            <!-- Add category panel -->
+            <div class="bp-add-cat-panel" id="bpAddCatPanel">
+                <div class="bp-add-cat-inner">
+                    <select class="bp-cat-select" id="bpCatSelect">
+                        <option value="">— Select a category —</option>
+                    </select>
+                    <div class="bp-rupee-wrap">
+                        <span class="bp-rupee">₹</span>
+                        <input type="number" class="bp-cat-limit-input" id="bpCatLimitInput"
+                               placeholder="Budget limit" min="0" step="100" />
+                    </div>
+                    <button class="bp-add-cat-confirm" id="bpAddCatConfirm">
+                        <i class="fa-solid fa-check"></i> Add
+                    </button>
+                    <button class="bp-add-cat-cancel" id="bpAddCatCancel">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <p class="bp-add-cat-error" id="bpAddCatError"></p>
+            </div>
+
+            <!-- Category rows list -->
+            <div class="bp-cat-list" id="bpCatList">
+                <!-- Populated by JS -->
+            </div>
+
+            <!-- Empty state -->
+            <div class="bp-empty" id="bpCatEmpty">
+                <i class="fa-solid fa-wallet"></i>
+                <p>No category budgets set yet</p>
+                <span>Click "Add Category" to start planning</span>
+            </div>
+
+        </div>
+
+
+        <!-- UNBUDGETED CATEGORIES -->
+        <div class="bp-card" id="bpUnbudgetedCard">
+            <div class="bp-card-header">
+                <h3><i class="fa-solid fa-triangle-exclamation"></i> Unbudgeted Spending</h3>
+                <span class="bp-card-sub">Spending found with no budget set</span>
+            </div>
+            <div class="bp-unbudgeted-list" id="bpUnbudgetedList">
+                <!-- Populated by JS -->
+            </div>
+            <div class="bp-empty" id="bpUnbudgetedEmpty">
+                <i class="fa-solid fa-circle-check"></i>
+                <p>All spending is budgeted</p>
+                <span>Great job! No untracked categories found</span>
+            </div>
+        </div>
+
+
+        <!-- SHARED MODAL (Assignment 6) -->
+        <div class="modal-overlay" id="modalOverlay">
+            <div class="modal-box" id="sharedModal">
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <span class="modal-icon" id="modalIcon">⚠️</span>
+                <h3 class="modal-title" id="modalTitle">Are you sure?</h3>
+                <p class="modal-message" id="modalMessage"></p>
+                <div class="modal-actions">
+                    <button class="modal-cancel-btn" onclick="closeModal()">Cancel</button>
+                    <button class="modal-confirm-btn" id="modalConfirmBtn" onclick="confirmModal()">Confirm</button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- BULK EDIT MODAL -->
+        <div class="bp-bulk-overlay" id="bpBulkOverlay">
+            <div class="bp-bulk-modal" id="bpBulkModal">
+                <div class="bp-bulk-header">
+                    <h3><i class="fa-solid fa-sliders"></i> Bulk Edit Budgets</h3>
+                    <button class="bp-bulk-close" id="bpBulkClose">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="bp-bulk-body" id="bpBulkBody">
+                    <!-- Populated by JS -->
+                </div>
+                <div class="bp-bulk-footer">
+                    <button class="bp-bulk-cancel" id="bpBulkCancel">Cancel</button>
+                    <button class="bp-bulk-save" id="bpBulkSave">
+                        <i class="fa-solid fa-floppy-disk"></i> Save All
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- MONTHLY RESET MODAL -->
+        <div class="bp-bulk-overlay" id="bpResetOverlay">
+            <div class="bp-bulk-modal bp-reset-modal" id="bpResetModal">
+                <div class="bp-bulk-header">
+                    <h3><i class="fa-solid fa-calendar-plus"></i> New Month Detected</h3>
+                </div>
+                <div class="bp-reset-body">
+                    <div class="bp-reset-icon">📅</div>
+                    <p id="bpResetMsg">It's a new month! What would you like to do with your budgets?</p>
+                    <p class="bp-reset-sub" id="bpResetSub">Last month's budgets have been saved in history.</p>
+                </div>
+                <div class="bp-reset-actions">
+                    <button class="bp-reset-btn bp-reset-keep" id="bpResetKeep">
+                        <i class="fa-solid fa-copy"></i>
+                        Keep Same Budgets
+                        <span>Copy last month's limits</span>
+                    </button>
+                    <button class="bp-reset-btn bp-reset-fresh" id="bpResetFresh">
+                        <i class="fa-solid fa-star"></i>
+                        Start Fresh
+                        <span>Begin with no limits set</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script src="js/dashboard.js"></script>
+<script src="js/budgetplanner.js"></script>
+
+</body>
+</html>

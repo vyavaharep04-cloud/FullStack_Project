@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Savings Goals - FinanTra</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="image/FinanTra_logo (2).png" type="image/png">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/savinggoal.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div class="layout">
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+
+        <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="sidebar-header">
+            <div class="logo-circle">
+                <img src="image/FinanTra_logo (2).png" alt="Logo">
+            </div>
+            <div class="brand-text">
+                <h2>Finan<span>Tra</span></h2>
+                <p>Welcome, User</p>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Finance Core</p>
+            <a href="dashboard.html">
+                <i class="fa-solid fa-house"></i>
+                <span class="link-text">Dashboard</span>
+            </a>
+            <a href="addTransaction.html">
+                <i class="fa-solid fa-plus-circle"></i>
+                <span class="link-text">Add Transaction</span>
+            </a>
+            <a href="transactions.html">
+                <i class="fa-solid fa-list"></i>
+                <span class="link-text">Transactions</span>
+            </a>
+            <a href="analytics.html">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span class="link-text">Analytics</span>
+            </a>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Smart Tools</p>
+            <a href="budgetPlanner.html">
+                <i class="fa-solid fa-wallet"></i>
+                <span class="link-text">Budget Planner</span>
+            </a>
+            <a href="savinggoal.html" class="active">
+                <i class="fa-solid fa-piggy-bank"></i>
+                <span class="link-text">Savings Goal Planner</span>
+            </a>
+            <a href="financialHealth.html">
+                <i class="fa-solid fa-heart-pulse"></i>
+                <span class="link-text">Financial Health</span>
+            </a>
+            <a href="currencyConverter.html">
+                <i class="fa-solid fa-coins"></i>
+                <span class="link-text">Currency Converter</span>
+            </a>
+            <a href="statement.html">
+                <i class="fa-solid fa-file-invoice"></i>
+                <span class="link-text">SOA Statement</span>
+            </a>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Account Info</p>
+            <a href="profile.html">
+                <i class="fa-solid fa-user"></i>
+                <span class="link-text">Profile</span>
+            </a>
+            <a href="login.html" class="signout-link">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span class="link-text">Sign Out</span>
+            </a>
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main" id="mainContent">
+
+        <!-- TOP BAR -->
+        <div class="top-bar">
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="page-header-text">
+                <h1>Savings Goals</h1>
+                <p class="subtitle">Plan, track and achieve your financial goals</p>
+            </div>
+            <button class="sg-add-btn" id="sgAddGoalBtn">
+                <i class="fa-solid fa-plus"></i> Add Goal
+            </button>
+        </div>
+
+
+        <!-- SUMMARY STRIP -->
+        <div class="sg-summary-strip">
+            <div class="sg-sum-item">
+                <span class="sg-sum-label">Active Goals</span>
+                <strong class="sg-sum-val" id="sgSumActive">0</strong>
+            </div>
+            <div class="sg-sum-divider"></div>
+            <div class="sg-sum-item">
+                <span class="sg-sum-label">Total Target</span>
+                <strong class="sg-sum-val" id="sgSumTarget">₹ 0</strong>
+            </div>
+            <div class="sg-sum-divider"></div>
+            <div class="sg-sum-item">
+                <span class="sg-sum-label">Total Saved</span>
+                <strong class="sg-sum-val" id="sgSumSaved">₹ 0</strong>
+            </div>
+            <div class="sg-sum-divider"></div>
+            <div class="sg-sum-item">
+                <span class="sg-sum-label">Goals Achieved</span>
+                <strong class="sg-sum-val achieved-val" id="sgSumAchieved">0</strong>
+            </div>
+        </div>
+
+
+        <!-- ACTIVE GOALS LIST -->
+        <div id="sgGoalsList">
+            <!-- Populated by JS -->
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div class="sg-empty" id="sgEmpty">
+            <div class="sg-empty-icon">🎯</div>
+            <p>No savings goals yet</p>
+            <span>Click "+ Add Goal" to create your first financial goal</span>
+            <button class="sg-empty-btn" id="sgEmptyAddBtn">
+                <i class="fa-solid fa-plus"></i> Create First Goal
+            </button>
+        </div>
+
+
+        <!-- ACHIEVED GOALS SECTION -->
+        <div class="sg-achieved-section" id="sgAchievedSection">
+            <div class="sg-achieved-header" id="sgAchievedToggle">
+                <h3><i class="fa-solid fa-trophy"></i> Achieved Goals</h3>
+                <span id="sgAchievedCount" class="sg-achieved-count">0</span>
+                <i class="fa-solid fa-chevron-down sg-achieved-chevron" id="sgAchievedChevron"></i>
+            </div>
+            <div class="sg-achieved-list" id="sgAchievedList">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════
+             CREATE / EDIT GOAL MODAL
+        ═══════════════════════════════ -->
+        <div class="sg-modal-overlay" id="sgGoalModalOverlay">
+            <div class="sg-modal" id="sgGoalModal">
+
+                <div class="sg-modal-header">
+                    <h3 id="sgModalTitle">Create New Goal</h3>
+                    <button class="sg-modal-close" id="sgModalClose">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div class="sg-modal-body">
+
+                    <!-- Emoji Picker -->
+                    <div class="sg-form-group">
+                        <label class="sg-label">Goal Icon</label>
+                        <div class="sg-emoji-row" id="sgEmojiRow">
+                            <!-- Populated by JS -->
+                        </div>
+                        <input type="text" class="sg-emoji-custom" id="sgCustomEmoji"
+                               placeholder="Or type custom emoji" maxlength="2" />
+                    </div>
+
+                    <!-- Goal Name -->
+                    <div class="sg-form-group">
+                        <label class="sg-label">Goal Name <span class="sg-required">*</span></label>
+                        <input type="text" class="sg-input" id="sgGoalName"
+                               placeholder="e.g. Buy a Laptop" maxlength="50" />
+                        <p class="sg-error" id="sgNameError">Please enter a goal name.</p>
+                    </div>
+
+                    <!-- Target + Starting Amount -->
+                    <div class="sg-form-row">
+                        <div class="sg-form-group sg-flex1">
+                            <label class="sg-label">Target Amount <span class="sg-required">*</span></label>
+                            <div class="sg-input-wrap">
+                                <span class="sg-prefix">₹</span>
+                                <input type="number" class="sg-input sg-has-prefix" id="sgTargetAmount"
+                                       placeholder="50000" min="1" step="100" />
+                            </div>
+                            <p class="sg-error" id="sgTargetError">Enter a valid target amount.</p>
+                        </div>
+                        <div class="sg-form-group sg-flex1">
+                            <label class="sg-label">Already Saved</label>
+                            <div class="sg-input-wrap">
+                                <span class="sg-prefix">₹</span>
+                                <input type="number" class="sg-input sg-has-prefix" id="sgStartAmount"
+                                       placeholder="0" min="0" step="100" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Deadline -->
+                    <div class="sg-form-group">
+                        <label class="sg-label">Deadline <span class="sg-required">*</span></label>
+                        <input type="date" class="sg-input" id="sgDeadline" />
+                        <p class="sg-error" id="sgDeadlineError">Please select a deadline.</p>
+                    </div>
+
+                    <!-- Priority -->
+                    <div class="sg-form-group">
+                        <label class="sg-label">Priority</label>
+                        <div class="sg-priority-row" id="sgPriorityRow">
+                            <button type="button" class="sg-priority-btn" data-priority="High">
+                                <i class="fa-solid fa-circle-exclamation"></i> High
+                            </button>
+                            <button type="button" class="sg-priority-btn active" data-priority="Medium">
+                                <i class="fa-solid fa-circle-minus"></i> Medium
+                            </button>
+                            <button type="button" class="sg-priority-btn" data-priority="Low">
+                                <i class="fa-solid fa-circle-dot"></i> Low
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Status Override -->
+                    <div class="sg-form-group">
+                        <label class="sg-label">
+                            Status
+                            <span class="sg-label-hint">(auto-calculated — override if needed)</span>
+                        </label>
+                        <div class="sg-status-row" id="sgStatusRow">
+                            <button type="button" class="sg-status-btn" data-status="auto">
+                                <i class="fa-solid fa-rotate"></i> Auto
+                            </button>
+                            <button type="button" class="sg-status-btn" data-status="on-track">
+                                <i class="fa-solid fa-circle-check"></i> On Track
+                            </button>
+                            <button type="button" class="sg-status-btn" data-status="behind">
+                                <i class="fa-solid fa-circle-exclamation"></i> Behind
+                            </button>
+                            <button type="button" class="sg-status-btn" data-status="critical">
+                                <i class="fa-solid fa-circle-xmark"></i> Critical
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="sg-modal-footer">
+                    <button class="sg-modal-cancel" id="sgModalCancel">Cancel</button>
+                    <button class="sg-modal-save" id="sgModalSave">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Goal
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════
+             ADD CONTRIBUTION MODAL
+        ═══════════════════════════════ -->
+        <div class="sg-modal-overlay" id="sgContribModalOverlay">
+            <div class="sg-modal sg-modal-sm" id="sgContribModal">
+
+                <div class="sg-modal-header">
+                    <h3 id="sgContribTitle">Add Contribution</h3>
+                    <button class="sg-modal-close" id="sgContribClose">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div class="sg-modal-body">
+                    <div class="sg-contrib-goal-info" id="sgContribGoalInfo"></div>
+
+                    <div class="sg-form-group">
+                        <label class="sg-label">Amount to Add <span class="sg-required">*</span></label>
+                        <div class="sg-input-wrap">
+                            <span class="sg-prefix">₹</span>
+                            <input type="number" class="sg-input sg-has-prefix" id="sgContribAmount"
+                                   placeholder="Enter amount" min="1" step="100" />
+                        </div>
+                        <p class="sg-error" id="sgContribError">Please enter a valid amount.</p>
+                    </div>
+
+                    <div class="sg-form-group">
+                        <label class="sg-label">Date</label>
+                        <input type="date" class="sg-input" id="sgContribDate" />
+                    </div>
+
+                    <div class="sg-form-group">
+                        <label class="sg-label">Note (optional)</label>
+                        <input type="text" class="sg-input" id="sgContribNote"
+                               placeholder="e.g. Monthly saving" maxlength="60" />
+                    </div>
+                </div>
+
+                <div class="sg-modal-footer">
+                    <button class="sg-modal-cancel" id="sgContribCancel">Cancel</button>
+                    <button class="sg-modal-save" id="sgContribSave">
+                        <i class="fa-solid fa-plus"></i> Add Money
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════
+             CONTRIBUTION HISTORY MODAL
+        ═══════════════════════════════ -->
+        <div class="sg-modal-overlay" id="sgHistoryModalOverlay">
+            <div class="sg-modal" id="sgHistoryModal">
+
+                <div class="sg-modal-header">
+                    <h3 id="sgHistoryTitle">Contribution History</h3>
+                    <button class="sg-modal-close" id="sgHistoryClose">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div class="sg-modal-body">
+                    <div class="sg-history-list" id="sgHistoryList"></div>
+                    <div class="sg-empty sg-history-empty" id="sgHistoryEmpty">
+                        <div class="sg-empty-icon" style="font-size:28px;">📭</div>
+                        <p>No contributions yet</p>
+                        <span>Start adding money toward this goal</span>
+                    </div>
+                </div>
+
+                <div class="sg-modal-footer">
+                    <button class="sg-modal-cancel" id="sgHistoryClose2">Close</button>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- SHARED MODAL (Assignment 6) -->
+        <div class="modal-overlay" id="modalOverlay">
+            <div class="modal-box" id="sharedModal">
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <span class="modal-icon" id="modalIcon">⚠️</span>
+                <h3 class="modal-title" id="modalTitle">Are you sure?</h3>
+                <p class="modal-message" id="modalMessage"></p>
+                <div class="modal-actions">
+                    <button class="modal-cancel-btn" onclick="closeModal()">Cancel</button>
+                    <button class="modal-confirm-btn" id="modalConfirmBtn" onclick="confirmModal()">Confirm</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script src="js/dashboard.js"></script>
+<script src="js/savinggoal.js"></script>
+
+</body>
+</html>

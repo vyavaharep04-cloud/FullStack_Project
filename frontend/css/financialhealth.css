@@ -1,0 +1,732 @@
+/* ================================
+   FINANCIAL HEALTH — PAGE STYLES
+   Extends dashboard.css + analytics.css patterns
+================================ */
+
+
+/* ================================
+   PAGE HEADER
+================================ */
+.page-header-text h1 {
+    font-size: 26px;
+    color: #1f82a6;
+    font-weight: 700;
+}
+
+.page-header-text .subtitle {
+    font-size: 14px;
+    color: #888;
+    margin-top: 2px;
+}
+
+
+/* ================================
+   PERIOD BAR (matches analytics.css)
+================================ */
+.period-bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.period-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+}
+
+.period-label i { color: #1f82a6; }
+
+.period-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.period-pill {
+    padding: 7px 16px;
+    border: 1.5px solid #dde4ea;
+    border-radius: 20px;
+    background: white;
+    color: #555;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.period-pill:hover {
+    border-color: #1f82a6;
+    color: #1f82a6;
+    background: #eef7fa;
+}
+
+.period-pill.active {
+    background: #1f82a6;
+    color: white;
+    border-color: #1f82a6;
+    box-shadow: 0 3px 8px rgba(31,130,166,0.25);
+}
+
+
+/* ================================
+   CHART CARD (matches analytics.css)
+================================ */
+.chart-card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    border: 1px solid #eef3f6;
+    margin-bottom: 20px;
+}
+
+.chart-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.chart-card-header h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.chart-card-header h3 i {
+    color: #1f82a6;
+    font-size: 14px;
+}
+
+.chart-subtitle { font-size: 12px; color: #aaa; }
+
+
+/* ================================
+   ROW 1: SCORE + SUBSCORES
+================================ */
+.fh-top-row {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.fh-score-card,
+.fh-subscores-card {
+    margin-bottom: 0;
+}
+
+
+/* ================================
+   SVG GAUGE
+================================ */
+.fh-gauge-wrap {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 16px;
+}
+
+.fh-gauge-svg {
+    width: 100%;
+    height: 100%;
+}
+
+.fh-gauge-track {
+    stroke: #eef3f6;
+}
+
+.fh-gauge-fill {
+    stroke: #1f82a6;
+    transition: stroke-dashoffset 1.2s cubic-bezier(0.34, 1.1, 0.64, 1),
+                stroke 0.6s ease;
+}
+
+/* Color bands for gauge */
+.fh-gauge-fill.excellent { stroke: #28a745; }
+.fh-gauge-fill.good      { stroke: #1f82a6; }
+.fh-gauge-fill.improve   { stroke: #f0a500; }
+.fh-gauge-fill.risky     { stroke: #dc3545; }
+
+.fh-gauge-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.fh-score-number {
+    font-size: 2.6rem;
+    font-weight: 800;
+    color: #222;
+    line-height: 1;
+    letter-spacing: -0.03em;
+}
+
+.fh-score-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.fh-score-trend {
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-top: 2px;
+}
+
+.fh-score-trend.up   { color: #28a745; }
+.fh-score-trend.down { color: #dc3545; }
+.fh-score-trend.same { color: #888; }
+
+
+/* Band legend */
+.fh-band-legend {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.fh-band {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+.fh-band.excellent { background: #eafaf0; color: #1a7a3a; }
+.fh-band.good      { background: #e6f4f7; color: #1f82a6; }
+.fh-band.improve   { background: #fff8e6; color: #b07d00; }
+.fh-band.risky     { background: #fdecea; color: #c0392b; }
+
+
+/* ================================
+   SUB-SCORES
+================================ */
+.fh-subscores-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.fh-subscore-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.fh-subscore-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+}
+
+.fh-subscore-name i { color: #1f82a6; font-size: 12px; }
+
+.fh-subscore-weight {
+    font-size: 11px;
+    color: #aaa;
+    background: #f0f4f7;
+    padding: 2px 7px;
+    border-radius: 20px;
+}
+
+.fh-subscore-val {
+    font-size: 14px;
+    font-weight: 800;
+    color: #222;
+    min-width: 32px;
+    text-align: right;
+}
+
+.fh-subscore-bar {
+    height: 8px;
+    background: #eef3f6;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+
+.fh-subscore-fill {
+    height: 100%;
+    border-radius: 20px;
+    width: 0%;
+    transition: width 1s cubic-bezier(0.34, 1.1, 0.64, 1);
+    background: #1f82a6;
+}
+
+.fh-subscore-fill.excellent { background: #28a745; }
+.fh-subscore-fill.good      { background: #1f82a6; }
+.fh-subscore-fill.improve   { background: #f0a500; }
+.fh-subscore-fill.risky     { background: #dc3545; }
+
+.fh-subscore-hint {
+    font-size: 11px;
+    color: #aaa;
+    margin: 0;
+}
+
+
+/* ================================
+   INCOME VS EXPENSES
+================================ */
+.fh-inc-exp-card { margin-bottom: 20px; }
+
+.fh-inc-exp-stats {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.fh-ie-stat {
+    flex: 1;
+    min-width: 130px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f6f9fb;
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+
+.fh-ie-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.income-stat  .fh-ie-icon { background: #e8f8ee; color: #28a745; }
+.expense-stat .fh-ie-icon { background: #fdecea; color: #dc3545; }
+.balance-stat .fh-ie-icon { background: #e6f4f7; color: #1f82a6; }
+
+.fh-ie-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.fh-ie-info span   { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.04em; }
+.fh-ie-info strong { font-size: 17px; font-weight: 700; color: #222; }
+
+.fh-ie-vs {
+    font-size: 12px;
+    font-weight: 800;
+    color: #ccc;
+    flex-shrink: 0;
+}
+
+/* Horizontal bars */
+.fh-ie-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.fh-ie-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.fh-ie-bar-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    width: 60px;
+    flex-shrink: 0;
+}
+
+.fh-ie-bar-track {
+    flex: 1;
+    height: 12px;
+    background: #eef3f6;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.fh-ie-bar-fill {
+    height: 100%;
+    border-radius: 20px;
+    width: 0%;
+    transition: width 1s ease;
+}
+
+.income-fill  { background: #28a745; }
+.expense-fill { background: #dc3545; }
+
+.fh-ie-bar-pct {
+    font-size: 12px;
+    font-weight: 700;
+    color: #555;
+    width: 38px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+/* Insight line */
+.fh-ie-insight {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 14px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fh-ie-insight.positive { background: #eafaf0; color: #1a7a3a; }
+.fh-ie-insight.warning  { background: #fff8e6; color: #b07d00; }
+.fh-ie-insight.critical { background: #fdecea; color: #c0392b; }
+
+
+/* ================================
+   SNAPSHOT ROW
+================================ */
+.fh-snapshot-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.fh-snapshot-card { margin-bottom: 0; }
+
+.fh-view-link {
+    font-size: 13px;
+    color: #1f82a6;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+    white-space: nowrap;
+}
+
+.fh-view-link:hover { color: #186e8f; text-decoration: underline; }
+
+.fh-snapshot-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Snapshot stat row */
+.fh-snap-stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: #f6f9fb;
+    border-radius: 10px;
+}
+
+.fh-snap-stat-label {
+    font-size: 13px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.fh-snap-stat-label i { color: #1f82a6; font-size: 12px; }
+
+.fh-snap-stat-val {
+    font-size: 14px;
+    font-weight: 700;
+    color: #222;
+}
+
+/* Mini progress in snapshot */
+.fh-snap-progress {
+    margin-top: 4px;
+}
+
+.fh-snap-bar {
+    height: 6px;
+    background: #eef3f6;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.fh-snap-fill {
+    height: 100%;
+    border-radius: 20px;
+    background: #1f82a6;
+    transition: width 0.8s ease;
+}
+
+.fh-snap-fill.warn { background: #f0a500; }
+.fh-snap-fill.over { background: #dc3545; }
+.fh-snap-fill.good { background: #28a745; }
+
+.fh-snapshot-empty {
+    font-size: 13px;
+    color: #aaa;
+    text-align: center;
+    padding: 20px;
+    background: #f6f9fb;
+    border-radius: 10px;
+}
+
+
+/* ================================
+   EXPENSE BREAKDOWN (CSS bars)
+================================ */
+.fh-expense-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.fh-exp-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: fhFadeIn 0.3s ease;
+}
+
+@keyframes fhFadeIn {
+    from { opacity: 0; transform: translateX(-6px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.fh-exp-rank  { font-size: 12px; font-weight: 700; color: #aaa; width: 20px; text-align: center; flex-shrink: 0; }
+.fh-exp-emoji { font-size: 20px; width: 28px; text-align: center; flex-shrink: 0; }
+
+.fh-exp-info  { flex: 1; min-width: 0; }
+
+.fh-exp-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.fh-exp-bar-track {
+    height: 8px;
+    background: #f0f4f8;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.fh-exp-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.8s ease;
+}
+
+.fh-exp-amount { font-size: 14px; font-weight: 700; color: #dc3545; white-space: nowrap; flex-shrink: 0; }
+.fh-exp-pct    { font-size: 12px; color: #aaa; white-space: nowrap; flex-shrink: 0; min-width: 36px; text-align: right; }
+
+/* High-spend warning on category */
+.fh-exp-warn {
+    font-size: 11px;
+    color: #f0a500;
+    margin-top: 2px;
+}
+
+
+/* ================================
+   SMART INSIGHTS
+================================ */
+.fh-insights-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.fh-insight-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 13px 16px;
+    border-radius: 10px;
+    animation: fhFadeIn 0.3s ease;
+}
+
+.fh-insight-item.critical { background: #fdecea; border-left: 4px solid #dc3545; }
+.fh-insight-item.warning  { background: #fff8e6; border-left: 4px solid #f0a500; }
+.fh-insight-item.positive { background: #eafaf0; border-left: 4px solid #28a745; }
+
+.fh-insight-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.fh-insight-icon.critical { color: #dc3545; }
+.fh-insight-icon.warning  { color: #f0a500; }
+.fh-insight-icon.positive { color: #28a745; }
+
+.fh-insight-text {
+    flex: 1;
+}
+
+.fh-insight-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 3px;
+}
+
+.fh-insight-desc {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.5;
+}
+
+/* Severity badge */
+.fh-insight-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    flex-shrink: 0;
+    align-self: flex-start;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.fh-insight-badge.critical { background: #dc3545; color: #fff; }
+.fh-insight-badge.warning  { background: #f0a500; color: #fff; }
+.fh-insight-badge.positive { background: #28a745; color: #fff; }
+
+
+/* ================================
+   EMPTY STATE
+================================ */
+.fh-empty {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 36px 20px;
+    text-align: center;
+    gap: 8px;
+    color: #bbb;
+}
+
+.fh-empty.visible { display: flex; }
+.fh-empty i  { font-size: 32px; margin-bottom: 4px; }
+.fh-empty p  { font-size: 14px; color: #888; font-weight: 500; margin: 0; }
+.fh-empty span { font-size: 12px; color: #bbb; }
+
+
+/* ================================
+   DARK MODE
+================================ */
+body.dark-mode .chart-card {
+    background: #1a1a2e;
+    border-color: #2a2a4a;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .chart-card-header h3 { color: #bbb; }
+body.dark-mode .chart-subtitle        { color: #555; }
+
+body.dark-mode .period-pill {
+    background: #1a1a2e;
+    border-color: #2a2a4a;
+    color: #aaa;
+}
+
+body.dark-mode .period-pill:hover  { background: #2a2a4a; color: #6cc7d1; border-color: #1f82a6; }
+body.dark-mode .period-pill.active { background: #1f82a6; color: #fff; border-color: #1f82a6; }
+
+body.dark-mode .fh-gauge-track { stroke: #2a2a4a; }
+body.dark-mode .fh-score-number { color: #e0e0e0; }
+body.dark-mode .fh-score-label  { color: #666; }
+
+body.dark-mode .fh-subscore-bar { background: #2a2a4a; }
+body.dark-mode .fh-subscore-name { color: #bbb; }
+body.dark-mode .fh-subscore-val  { color: #e0e0e0; }
+body.dark-mode .fh-subscore-hint { color: #555; }
+body.dark-mode .fh-subscore-weight { background: #2a2a4a; color: #666; }
+
+body.dark-mode .fh-ie-stat { background: #0f0f1a; }
+body.dark-mode .fh-ie-info strong { color: #e0e0e0; }
+body.dark-mode .fh-ie-bar-track { background: #2a2a4a; }
+
+body.dark-mode .fh-ie-insight.positive { background: #0a1a0a; color: #5dd879; }
+body.dark-mode .fh-ie-insight.warning  { background: #1a1200; color: #d4aa00; }
+body.dark-mode .fh-ie-insight.critical { background: #1a0a0a; color: #f08080; }
+
+body.dark-mode .fh-snap-stat { background: #0f0f1a; }
+body.dark-mode .fh-snap-stat-label { color: #888; }
+body.dark-mode .fh-snap-stat-val   { color: #e0e0e0; }
+body.dark-mode .fh-snap-bar        { background: #2a2a4a; }
+body.dark-mode .fh-snapshot-empty  { background: #0f0f1a; color: #555; }
+
+body.dark-mode .fh-exp-bar-track { background: #2a2a4a; }
+body.dark-mode .fh-exp-name      { color: #ccc; }
+body.dark-mode .fh-exp-pct       { color: #555; }
+body.dark-mode .fh-exp-rank      { color: #555; }
+
+body.dark-mode .fh-insight-item.critical { background: #1a0a0a; border-left-color: #dc3545; }
+body.dark-mode .fh-insight-item.warning  { background: #1a1200; border-left-color: #f0a500; }
+body.dark-mode .fh-insight-item.positive { background: #0a1a0a; border-left-color: #28a745; }
+
+body.dark-mode .fh-insight-title { color: #e0e0e0; }
+body.dark-mode .fh-insight-desc  { color: #888; }
+
+body.dark-mode .fh-view-link { color: #6cc7d1; }
+
+
+/* ================================
+   RESPONSIVE
+================================ */
+@media (max-width: 900px) {
+    .fh-top-row      { grid-template-columns: 1fr; }
+    .fh-snapshot-row { grid-template-columns: 1fr; }
+    .fh-snapshot-card { margin-bottom: 0; }
+    .fh-snapshot-row .fh-snapshot-card:first-child { margin-bottom: 20px; }
+}
+
+@media (max-width: 768px) {
+    .fh-inc-exp-stats { flex-direction: column; gap: 10px; }
+    .fh-ie-vs         { display: none; }
+    .fh-ie-stat       { min-width: 100%; }
+
+    .period-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .period-pill { padding: 6px 12px; font-size: 12px; }
+}
+
+@media (max-width: 480px) {
+    .fh-gauge-wrap { width: 160px; height: 160px; }
+    .fh-score-number { font-size: 2rem; }
+}
