@@ -1,9 +1,6 @@
 // ================================
 // ANALYTICS PAGE
-// Reads from localStorage: finantra_transactions
-// Charts: Expense Breakdown, Payment Split,
-//         Income vs Expense Trend, Daily Pattern,
-//         Savings Rate, Top Categories
+// FinanTra | Smart Tools
 // ================================
 
 
@@ -37,15 +34,6 @@ let chartSavings  = null;
 // ================================
 
 let currentPeriod = "month";
-
-
-// ================================
-// GET TRANSACTIONS FROM LOCALSTORAGE
-// ================================
-
-function getTransactions() {
-    return JSON.parse(localStorage.getItem("finantra_transactions")) || [];
-}
 
 
 // ================================
@@ -100,7 +88,7 @@ function formatShortDate(dateStr) {
 // PERIOD SELECTOR
 // ================================
 
-function setPeriod(period, btn) {
+async function setPeriod(period, btn) {
     currentPeriod = period;
 
     document.querySelectorAll(".period-pill").forEach(function (p) {
@@ -108,7 +96,7 @@ function setPeriod(period, btn) {
     });
     btn.classList.add("active");
 
-    renderAll();
+    await renderAll();
 }
 
 
@@ -116,8 +104,15 @@ function setPeriod(period, btn) {
 // RENDER ALL
 // ================================
 
-function renderAll() {
-    const all  = getTransactions();
+async function renderAll() {
+    let all;
+    try {
+        all = await DataService.getTransactions();
+    } catch (err) {
+        console.error("Failed to load transactions:", err);
+        all = [];
+    }
+
     const data = filterByPeriod(all, currentPeriod);
 
     updateOverview(data);
@@ -135,7 +130,7 @@ function renderAll() {
 // ================================
 
 function updateOverview(data) {
-    let income = 0;
+    let income  = 0;
     let expense = 0;
 
     data.forEach(function (t) {
@@ -146,7 +141,6 @@ function updateOverview(data) {
     const savings = income - expense;
     const rate    = income > 0 ? Math.round((savings / income) * 100) : 0;
 
-    // Avg daily spend — based on number of unique days
     const days = new Set(data.filter(t => t.type === "Expense").map(t => t.date)).size || 1;
     const avg  = expense > 0 ? Math.round(expense / days) : 0;
 
@@ -206,7 +200,6 @@ function renderExpenseBreakdown(data) {
 
     hideEmpty("expenseBreakdownEmpty", "expenseBreakdownChart");
 
-    // Group by category
     const catMap = {};
     expenses.forEach(function (t) {
         catMap[t.category] = (catMap[t.category] || 0) + t.amount;
@@ -273,8 +266,8 @@ function renderPaymentSplit(data) {
         payMap[t.payment] = (payMap[t.payment] || 0) + 1;
     });
 
-    const labels = Object.keys(payMap);
-    const values = Object.values(payMap);
+    const labels    = Object.keys(payMap);
+    const values    = Object.values(payMap);
     const payColors = ["#1f82a6", "#28a745", "#f0a500", "#6f42c1"];
 
     chartPayment = new Chart(
@@ -330,7 +323,6 @@ function renderTrend(data) {
 
     hideEmpty("trendEmpty", "trendChart");
 
-    // Group by date
     const incomeByDate  = {};
     const expenseByDate = {};
 
@@ -342,7 +334,6 @@ function renderTrend(data) {
         }
     });
 
-    // Get all unique dates sorted
     const allDates = [...new Set(data.map(function (t) { return t.date; }))].sort();
     const labels   = allDates.map(formatShortDate);
 
@@ -436,7 +427,6 @@ function renderDailyPattern(data) {
 
     hideEmpty("dailyPatternEmpty", "dailyPatternChart");
 
-    // Day totals — 0=Sun, 1=Mon ... 6=Sat
     const dayTotals = [0, 0, 0, 0, 0, 0, 0];
     const dayCounts = [0, 0, 0, 0, 0, 0, 0];
 
@@ -447,14 +437,12 @@ function renderDailyPattern(data) {
         dayCounts[day]++;
     });
 
-    // Average per day (Mon first)
-    const dayLabels  = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    const dayOrder   = [1, 2, 3, 4, 5, 6, 0];
-    const avgByDay   = dayOrder.map(function (d) {
+    const dayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const dayOrder  = [1, 2, 3, 4, 5, 6, 0];
+    const avgByDay  = dayOrder.map(function (d) {
         return dayCounts[d] > 0 ? Math.round(dayTotals[d] / dayCounts[d]) : 0;
     });
 
-    // Color weekend bars differently
     const barColors = dayLabels.map(function (d) {
         return (d === "Sat" || d === "Sun") ? "#fd7e14" : EXPENSE_COLOR;
     });
@@ -521,7 +509,6 @@ function renderSavingsRate(data) {
         return;
     }
 
-    // Group by date
     const incomeByDate  = {};
     const expenseByDate = {};
 
@@ -535,7 +522,6 @@ function renderSavingsRate(data) {
 
     const allDates = [...new Set(data.map(function (t) { return t.date; }))].sort();
 
-    // Calculate cumulative savings rate per date
     let cumIncome  = 0;
     let cumExpense = 0;
 
@@ -619,7 +605,6 @@ function renderTopCategories(data) {
 
     if (expenses.length === 0) {
         emptyEl.classList.add("visible");
-        // Remove old items
         container.querySelectorAll(".category-bar-item").forEach(function (el) {
             el.remove();
         });
@@ -628,8 +613,7 @@ function renderTopCategories(data) {
 
     emptyEl.classList.remove("visible");
 
-    // Group by category
-    const catMap  = {};
+    const catMap   = {};
     const emojiMap = {};
 
     expenses.forEach(function (t) {
@@ -637,19 +621,16 @@ function renderTopCategories(data) {
         emojiMap[t.category] = t.emoji || "💰";
     });
 
-    // Sort by amount desc, take top 6
     const sorted = Object.entries(catMap)
         .sort(function (a, b) { return b[1] - a[1]; })
         .slice(0, 6);
 
     const maxAmt = sorted[0][1];
 
-    // Remove old items
     container.querySelectorAll(".category-bar-item").forEach(function (el) {
         el.remove();
     });
 
-    // Render each
     sorted.forEach(function (entry, index) {
         const [name, amount] = entry;
         const pct = Math.round((amount / maxAmt) * 100);
@@ -680,12 +661,11 @@ function renderTopCategories(data) {
 // INIT
 // ================================
 
-(function init() {
-    // Set default period pill to "Last 7 Days"
+(async function init() {
     const pills = document.querySelectorAll(".period-pill");
     pills.forEach(function (p) { p.classList.remove("active"); });
     pills[0].classList.add("active");
     currentPeriod = "7days";
 
-    renderAll();
+    await renderAll();
 })();

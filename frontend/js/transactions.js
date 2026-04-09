@@ -1,6 +1,6 @@
 // ================================
 // TRANSACTIONS PAGE
-// Reads from localStorage: finantra_transactions
+// Reads via DataService (backend or localStorage guest mode)
 // Features: search, filter, sort, date group, delete, load more
 // ================================
 
@@ -9,44 +9,32 @@
 // STATE
 // ================================
 
-const PAGE_SIZE    = 20;
-let visibleCount   = PAGE_SIZE;
-let filteredData   = [];
+const PAGE_SIZE  = 20;
+let visibleCount = PAGE_SIZE;
+let filteredData = [];
+let allTransactions = [];   // cached from DataService on each load
 
 
 // ================================
 // ELEMENT REFERENCES
 // ================================
 
-const txnList          = document.getElementById("txnList");
-const emptyState       = document.getElementById("emptyState");
-const emptyStateMsg    = document.getElementById("emptyStateMsg");
-const loadMoreWrap     = document.getElementById("loadMoreWrap");
-const deleteConfirmBar = document.getElementById("deleteConfirmBar");
+const txnList           = document.getElementById("txnList");
+const emptyState        = document.getElementById("emptyState");
+const emptyStateMsg     = document.getElementById("emptyStateMsg");
+const loadMoreWrap      = document.getElementById("loadMoreWrap");
+const deleteConfirmBar  = document.getElementById("deleteConfirmBar");
 const deleteConfirmText = document.getElementById("deleteConfirmText");
 
-const searchInput  = document.getElementById("searchInput");
-const typeFilter   = document.getElementById("typeFilter");
-const dateFilter   = document.getElementById("dateFilter");
-const sortSelect   = document.getElementById("sortSelect");
+const searchInput = document.getElementById("searchInput");
+const typeFilter  = document.getElementById("typeFilter");
+const dateFilter  = document.getElementById("dateFilter");
+const sortSelect  = document.getElementById("sortSelect");
 
 const summaryIncome  = document.getElementById("summaryIncome");
 const summaryExpense = document.getElementById("summaryExpense");
 const summaryNet     = document.getElementById("summaryNet");
 const summaryCount   = document.getElementById("summaryCount");
-
-
-// ================================
-// LOAD TRANSACTIONS FROM LOCALSTORAGE
-// ================================
-
-function getTransactions() {
-    return JSON.parse(localStorage.getItem("finantra_transactions")) || [];
-}
-
-function saveTransactions(data) {
-    localStorage.setItem("finantra_transactions", JSON.stringify(data));
-}
 
 
 // ================================
@@ -58,9 +46,9 @@ function getToday() {
 }
 
 function getWeekStart() {
-    const now  = new Date();
-    const day  = now.getDay();
-    const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Monday
+    const now    = new Date();
+    const day    = now.getDay();
+    const diff   = now.getDate() - day + (day === 0 ? -6 : 1);
     const monday = new Date(now.setDate(diff));
     return monday.toISOString().split("T")[0];
 }
@@ -75,68 +63,65 @@ function formatDisplayDate(dateStr) {
     const [year, month, day] = dateStr.split("-");
     const months = ["Jan","Feb","Mar","Apr","May","Jun",
                     "Jul","Aug","Sep","Oct","Nov","Dec"];
-    const today    = getToday();
+    const today     = getToday();
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const yStr = yesterday.toISOString().split("T")[0];
 
-    if (dateStr === today)  return "Today";
-    if (dateStr === yStr)   return "Yesterday";
+    if (dateStr === today) return "Today";
+    if (dateStr === yStr)  return "Yesterday";
     return `${parseInt(day)} ${months[parseInt(month) - 1]} ${year}`;
 }
 
 
 // ================================
-// APPLY FILTERS + SORT
+// APPLY FILTERS + SORT  ← SWAPPED
 // ================================
 
-function applyFilters() {
+async function applyFilters() {
     visibleCount = PAGE_SIZE;
-    const all = getTransactions();
+
+    // Load from DataService once per call — works for both backend + guest
+    try {
+        allTransactions = await DataService.getTransactions();
+    } catch (err) {
+        console.error("applyFilters: failed to load transactions:", err.message);
+        allTransactions = [];
+    }
 
     const search   = searchInput.value.toLowerCase().trim();
     const type     = typeFilter.value;
     const dateMode = dateFilter.value;
     const sort     = sortSelect.value;
 
-    // Date boundaries
     const today      = getToday();
     const weekStart  = getWeekStart();
     const monthStart = getMonthStart();
 
-    // Filter
-    filteredData = all.filter(function (t) {
-
-        // Search match
+    filteredData = allTransactions.filter(function (t) {
         const searchMatch = search === "" ||
             t.category.toLowerCase().includes(search) ||
             (t.notes && t.notes.toLowerCase().includes(search));
 
-        // Type match
         const typeMatch = type === "all" || t.type === type;
 
-        // Date match
         let dateMatch = true;
-        if (dateMode === "today")  dateMatch = t.date === today;
-        if (dateMode === "week")   dateMatch = t.date >= weekStart;
-        if (dateMode === "month")  dateMatch = t.date >= monthStart;
+        if (dateMode === "today") dateMatch = t.date === today;
+        if (dateMode === "week")  dateMatch = t.date >= weekStart;
+        if (dateMode === "month") dateMatch = t.date >= monthStart;
 
         return searchMatch && typeMatch && dateMatch;
     });
 
-    // Sort
     filteredData.sort(function (a, b) {
-        if (sort === "newest")      return b.date.localeCompare(a.date) || b.id - a.id;
-        if (sort === "oldest")      return a.date.localeCompare(b.date) || a.id - b.id;
+        if (sort === "newest")      return b.date.localeCompare(a.date) || String(b.id).localeCompare(String(a.id));
+        if (sort === "oldest")      return a.date.localeCompare(b.date) || String(a.id).localeCompare(String(b.id));
         if (sort === "amount-high") return b.amount - a.amount;
         if (sort === "amount-low")  return a.amount - b.amount;
         return 0;
     });
 
-    // Update summary cards
     updateSummary(filteredData);
-
-    // Render
     renderList();
 }
 
@@ -173,13 +158,10 @@ function renderList() {
 
     const slice = filteredData.slice(0, visibleCount);
 
-    // Empty state
     if (filteredData.length === 0) {
         emptyState.classList.add("visible");
         loadMoreWrap.classList.remove("visible");
-
-        const hasAny = getTransactions().length > 0;
-        emptyStateMsg.textContent = hasAny
+        emptyStateMsg.textContent = allTransactions.length > 0
             ? "No transactions match your current filters."
             : "You have no transactions yet. Add your first one!";
         return;
@@ -195,18 +177,15 @@ function renderList() {
         groups[key].push(t);
     });
 
-    // Sort group keys
     const sortedDates = Object.keys(groups).sort(function (a, b) {
-        const s = sortSelect.value;
-        if (s === "oldest") return a.localeCompare(b);
-        return b.localeCompare(a);
+        return sortSelect.value === "oldest"
+            ? a.localeCompare(b)
+            : b.localeCompare(a);
     });
 
-    // Render each date group
     sortedDates.forEach(function (date) {
         const items = groups[date];
 
-        // Calculate group net
         let groupNet = 0;
         items.forEach(function (t) {
             groupNet += t.type === "Income" ? t.amount : -t.amount;
@@ -215,19 +194,17 @@ function renderList() {
         const groupEl = document.createElement("div");
         groupEl.classList.add("date-group");
 
-        // Date header
         const header = document.createElement("div");
         header.classList.add("date-group-header");
         header.innerHTML = `
             <span class="date-group-label">${formatDisplayDate(date)}</span>
             <div class="date-group-line"></div>
-            <span class="date-group-total" style="color:${groupNet >= 0 ? '#28a745' : '#dc3545'}">
+            <span class="date-group-total" style="color:${groupNet >= 0 ? "#28a745" : "#dc3545"}">
                 ${groupNet >= 0 ? "+" : ""}₹${Math.abs(groupNet).toLocaleString("en-IN")}
             </span>
         `;
         groupEl.appendChild(header);
 
-        // Transaction items
         items.forEach(function (t) {
             groupEl.appendChild(createTxnItem(t));
         });
@@ -235,12 +212,7 @@ function renderList() {
         txnList.appendChild(groupEl);
     });
 
-    // Load more button
-    if (filteredData.length > visibleCount) {
-        loadMoreWrap.classList.add("visible");
-    } else {
-        loadMoreWrap.classList.remove("visible");
-    }
+    loadMoreWrap.classList.toggle("visible", filteredData.length > visibleCount);
 }
 
 
@@ -249,11 +221,11 @@ function renderList() {
 // ================================
 
 function createTxnItem(t) {
-    const isIncome = t.type === "Income";
-    const sign     = isIncome ? "+ ₹" : "- ₹";
-    const amtClass = isIncome ? "income" : "expense";
+    const isIncome   = t.type === "Income";
+    const sign       = isIncome ? "+ ₹" : "- ₹";
+    const amtClass   = isIncome ? "income" : "expense";
     const emojiClass = isIncome ? "income-emoji" : "expense-emoji";
-    const emoji    = t.emoji || "💰";
+    const emoji      = t.emoji || "💰";
 
     const div = document.createElement("div");
     div.classList.add("txn-item");
@@ -272,7 +244,7 @@ function createTxnItem(t) {
             </span>
             <span class="txn-type-badge ${amtClass}">${t.type}</span>
         </div>
-        <button class="txn-delete" onclick="deleteTransaction(${t.id})" title="Delete">
+        <button class="txn-delete" onclick="deleteTransaction('${t.id}')" title="Delete">
             <i class="fa-solid fa-trash-can"></i>
         </button>
     `;
@@ -292,31 +264,12 @@ function loadMore() {
 
 
 // ================================
-// DELETE TRANSACTION
+// DELETE TRANSACTION  ← SWAPPED
 // ================================
 
-// function deleteTransaction(id) {
-//     const confirmed = confirm("Delete this transaction? This cannot be undone.");
-//     if (!confirmed) return;
-
-//     let transactions = getTransactions();
-//     const deleted    = transactions.find(function (t) { return t.id === id; });
-//     transactions     = transactions.filter(function (t) { return t.id !== id; });
-//     saveTransactions(transactions);
-
-//     // Show snackbar
-//     if (deleted) {
-//         deleteConfirmText.textContent =
-//             `"${deleted.category}" transaction deleted`;
-//         showSnackbar();
-//     }
-
-//     // Re-apply filters
-//     applyFilters();
-// }
 function deleteTransaction(id) {
-    const transactions = getTransactions();
-    const t = transactions.find(function (t) { return t.id === id; });
+    // Find in cached array — no extra fetch needed
+    const t = allTransactions.find(function (t) { return String(t.id) === String(id); });
     if (!t) return;
 
     const sign   = t.type === "Income" ? "+ ₹" : "- ₹";
@@ -328,13 +281,16 @@ function deleteTransaction(id) {
         message:      `<strong>${t.emoji || ""} ${t.category}</strong> — ${sign}${amount}<br><br>This action cannot be undone.`,
         confirmText:  "Delete",
         confirmClass: "",
-        onConfirm: function () {
-            let data = getTransactions();
-            data = data.filter(function (item) { return item.id !== id; });
-            saveTransactions(data);
-            deleteConfirmText.textContent = `"${t.category}" deleted`;
-            showSnackbar();
-            applyFilters();
+        onConfirm: async function () {
+            try {
+                await DataService.deleteTransaction(id);
+                deleteConfirmText.textContent = `"${t.category}" deleted`;
+                showSnackbar();
+                await applyFilters();   // reload from source after delete
+            } catch (err) {
+                console.error("deleteTransaction error:", err.message);
+                alert("Failed to delete: " + err.message);
+            }
         }
     });
 }
@@ -359,6 +315,6 @@ function showSnackbar() {
 // INIT
 // ================================
 
-(function init() {
-    applyFilters();
+(async function init() {
+    await applyFilters();
 })();

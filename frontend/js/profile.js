@@ -7,16 +7,6 @@
 
 
 // ================================
-// LOCALSTORAGE KEYS
-// ================================
-
-const KEY_USER_ID     = "finantra_user_id";
-const KEY_PROFILE     = "finantra_user_profile";
-const KEY_PREFS       = "finantra_preferences";
-const KEY_TRANSACTIONS = "finantra_transactions";
-
-
-// ================================
 // AVATAR COLOR MAP (by first letter)
 // ================================
 
@@ -45,7 +35,7 @@ function getInitials(name) {
 
 
 // ================================
-// GENERATE USER ID
+// GENERATE USER ID (guest fallback)
 // ================================
 
 function generateUserId() {
@@ -55,10 +45,10 @@ function generateUserId() {
 }
 
 function getOrCreateUserId() {
-    let id = localStorage.getItem(KEY_USER_ID);
+    let id = localStorage.getItem("finantra_user_id");
     if (!id) {
         id = generateUserId();
-        localStorage.setItem(KEY_USER_ID, id);
+        localStorage.setItem("finantra_user_id", id);
     }
     return id;
 }
@@ -80,7 +70,6 @@ function copyUserId() {
             btn.style.color = "";
         }, 2000);
     }).catch(function () {
-        // Fallback for older browsers
         prompt("Copy your ID:", id);
     });
 }
@@ -100,29 +89,6 @@ function formatMemberSince(dateStr) {
 
 
 // ================================
-// LOAD PROFILE DATA
-// ================================
-
-function loadProfile() {
-    const profile = JSON.parse(localStorage.getItem(KEY_PROFILE)) || {};
-    const userId  = getOrCreateUserId();
-
-    // Set profile header
-    const name = profile.name || "";
-    updateAvatarDisplay(name);
-    document.getElementById("profileDisplayName").textContent = name || "Your Name";
-    document.getElementById("profileUserId").textContent      = userId;
-    document.getElementById("memberSince").textContent        =
-        "Member since " + formatMemberSince(profile.memberSince || new Date().toISOString());
-
-    // Fill form fields
-    document.getElementById("inputName").value  = profile.name  || "";
-    document.getElementById("inputEmail").value = profile.email || "";
-    document.getElementById("inputPhone").value = profile.phone || "";
-}
-
-
-// ================================
 // UPDATE AVATAR DISPLAY
 // ================================
 
@@ -131,7 +97,7 @@ function updateAvatarDisplay(name) {
     const initials = document.getElementById("avatarInitials");
 
     initials.textContent     = getInitials(name);
-    circle.style.background  = getAvatarColor(name) + "55"; // semi-transparent
+    circle.style.background  = getAvatarColor(name) + "55";
     circle.style.borderColor = getAvatarColor(name) + "88";
 }
 
@@ -144,27 +110,55 @@ function updateAvatarLive() {
 
 
 // ================================
+// LOAD PROFILE DATA
+// ================================
+
+async function loadProfile() {
+    try {
+        const profile = await DataService.getProfile();
+        const userId  = profile.userId || getOrCreateUserId();
+
+        const name = profile.name || "";
+        updateAvatarDisplay(name);
+        document.getElementById("profileDisplayName").textContent = name || "Your Name";
+        document.getElementById("profileUserId").textContent      = userId;
+        document.getElementById("memberSince").textContent        =
+            "Member since " + (profile.memberSince || formatMemberSince(new Date().toISOString()));
+
+        // Fill form fields
+        document.getElementById("inputName").value  = profile.name  || "";
+        document.getElementById("inputEmail").value = profile.email || "";
+        document.getElementById("inputPhone").value = profile.phone || "";
+
+    } catch (err) {
+        console.error("loadProfile error:", err);
+    }
+}
+
+
+// ================================
 // SAVE PERSONAL INFO
 // ================================
 
-function savePersonalInfo() {
-    const existing = JSON.parse(localStorage.getItem(KEY_PROFILE)) || {};
+async function savePersonalInfo() {
+    try {
+        const updates = {
+            name:  document.getElementById("inputName").value.trim(),
+            email: document.getElementById("inputEmail").value.trim(),
+            phone: document.getElementById("inputPhone").value.trim()
+        };
 
-    const profile = {
-        name:        document.getElementById("inputName").value.trim(),
-        email:       document.getElementById("inputEmail").value.trim(),
-        phone:       document.getElementById("inputPhone").value.trim(),
-        memberSince: existing.memberSince || new Date().toISOString()
-    };
+        await DataService.saveProfile(updates);
 
-    localStorage.setItem(KEY_PROFILE, JSON.stringify(profile));
+        // Update display name
+        document.getElementById("profileDisplayName").textContent =
+            updates.name || "Your Name";
 
-    // Update display name
-    document.getElementById("profileDisplayName").textContent =
-        profile.name || "Your Name";
+        showSaveMsg("personalSaveMsg");
 
-    // Show success message
-    showSaveMsg("personalSaveMsg");
+    } catch (err) {
+        console.error("savePersonalInfo error:", err);
+    }
 }
 
 
@@ -172,28 +166,33 @@ function savePersonalInfo() {
 // LOAD FINANCIAL SUMMARY
 // ================================
 
-function loadFinancialSummary() {
-    const transactions = JSON.parse(localStorage.getItem(KEY_TRANSACTIONS)) || [];
+async function loadFinancialSummary() {
+    try {
+        const transactions = await DataService.getTransactions();
 
-    let income  = 0;
-    let expense = 0;
+        let income  = 0;
+        let expense = 0;
 
-    transactions.forEach(function (t) {
-        if (t.type === "Income") income  += parseFloat(t.amount);
-        else                     expense += parseFloat(t.amount);
-    });
+        transactions.forEach(function (t) {
+            if (t.type === "Income") income  += parseFloat(t.amount);
+            else                     expense += parseFloat(t.amount);
+        });
 
-    const savings = income - expense;
+        const savings = income - expense;
 
-    document.getElementById("finIncome").textContent  = "₹ " + income.toLocaleString("en-IN");
-    document.getElementById("finExpense").textContent = "₹ " + expense.toLocaleString("en-IN");
+        document.getElementById("finIncome").textContent  = "₹ " + income.toLocaleString("en-IN");
+        document.getElementById("finExpense").textContent = "₹ " + expense.toLocaleString("en-IN");
 
-    const savingsEl = document.getElementById("finSavings");
-    savingsEl.textContent = (savings >= 0 ? "₹ " : "-₹ ") +
-        Math.abs(savings).toLocaleString("en-IN");
-    savingsEl.style.color = savings >= 0 ? "#28a745" : "#dc3545";
+        const savingsEl = document.getElementById("finSavings");
+        savingsEl.textContent = (savings >= 0 ? "₹ " : "-₹ ") +
+            Math.abs(savings).toLocaleString("en-IN");
+        savingsEl.style.color = savings >= 0 ? "#28a745" : "#dc3545";
 
-    document.getElementById("finCount").textContent = transactions.length;
+        document.getElementById("finCount").textContent = transactions.length;
+
+    } catch (err) {
+        console.error("loadFinancialSummary error:", err);
+    }
 }
 
 
@@ -201,19 +200,23 @@ function loadFinancialSummary() {
 // LOAD PREFERENCES
 // ================================
 
-function loadPreferences() {
-    const prefs = JSON.parse(localStorage.getItem(KEY_PREFS)) || {};
+async function loadPreferences() {
+    try {
+        const profile = await DataService.getProfile();
+        const prefs   = profile.preferences || {};
 
-    // Default filter
-    const filterEl = document.getElementById("prefFilter");
-    filterEl.value = prefs.defaultFilter || "monthly";
+        document.getElementById("prefFilter").value  = prefs.defaultFilter || "monthly";
+        document.getElementById("prefBalance").value = prefs.startingBalance || "";
 
-    // Starting balance
-    document.getElementById("prefBalance").value = prefs.startingBalance || "";
+        // Theme is always read from localStorage (intentional — stays local)
+        const theme = prefs.theme || localStorage.getItem("finantra_preferences")
+            ? (JSON.parse(localStorage.getItem("finantra_preferences") || "{}").theme || "light")
+            : "light";
+        applyTheme(theme, false);
 
-    // Theme
-    const theme = prefs.theme || "light";
-    applyTheme(theme, false); // false = don't save again on load
+    } catch (err) {
+        console.error("loadPreferences error:", err);
+    }
 }
 
 
@@ -221,26 +224,34 @@ function loadPreferences() {
 // SAVE PREFERENCES
 // ================================
 
-function savePreferences() {
-    const existing = JSON.parse(localStorage.getItem(KEY_PREFS)) || {};
+async function savePreferences() {
+    try {
+        // Read current theme from localStorage (theme is always local)
+        const localPrefs = JSON.parse(localStorage.getItem("finantra_preferences") || "{}");
 
-    const prefs = {
-        defaultFilter:   document.getElementById("prefFilter").value,
-        startingBalance: parseFloat(document.getElementById("prefBalance").value) || 0,
-        theme:           existing.theme || "light"
-    };
+        const preferences = {
+            defaultFilter:   document.getElementById("prefFilter").value,
+            startingBalance: parseFloat(document.getElementById("prefBalance").value) || 0,
+            theme:           localPrefs.theme || "light"
+        };
 
-    localStorage.setItem(KEY_PREFS, JSON.stringify(prefs));
-    showSaveMsg("prefSaveMsg");
+        await DataService.saveProfile({ preferences });
+        showSaveMsg("prefSaveMsg");
+
+    } catch (err) {
+        console.error("savePreferences error:", err);
+    }
 }
 
 
 // ================================
 // THEME TOGGLE
+// Theme is always stored in localStorage only
+// (no backend route for theme — intentional per project design)
 // ================================
 
 function setTheme(theme) {
-    applyTheme(theme, true); // true = save to localStorage
+    applyTheme(theme, true);
 }
 
 function applyTheme(theme, save) {
@@ -258,16 +269,15 @@ function applyTheme(theme, save) {
     }
 
     if (save) {
-        const prefs   = JSON.parse(localStorage.getItem(KEY_PREFS)) || {};
-        prefs.theme   = theme;
-        localStorage.setItem(KEY_PREFS, JSON.stringify(prefs));
+        const prefs = JSON.parse(localStorage.getItem("finantra_preferences") || "{}");
+        prefs.theme = theme;
+        localStorage.setItem("finantra_preferences", JSON.stringify(prefs));
     }
 }
 
-// Apply saved theme on any page load
-// (Called from dashboard.js area — but we add it here for profile page)
+// Must stay sync — runs before page paint
 (function applySavedTheme() {
-    const prefs = JSON.parse(localStorage.getItem(KEY_PREFS)) || {};
+    const prefs = JSON.parse(localStorage.getItem("finantra_preferences") || "{}");
     if (prefs.theme === "dark") {
         document.body.classList.add("dark-mode");
     }
@@ -289,39 +299,38 @@ function showSaveMsg(elementId) {
 
 // ================================
 // DATA MANAGEMENT — CLEAR TRANSACTIONS
+// No bulk-delete API route exists — guests use localStorage,
+// logged-in users see a "not supported" notice via modal.
 // ================================
 
-// function clearTransactions() {
-//     const confirmed1 = confirm(
-//         "Are you sure you want to delete ALL transactions?\n\nThis action cannot be undone."
-//     );
-//     if (!confirmed1) return;
-
-//     const confirmed2 = confirm(
-//         "This will permanently delete all your saved transactions.\n\nClick OK to confirm."
-//     );
-//     if (!confirmed2) return;
-
-//     localStorage.removeItem(KEY_TRANSACTIONS);
-
-//     // Refresh financial summary
-//     loadFinancialSummary();
-
-//     alert("All transactions have been cleared.");
-// }
 function clearTransactions() {
-    openModal({
-        icon:         "🗑️",
-        title:        "Clear All Transactions?",
-        message:      "This will permanently delete all your saved transactions.<br><br>This action <strong>cannot be undone</strong>.",
-        confirmText:  "Clear Transactions",
-        confirmClass: "",
-        onConfirm: function () {
-            localStorage.removeItem(KEY_TRANSACTIONS);
-            loadFinancialSummary();
-            showSaveMsg("personalSaveMsg");
-        }
-    });
+    if (DataService.isGuest()) {
+        // Guest mode — safe to wipe localStorage directly
+        openModal({
+            icon:         "🗑️",
+            title:        "Clear All Transactions?",
+            message:      "This will permanently delete all your saved transactions.<br><br>This action <strong>cannot be undone</strong>.",
+            confirmText:  "Clear Transactions",
+            confirmClass: "",
+            onConfirm: async function () {
+                localStorage.removeItem("finantra_transactions");
+                await loadFinancialSummary();
+                showSaveMsg("personalSaveMsg");
+            }
+        });
+    } else {
+        // Logged-in — no bulk-delete route on backend
+        openModal({
+            icon:         "ℹ️",
+            title:        "Not Available",
+            message:      "Bulk transaction deletion is not supported for logged-in accounts.<br><br>You can delete individual transactions from the <strong>Transactions</strong> page.",
+            confirmText:  "Go to Transactions",
+            confirmClass: "primary",
+            onConfirm: function () {
+                window.location.href = "transactions.html";
+            }
+        });
+    }
 }
 
 
@@ -329,34 +338,6 @@ function clearTransactions() {
 // DATA MANAGEMENT — RESET APP
 // ================================
 
-// function resetApp() {
-//     const confirmed1 = confirm(
-//         "⚠️ RESET APP\n\nThis will delete EVERYTHING:\n• All transactions\n• Your profile\n• All preferences\n• All custom categories\n\nAre you absolutely sure?"
-//     );
-//     if (!confirmed1) return;
-
-//     const confirmed2 = confirm(
-//         "Final confirmation — this cannot be undone.\n\nClick OK to completely reset FinanTra."
-//     );
-//     if (!confirmed2) return;
-
-//     // Clear all FinanTra localStorage keys
-//     const keysToRemove = [
-//         KEY_TRANSACTIONS,
-//         KEY_PROFILE,
-//         KEY_PREFS,
-//         KEY_USER_ID,
-//         "finantra_custom_income",
-//         "finantra_custom_expense"
-//     ];
-
-//     keysToRemove.forEach(function (key) {
-//         localStorage.removeItem(key);
-//     });
-
-//     alert("App has been reset. Redirecting to login...");
-//     window.location.href = "login.html";
-// }
 function resetApp() {
     openModal({
         icon:         "⚠️",
@@ -377,10 +358,8 @@ function resetApp() {
                 confirmText:  "Yes, Reset",
                 confirmClass: "danger-dark",
                 onConfirm: function () {
-                    [KEY_TRANSACTIONS, KEY_PROFILE, KEY_PREFS, KEY_USER_ID,
-                     "finantra_custom_income", "finantra_custom_expense"
-                    ].forEach(function (k) { localStorage.removeItem(k); });
-                    window.location.href = "login.html";
+                    // DataService.logout() clears all finantra_* keys and redirects to login.html
+                    DataService.logout();
                 }
             });
         }
@@ -392,8 +371,8 @@ function resetApp() {
 // INIT
 // ================================
 
-(function init() {
-    loadProfile();
-    loadFinancialSummary();
-    loadPreferences();
+(async function init() {
+    await loadProfile();
+    await loadFinancialSummary();
+    await loadPreferences();
 })();

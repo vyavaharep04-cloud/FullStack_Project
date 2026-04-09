@@ -94,22 +94,24 @@ init();
 
 
 // ================================
-// LOAD BALANCE
+// LOAD BALANCE  ← SWAPPED
 // ================================
 
+async function loadBalance() {
+    try {
+        const transactions = await DataService.getTransactions();
+        const prefs        = JSON.parse(localStorage.getItem("finantra_preferences")) || {};
 
-function loadBalance() {
-    const transactions = JSON.parse(localStorage.getItem("finantra_transactions")) || [];
-    const prefs        = JSON.parse(localStorage.getItem("finantra_preferences")) || {};
+        let balance = parseFloat(prefs.startingBalance) || 0;
+        transactions.forEach(function (t) {
+            balance += t.type === "Income" ? parseFloat(t.amount) : -parseFloat(t.amount);
+        });
 
-    // Start from user's saved starting balance
-    let balance = parseFloat(prefs.startingBalance) || 0;
-
-    transactions.forEach(function (t) {
-        balance += t.type === "Income" ? parseFloat(t.amount) : -parseFloat(t.amount);
-    });
-
-    balanceAmount.textContent = "₹ " + balance.toLocaleString("en-IN");
+        balanceAmount.textContent = "₹ " + balance.toLocaleString("en-IN");
+    } catch (err) {
+        console.error("loadBalance error:", err.message);
+        balanceAmount.textContent = "₹ —";
+    }
 }
 
 
@@ -159,7 +161,6 @@ function loadCategories(type) {
 
     dropdownOptions.innerHTML = "";
 
-    // ── DEFAULT categories (no delete button)
     defaults.forEach(function (cat) {
         const div = document.createElement("div");
         div.classList.add("dropdown-option");
@@ -168,22 +169,18 @@ function loadCategories(type) {
             <span class="option-emoji">${cat.emoji}</span>
             <span class="option-label">${cat.label}</span>
         `;
-
         div.addEventListener("click", function () {
             selectCategory(cat.label, cat.emoji, div);
         });
-
         dropdownOptions.appendChild(div);
     });
 
-    // ── Divider between defaults and customs (only if customs exist)
     if (customs.length > 0) {
         const dividerCustom = document.createElement("div");
         dividerCustom.classList.add("dropdown-divider");
         dropdownOptions.appendChild(dividerCustom);
     }
 
-    // ── CUSTOM categories (with delete button)
     customs.forEach(function (cat) {
         const div = document.createElement("div");
         div.classList.add("dropdown-option", "custom-option");
@@ -195,22 +192,17 @@ function loadCategories(type) {
                 <i class="fa-solid fa-xmark"></i>
             </button>
         `;
-
-        // Click on the row (not the delete button) selects category
         div.addEventListener("click", function (e) {
             if (e.target.closest(".option-delete-btn")) return;
             selectCategory(cat.label, cat.emoji, div);
         });
-
         dropdownOptions.appendChild(div);
     });
 
-    // ── Divider before Add Custom
     const divider = document.createElement("div");
     divider.classList.add("dropdown-divider");
     dropdownOptions.appendChild(divider);
 
-    // ── Add Custom option
     const addCustomDiv = document.createElement("div");
     addCustomDiv.classList.add("add-custom-option");
     addCustomDiv.innerHTML = `<i class="fa-solid fa-plus"></i> Add Custom Category`;
@@ -223,7 +215,7 @@ function loadCategories(type) {
 
 
 // ================================
-// SELECT CATEGORY (shared helper)
+// SELECT CATEGORY
 // ================================
 
 function selectCategory(label, emoji, div) {
@@ -246,8 +238,30 @@ function selectCategory(label, emoji, div) {
 // DELETE CUSTOM CATEGORY
 // ================================
 
-function deleteCustomCategory(event, name, type) {
-    // Stop the click from selecting the category
+// async function deleteCustomCategory(event, name, type) {
+//     event.stopPropagation();
+
+//     const confirmed = confirm(`Delete custom category "${name}"?\n\nPast transactions using this category will not be affected.`);
+//     if (!confirmed) return;
+
+//     const storageKey = type === "Income"
+//         ? "finantra_custom_income"
+//         : "finantra_custom_expense";
+
+//     let customs = JSON.parse(localStorage.getItem(storageKey)) || [];
+//     customs = customs.filter(function (c) { return c.label !== name; });
+//     localStorage.setItem(storageKey, JSON.stringify(customs));
+
+//     if (selectedCategory === name) {
+//         selectedCategory = "";
+//         selectedEmoji    = "";
+//         selectedText.textContent = "Select category";
+//         dropdownSelected.classList.remove("invalid");
+//     }
+
+//     loadCategories(type);
+// }
+async function deleteCustomCategory(event, name, type) { // <-- Added async
     event.stopPropagation();
 
     const confirmed = confirm(`Delete custom category "${name}"?\n\nPast transactions using this category will not be affected.`);
@@ -259,9 +273,20 @@ function deleteCustomCategory(event, name, type) {
 
     let customs = JSON.parse(localStorage.getItem(storageKey)) || [];
     customs = customs.filter(function (c) { return c.label !== name; });
-    localStorage.setItem(storageKey, JSON.stringify(customs));
+    localStorage.setItem(storageKey, JSON.stringify(customs)); // Optimistic UI update
 
-    // If deleted category was currently selected — reset selection
+    // --- NEW SWAP CODE (Cloud Sync) ---
+    try {
+        const updatePayload = type === "Income" 
+            ? { customIncomeCategories: customs } 
+            : { customExpenseCategories: customs };
+            
+        await DataService.saveProfile(updatePayload); // Saves to MongoDB!
+    } catch (err) {
+        console.error("Failed to delete custom category from cloud:", err);
+    }
+    // ----------------------------------
+
     if (selectedCategory === name) {
         selectedCategory = "";
         selectedEmoji    = "";
@@ -269,7 +294,6 @@ function deleteCustomCategory(event, name, type) {
         dropdownSelected.classList.remove("invalid");
     }
 
-    // Reload dropdown
     loadCategories(type);
 }
 
@@ -317,7 +341,7 @@ function hideCustomPanel() {
     customNameInput.value  = "";
 }
 
-function saveCustomCategory() {
+async function saveCustomCategory() {
     const emoji = customEmojiInput.value.trim();
     const name  = customNameInput.value.trim();
 
@@ -352,6 +376,12 @@ function saveCustomCategory() {
 
     customs.push({ emoji: emoji, label: name });
     localStorage.setItem(storageKey, JSON.stringify(customs));
+
+    const updatePayload = currentType === "Income" 
+        ? { customIncomeCategories: customs } 
+        : { customExpenseCategories: customs };
+        
+    await DataService.saveProfile(updatePayload);
 
     loadCategories(currentType);
 
@@ -557,30 +587,50 @@ function updateSessionTotals() {
 
 
 // ================================
-// SAVE ALL
+// SAVE ALL  ← SWAPPED
 // ================================
 
-function saveAll() {
+async function saveAll() {
     if (sessionItems.length === 0) return;
 
-    const existing = JSON.parse(localStorage.getItem("finantra_transactions")) || [];
-    const updated  = [...existing, ...sessionItems];
-    localStorage.setItem("finantra_transactions", JSON.stringify(updated));
+    const btn = document.querySelector(".save-all-btn");
+    if (btn) { btn.disabled = true; btn.textContent = "Saving..."; }
 
-    const count = sessionItems.length;
-    successText.textContent = count + " transaction" + (count > 1 ? "s" : "") + " saved successfully!";
-    successBanner.classList.add("visible");
+    try {
+        // Save each session item via DataService (handles both backend + guest)
+        for (const item of sessionItems) {
+            await DataService.addTransaction({
+                type:     item.type,
+                amount:   item.amount,
+                category: item.category,
+                emoji:    item.emoji,
+                date:     item.date,
+                payment:  item.payment,
+                notes:    item.notes
+            });
+        }
 
-    sessionItems = [];
-    sessionCard.classList.remove("visible");
+        const count = sessionItems.length;
+        successText.textContent = count + " transaction" + (count > 1 ? "s" : "") + " saved successfully!";
+        successBanner.classList.add("visible");
 
-    loadBalance();
+        sessionItems = [];
+        sessionCard.classList.remove("visible");
 
-    successBanner.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        loadBalance();
 
-    setTimeout(function () {
-        successBanner.classList.remove("visible");
-    }, 4000);
+        successBanner.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+        setTimeout(function () {
+            successBanner.classList.remove("visible");
+        }, 4000);
+
+    } catch (err) {
+        console.error("saveAll error:", err.message);
+        alert("Failed to save transactions: " + err.message);
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = "Save All"; }
+    }
 }
 
 
@@ -588,14 +638,6 @@ function saveAll() {
 // CLEAR ALL
 // ================================
 
-// function clearAll() {
-//     if (sessionItems.length === 0) return;
-
-//     if (confirm("Clear all " + sessionItems.length + " item(s) from the session?")) {
-//         sessionItems = [];
-//         sessionCard.classList.remove("visible");
-//     }
-// }
 function clearAll() {
     if (sessionItems.length === 0) return;
 

@@ -71,6 +71,242 @@
 </section>
 
 
+<!-- ================================
+     ASSIGNMENT 8 — IMAGE GALLERY WITH CATEGORY FILTER
+================================ -->
+<section class="gallery-section" id="gallery">
+
+    <div class="gallery-header">
+        <span class="gallery-label">
+            <i class="fa-solid fa-images"></i> Finance Gallery
+        </span>
+        <h2>Visual Finance Insights</h2>
+        <p>Browse curated visuals across money management topics. Use the filters to explore by category.</p>
+    </div>
+
+    <!-- FILTER BUTTONS -->
+    <div class="gallery-filters" id="galleryFilters">
+        <button class="filter-btn active" data-filter="all" onclick="filterGallery('all', this)">
+            <i class="fa-solid fa-border-all"></i> All
+        </button>
+        <button class="filter-btn" data-filter="tips" onclick="filterGallery('tips', this)">
+            <i class="fa-solid fa-lightbulb"></i> Tips
+        </button>
+        <button class="filter-btn" data-filter="budgeting" onclick="filterGallery('budgeting', this)">
+            <i class="fa-solid fa-wallet"></i> Budgeting
+        </button>
+        <button class="filter-btn" data-filter="savings" onclick="filterGallery('savings', this)">
+            <i class="fa-solid fa-shield-halved"></i> Savings
+        </button>
+        <button class="filter-btn" data-filter="analytics" onclick="filterGallery('analytics', this)">
+            <i class="fa-solid fa-chart-line"></i> Analytics
+        </button>
+    </div>
+
+    <!-- RESULTS COUNT -->
+    <div class="gallery-count" id="galleryCount">
+        Showing <span id="visibleCount">12</span> of 12 images
+    </div>
+
+    <!-- IMAGE GRID -->
+    <div class="gallery-grid" id="galleryGrid">
+
+        <!-- TIPS (4 images) -->
+        <div class="gallery-item" data-category="tips">
+            <div class="gallery-img-wrap">
+                <img src="https://bsmedia.business-standard.com/_media/bs/img/article/2023-08/07/full/1691423166-0846.jpg"
+                     alt="Money management tips — coins in a plant pot" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat"><i class="fa-solid fa-lightbulb"></i> Tips</span>
+                    <p>Track every rupee you spend</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-tips"><i class="fa-solid fa-lightbulb"></i> Tips</span>
+                <span class="gi-title">Track Every Rupee</span>
+            </div>
+        </div>
+
+        <div class="gallery-item" data-category="tips">
+            <div class="gallery-img-wrap">
+                <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&q=80"
+                     alt="50-30-20 budgeting rule concept" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat"><i class="fa-solid fa-lightbulb"></i> Tips</span>
+                    <p>The 50-30-20 rule for smart budgeting</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-tips"><i class="fa-solid fa-lightbulb"></i> Tips</span>
+                <span class="gi-title">The 50-30-20 Rule</span>
+            </div>
+        </div>
+
+        <div class="gallery-item" data-category="tips">
+            <div class="gallery-img-wrap">
+                <img src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=600&q=80"
+                     alt="Pay yourself first — savings habit" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat"><i class="fa-solid fa-lightbulb"></i> Tips</span>
+                    <p>Pay yourself first every month</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-tips"><i class="fa-solid fa-lightbulb"></i> Tips</span>
+                <span class="gi-title">Pay Yourself First</span>
+            </div>
+        </div>
+
+        <div class="gallery-item" data-category="tips">
+            <div class="gallery-img-wrap">
+                <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=600&q=80"
+                     alt="Weekly financial review checklist" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat"><i class="fa-solid fa-lightbulb"></i> Tips</span>
+                    <p>Review your finances every week</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-tips"><i class="fa-solid fa-lightbulb"></i> Tips</span>
+                <span class="gi-title">Weekly Review Habit</span>
+            </div>
+        </div>
+
+        <!-- BUDGETING (3 images) -->
+        <div class="gallery-item" data-category="budgeting">
+            <div class="gallery-img-wrap">
+                <img src="https://thumbs.dreamstime.com/b/personal-finance-icon-set-such-as-cashflow-management-spending-plan-vector-illustration-52702518.jpg?w=768"
+                     alt="Budget planning concept — cashflow management icons" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat gi-overlay-budgeting"><i class="fa-solid fa-wallet"></i> Budgeting</span>
+                    <p>Assign every rupee a purpose</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-budgeting"><i class="fa-solid fa-wallet"></i> Budgeting</span>
+                <span class="gi-title">Cashflow Planning</span>
+            </div>
+        </div>
+
+        <div class="gallery-item" data-category="budgeting">
+            <div class="gallery-img-wrap">
+                <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&q=80"
+                     alt="Budget spreadsheet on laptop" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat gi-overlay-budgeting"><i class="fa-solid fa-wallet"></i> Budgeting</span>
+                    <p>Category-wise spending limits</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-budgeting"><i class="fa-solid fa-wallet"></i> Budgeting</span>
+                <span class="gi-title">Category Limits</span>
+            </div>
+        </div>
+
+        <div class="gallery-item" data-category="budgeting">
+            <div class="gallery-img-wrap">
+                <img src="https://images.unsplash.com/photo-1601597111158-2fceff292cdc?w=600&q=80"
+                     alt="Monthly budget planning with notebook and pen" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat gi-overlay-budgeting"><i class="fa-solid fa-wallet"></i> Budgeting</span>
+                    <p>Plan your monthly expenses ahead</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-budgeting"><i class="fa-solid fa-wallet"></i> Budgeting</span>
+                <span class="gi-title">Monthly Planning</span>
+            </div>
+        </div>
+
+        <!-- SAVINGS (3 images) -->
+        <div class="gallery-item" data-category="savings">
+            <div class="gallery-img-wrap">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqjD7k3FNd9Q9dr1ecseh5usXMyl1Fy9FFeQ&s"
+                     alt="Emergency fund savings jar with coins" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat gi-overlay-savings"><i class="fa-solid fa-shield-halved"></i> Savings</span>
+                    <p>Build a 3–6 month emergency fund</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-savings"><i class="fa-solid fa-shield-halved"></i> Savings</span>
+                <span class="gi-title">Emergency Fund</span>
+            </div>
+        </div>
+
+        <div class="gallery-item" data-category="savings">
+            <div class="gallery-img-wrap">
+                <img src="https://images.unsplash.com/photo-1518458028785-8fbcd101ebb9?w=600&q=80"
+                     alt="Savings goal progress tracking" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat gi-overlay-savings"><i class="fa-solid fa-shield-halved"></i> Savings</span>
+                    <p>Set and track your savings goals</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-savings"><i class="fa-solid fa-shield-halved"></i> Savings</span>
+                <span class="gi-title">Savings Goals</span>
+            </div>
+        </div>
+
+        <div class="gallery-item" data-category="savings">
+            <div class="gallery-img-wrap">
+                <img src="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=600&q=80"
+                     alt="Piggy bank savings concept" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat gi-overlay-savings"><i class="fa-solid fa-shield-halved"></i> Savings</span>
+                    <p>Small savings add up over time</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-savings"><i class="fa-solid fa-shield-halved"></i> Savings</span>
+                <span class="gi-title">Consistent Saving</span>
+            </div>
+        </div>
+
+        <!-- ANALYTICS (2 images) -->
+        <div class="gallery-item" data-category="analytics">
+            <div class="gallery-img-wrap">
+                <img src="https://moneypatrol.com/moneytalk/wp-content/uploads/2023/06/budget185.png"
+                     alt="Expense tracking on phone and laptop — analytics dashboard" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat gi-overlay-analytics"><i class="fa-solid fa-chart-line"></i> Analytics</span>
+                    <p>Visualize your spending patterns</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-analytics"><i class="fa-solid fa-chart-line"></i> Analytics</span>
+                <span class="gi-title">Spending Dashboard</span>
+            </div>
+        </div>
+
+        <div class="gallery-item" data-category="analytics">
+            <div class="gallery-img-wrap">
+                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80"
+                     alt="Data analytics charts for personal finance" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat gi-overlay-analytics"><i class="fa-solid fa-chart-line"></i> Analytics</span>
+                    <p>Compare your month-over-month trends</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-analytics"><i class="fa-solid fa-chart-line"></i> Analytics</span>
+                <span class="gi-title">Monthly Trends</span>
+            </div>
+        </div>
+
+    </div><!-- /gallery-grid -->
+
+    <!-- NO RESULTS MESSAGE (hidden by default) -->
+    <div class="gallery-empty" id="galleryEmpty" style="display:none;">
+        <i class="fa-solid fa-images"></i>
+        <p>No images found for this category.</p>
+    </div>
+
+</section>
+<!-- END ASSIGNMENT 8 -->
+
+
 <!-- BLOG POSTS -->
 <main class="blog-container" id="blog-articles">
 

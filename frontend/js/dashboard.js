@@ -97,15 +97,6 @@ let barChartInstance = null;
 
 
 // ================================
-// READ TRANSACTIONS FROM LOCALSTORAGE
-// ================================
-
-function getTransactions() {
-    return JSON.parse(localStorage.getItem("finantra_transactions")) || [];
-}
-
-
-// ================================
 // DATE HELPERS
 // ================================
 
@@ -181,7 +172,7 @@ function filterByMode(transactions, mode) {
 
 
 // ================================
-// CALCULATE SUMMARY FROM TRANSACTIONS
+// CALCULATE SUMMARY
 // ================================
 
 function calcSummary(transactions) {
@@ -210,7 +201,7 @@ function updateCards(summary) {
     const savingsEl = document.getElementById("cardSavings");
     const rateEl    = document.getElementById("cardRate");
 
-    if (!incomeEl) return; // guard — not on dashboard page
+    if (!incomeEl) return;
 
     incomeEl.textContent  = "₹ " + summary.income.toLocaleString("en-IN");
     expenseEl.textContent = "₹ " + summary.expense.toLocaleString("en-IN");
@@ -226,7 +217,7 @@ function updateCards(summary) {
 
 
 // ================================
-// BUILD PIE CHART DATA (expense by category)
+// BUILD PIE CHART DATA
 // ================================
 
 function buildPieData(transactions) {
@@ -250,12 +241,11 @@ function buildPieData(transactions) {
 
 function buildBarData(transactions, mode) {
 
-    // WEEKLY — day-wise expenses Mon–Sun
     if (mode === "weekly") {
-        const dayLabels  = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-        const dayOrder   = [1,2,3,4,5,6,0];
-        const dayTotals  = [0,0,0,0,0,0,0];
-        const today      = new Date().getDay();
+        const dayLabels = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+        const dayOrder  = [1,2,3,4,5,6,0];
+        const dayTotals = [0,0,0,0,0,0,0];
+        const today     = new Date().getDay();
 
         transactions.filter(function (t) {
             return t.type === "Expense";
@@ -265,26 +255,18 @@ function buildBarData(transactions, mode) {
             if (i !== -1) dayTotals[i] += parseFloat(t.amount);
         });
 
-        // Grey out future days
         const barColors = dayOrder.map(function (d) {
-            const dayIndex = dayOrder.indexOf(d);
+            const dayIndex   = dayOrder.indexOf(d);
             const todayIndex = dayOrder.indexOf(today);
             return dayIndex > todayIndex ? "#dee2e6" : expenseColor;
         });
 
-        return {
-            type:   "daily",
-            labels: dayLabels,
-            data:   dayTotals,
-            colors: barColors,
-            income: null
-        };
+        return { type: "daily", labels: dayLabels, data: dayTotals, colors: barColors, income: null };
     }
 
-    // MONTHLY — week-wise expenses
     if (mode === "monthly") {
-        const weekLabels  = ["Week 1", "Week 2", "Week 3", "Week 4"];
-        const weekTotals  = [0, 0, 0, 0];
+        const weekLabels = ["Week 1","Week 2","Week 3","Week 4"];
+        const weekTotals = [0,0,0,0];
 
         transactions.filter(function (t) {
             return t.type === "Expense";
@@ -294,39 +276,26 @@ function buildBarData(transactions, mode) {
             weekTotals[weekIdx] += parseFloat(t.amount);
         });
 
-        return {
-            type:   "expense-only",
-            labels: weekLabels,
-            data:   weekTotals,
-            colors: null,
-            income: null
-        };
+        return { type: "expense-only", labels: weekLabels, data: weekTotals, colors: null, income: null };
     }
 
-    // YEARLY — monthly income vs expense
     if (mode === "yearly") {
-        const monthNames  = ["Jan","Feb","Mar","Apr","May","Jun",
-                             "Jul","Aug","Sep","Oct","Nov","Dec"];
+        const monthNames   = ["Jan","Feb","Mar","Apr","May","Jun",
+                              "Jul","Aug","Sep","Oct","Nov","Dec"];
         const currentMonth = new Date().getMonth();
-        const labels      = monthNames.slice(0, currentMonth + 1);
-        const incomeData  = new Array(currentMonth + 1).fill(0);
-        const expenseData = new Array(currentMonth + 1).fill(0);
+        const labels       = monthNames.slice(0, currentMonth + 1);
+        const incomeData   = new Array(currentMonth + 1).fill(0);
+        const expenseData  = new Array(currentMonth + 1).fill(0);
 
         transactions.forEach(function (t) {
             const m = parseInt(t.date.split("-")[1]) - 1;
             if (m <= currentMonth) {
-                if (t.type === "Income")  incomeData[m]  += parseFloat(t.amount);
-                else                      expenseData[m] += parseFloat(t.amount);
+                if (t.type === "Income") incomeData[m]  += parseFloat(t.amount);
+                else                     expenseData[m] += parseFloat(t.amount);
             }
         });
 
-        return {
-            type:   "income-expense",
-            labels: labels,
-            data:   expenseData,
-            colors: null,
-            income: incomeData
-        };
+        return { type: "income-expense", labels, data: expenseData, colors: null, income: incomeData };
     }
 
     return { type: "expense-only", labels: [], data: [], colors: null, income: null };
@@ -342,7 +311,6 @@ function renderPieChart(pieData) {
 
     if (pieChartInstance) pieChartInstance.destroy();
 
-    // Empty state — no expense data
     if (pieData.data.length === 0) {
         pieChartInstance = new Chart(ctx, {
             type: "doughnut",
@@ -353,10 +321,7 @@ function renderPieChart(pieData) {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: false }
-                }
+                plugins: { legend: { display: false }, tooltip: { enabled: false } }
             }
         });
         return;
@@ -416,18 +381,18 @@ function renderBarChart(barData) {
                 labels: barData.labels,
                 datasets: [
                     {
-                        label: "Income",
-                        data:  barData.income,
+                        label:           "Income",
+                        data:            barData.income,
                         backgroundColor: incomeColor,
-                        borderRadius: 6,
-                        barPercentage: 0.4
+                        borderRadius:    6,
+                        barPercentage:   0.4
                     },
                     {
-                        label: "Expenses",
-                        data:  barData.data,
+                        label:           "Expenses",
+                        data:            barData.data,
                         backgroundColor: expenseColor,
-                        borderRadius: 6,
-                        barPercentage: 0.4
+                        borderRadius:    6,
+                        barPercentage:   0.4
                     }
                 ]
             }
@@ -439,11 +404,11 @@ function renderBarChart(barData) {
             data: {
                 labels: barData.labels,
                 datasets: [{
-                    label: "Expenses",
-                    data:  barData.data,
+                    label:           "Expenses",
+                    data:            barData.data,
                     backgroundColor: barData.colors,
-                    borderRadius: 6,
-                    barPercentage: 0.6
+                    borderRadius:    6,
+                    barPercentage:   0.6
                 }]
             }
         };
@@ -454,25 +419,25 @@ function renderBarChart(barData) {
             data: {
                 labels: barData.labels,
                 datasets: [{
-                    label: "Expenses",
-                    data:  barData.data,
+                    label:           "Expenses",
+                    data:            barData.data,
                     backgroundColor: expenseColor,
-                    borderRadius: 6,
-                    barPercentage: 0.5
+                    borderRadius:    6,
+                    barPercentage:   0.5
                 }]
             }
         };
     }
 
     chartConfig.options = {
-        responsive: true,
+        responsive:          true,
         maintainAspectRatio: false,
-        animation: { duration: 600 },
+        animation:           { duration: 600 },
         plugins: {
             legend: {
-                display: barData.type === "income-expense",
+                display:  barData.type === "income-expense",
                 position: "bottom",
-                labels: { padding: 16, font: { size: 12 }, usePointStyle: true }
+                labels:   { padding: 16, font: { size: 12 }, usePointStyle: true }
             },
             tooltip: {
                 callbacks: {
@@ -488,13 +453,13 @@ function renderBarChart(barData) {
                 grid: { color: "#f0f0f0" },
                 ticks: {
                     callback: function (v) {
-                        return v >= 1000 ? "₹" + (v/1000).toFixed(0) + "k" : "₹" + v;
+                        return v >= 1000 ? "₹" + (v / 1000).toFixed(0) + "k" : "₹" + v;
                     },
                     font: { size: 11 }
                 }
             },
             x: {
-                grid: { display: false },
+                grid:  { display: false },
                 ticks: { font: { size: 11 } }
             }
         }
@@ -508,27 +473,39 @@ function renderBarChart(barData) {
 // UPDATE CHART TITLES
 // ================================
 
+// function updateTitles(mode) {
+//     const month = getMonthName();
+//     const year  = getYearStr();
+
+//     const titles = {
+//         monthly: { pie: "Expense Breakdown — " + month,     bar: "Week-wise Expenses — " + month },
+//         weekly:  { pie: "Expense Breakdown — This Week",    bar: "Day-wise Expenses — This Week" },
+//         yearly:  { pie: "Expense Breakdown — " + year,      bar: "Monthly Income vs Expense — " + year }
+//     };
+
+//     document.getElementById("pieChartTitle").textContent = titles[mode].pie;
+//     document.getElementById("barChartTitle").textContent = titles[mode].bar;
+// }
+// ================================
+// UPDATE CHART TITLES
+// ================================
+
 function updateTitles(mode) {
     const month = getMonthName();
     const year  = getYearStr();
 
     const titles = {
-        monthly: {
-            pie: "Expense Breakdown — " + month,
-            bar: "Week-wise Expenses — " + month
-        },
-        weekly: {
-            pie: "Expense Breakdown — This Week",
-            bar: "Day-wise Expenses — This Week"
-        },
-        yearly: {
-            pie: "Expense Breakdown — " + year,
-            bar: "Monthly Income vs Expense — " + year
-        }
+        monthly: { pie: "Expense Breakdown — " + month,     bar: "Week-wise Expenses — " + month },
+        weekly:  { pie: "Expense Breakdown — This Week",    bar: "Day-wise Expenses — This Week" },
+        yearly:  { pie: "Expense Breakdown — " + year,      bar: "Monthly Income vs Expense — " + year },
+        all:     { pie: "Expense Breakdown — All Time",     bar: "Income vs Expense — All Time" }
     };
 
-    document.getElementById("pieChartTitle").textContent = titles[mode].pie;
-    document.getElementById("barChartTitle").textContent = titles[mode].bar;
+    // Safety fallback just in case mode is unrecognized
+    const safeMode = titles[mode] ? mode : "monthly";
+
+    document.getElementById("pieChartTitle").textContent = titles[safeMode].pie;
+    document.getElementById("barChartTitle").textContent = titles[safeMode].bar;
 }
 
 
@@ -537,34 +514,37 @@ function updateTitles(mode) {
 // ================================
 
 function renderRecentTransactions(transactions) {
-    const tbody        = document.getElementById("recentTbody");
-    const table        = document.getElementById("recentTable");
-    const emptyState   = document.getElementById("noTransactions");
+    const tbody      = document.getElementById("recentTbody");
+    const table      = document.getElementById("recentTable");
+    const emptyState = document.getElementById("noTransactions");
 
     if (!tbody) return;
 
     tbody.innerHTML = "";
 
     if (transactions.length === 0) {
-        table.style.display    = "none";
+        table.style.display      = "none";
         emptyState.style.display = "block";
         return;
     }
 
-    table.style.display    = "";
+    table.style.display      = "";
     emptyState.style.display = "none";
 
     // Sort newest first, take last 5
+    // Use String comparison for id — safe for both ObjectId and Date.now()
     const recent = [...transactions]
-        .sort(function (a, b) { return b.date.localeCompare(a.date) || b.id - a.id; })
+        .sort(function (a, b) {
+            return b.date.localeCompare(a.date) || String(b.id).localeCompare(String(a.id));
+        })
         .slice(0, 5);
 
     recent.forEach(function (t) {
-        const isIncome  = t.type === "Income";
-        const sign      = isIncome ? "+ ₹" : "- ₹";
-        const amtClass  = isIncome ? "income" : "expense";
-        const dateStr   = formatDisplayDate(t.date);
-        const notes     = t.notes || t.payment || "—";
+        const isIncome = t.type === "Income";
+        const sign     = isIncome ? "+ ₹" : "- ₹";
+        const amtClass = isIncome ? "income" : "expense";
+        const dateStr  = formatDisplayDate(t.date);
+        const notes    = t.notes || t.payment || "—";
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
@@ -579,7 +559,7 @@ function renderRecentTransactions(transactions) {
 
 
 // ================================
-// FILTER BUTTONS
+// FILTER BUTTONS  ← SWAPPED
 // ================================
 
 function setFilter(btn, mode) {
@@ -588,30 +568,36 @@ function setFilter(btn, mode) {
     });
     btn.classList.add("active");
 
-    renderDashboard(mode);
+    renderDashboard(mode);   // async — fire and forget is fine here
 }
 
 
 // ================================
-// RENDER DASHBOARD (main function)
+// RENDER DASHBOARD  ← SWAPPED
 // ================================
 
-function renderDashboard(mode) {
+async function renderDashboard(mode) {
     const isDashboard = document.getElementById("cardIncome") !== null;
     if (!isDashboard) return;
 
-    const all          = getTransactions();
-    const filtered     = filterByMode(all, mode);
-    const summary      = calcSummary(filtered);
-    const pieData      = buildPieData(filtered);
-    const barData      = buildBarData(filtered, mode);
+    let all = [];
+    try {
+        all = await DataService.getTransactions();
+    } catch (err) {
+        console.error("renderDashboard: failed to load transactions:", err.message);
+    }
+
+    const filtered = filterByMode(all, mode);
+    const summary  = calcSummary(filtered);
+    const pieData  = buildPieData(filtered);
+    const barData  = buildBarData(filtered, mode);
 
     updateCards(summary);
     updateTitles(mode);
     renderPieChart(pieData);
     renderBarChart(barData);
 
-    // Recent transactions always shows all-time last 5
+    // Recent transactions — always all-time last 5
     renderRecentTransactions(all);
 }
 
@@ -631,40 +617,29 @@ function renderDashboard(mode) {
 // ================================
 // SHARED MODAL SYSTEM
 // Assignment 6 — Modal popup
-// Opens on button click, closes on
-// outside click or close icon
 // ================================
 
 let modalConfirmCallback = null;
 
 function openModal(options) {
-    // options: { icon, title, message, confirmText, confirmClass, onConfirm }
     const modal   = document.getElementById("sharedModal");
     const overlay = document.getElementById("modalOverlay");
 
     if (!modal || !overlay) return;
 
-    // Populate modal content
-    document.getElementById("modalIcon").textContent        = options.icon        || "⚠️";
-    document.getElementById("modalTitle").textContent       = options.title       || "Are you sure?";
-    document.getElementById("modalMessage").innerHTML       = options.message     || "";
-    document.getElementById("modalConfirmBtn").textContent  = options.confirmText || "Confirm";
+    document.getElementById("modalIcon").textContent       = options.icon        || "⚠️";
+    document.getElementById("modalTitle").textContent      = options.title       || "Are you sure?";
+    document.getElementById("modalMessage").innerHTML      = options.message     || "";
+    document.getElementById("modalConfirmBtn").textContent = options.confirmText || "Confirm";
 
-    // Set confirm button style
-    const confirmBtn = document.getElementById("modalConfirmBtn");
+    const confirmBtn  = document.getElementById("modalConfirmBtn");
     confirmBtn.className = "modal-confirm-btn";
-    if (options.confirmClass) {
-        confirmBtn.classList.add(options.confirmClass);
-    }
+    if (options.confirmClass) confirmBtn.classList.add(options.confirmClass);
 
-    // Store callback
     modalConfirmCallback = options.onConfirm || null;
 
-    // Show modal with animation
     overlay.classList.add("active");
     modal.classList.add("active");
-
-    // Prevent body scroll
     document.body.style.overflow = "hidden";
 }
 
@@ -676,49 +651,36 @@ function closeModal() {
 
     modal.classList.remove("active");
     overlay.classList.remove("active");
-
-    // Restore body scroll
     document.body.style.overflow = "";
-
     modalConfirmCallback = null;
 }
 
 function confirmModal() {
-    if (modalConfirmCallback) {
-        modalConfirmCallback();
-    }
+    if (modalConfirmCallback) modalConfirmCallback();
     closeModal();
 }
 
-// Close modal when clicking overlay (outside modal box)
 document.addEventListener("click", function (e) {
     const overlay = document.getElementById("modalOverlay");
-    if (e.target === overlay) {
-        closeModal();
-    }
+    if (e.target === overlay) closeModal();
 });
 
-// Close modal on Escape key
 document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") {
-        closeModal();
-    }
+    if (e.key === "Escape") closeModal();
 });
 
 
 // ================================
-// INIT — Load with saved default filter
+// INIT  ← SWAPPED
 // ================================
 
-(function init() {
+(async function init() {
     const isDashboard = document.getElementById("cardIncome") !== null;
     if (!isDashboard) return;
 
-    // Read default filter from preferences
     const prefs         = JSON.parse(localStorage.getItem("finantra_preferences")) || {};
     const defaultFilter = prefs.defaultFilter || "monthly";
 
-    // Set correct filter button as active
     document.querySelectorAll(".filter").forEach(function (btn) {
         btn.classList.remove("active");
         if (btn.textContent.trim().toLowerCase() === defaultFilter) {
@@ -726,5 +688,5 @@ document.addEventListener("keydown", function (e) {
         }
     });
 
-    renderDashboard(defaultFilter);
+    await renderDashboard(defaultFilter);
 })();

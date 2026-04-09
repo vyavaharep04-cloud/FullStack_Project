@@ -544,3 +544,309 @@
     .key-takeaways { padding: 16px; }
 
 }
+
+
+/* ================================
+   ASSIGNMENT 8 — IMAGE GALLERY WITH CATEGORY FILTER
+================================ */
+
+.gallery-section {
+    background: #f6f9fb;
+    padding: 60px 24px 56px;
+    border-bottom: 1px solid #e4edf2;
+}
+
+/* Section header */
+.gallery-header {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto 36px;
+}
+
+.gallery-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #e0f2fa;
+    color: #1f82a6;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    border: 1px solid #b8dff0;
+}
+
+.gallery-header h2 {
+    font-size: 26px;
+    font-weight: 800;
+    color: #1a2e3b;
+    margin-bottom: 10px;
+    line-height: 1.3;
+}
+
+.gallery-header p {
+    font-size: 14px;
+    color: #667;
+    line-height: 1.65;
+}
+
+/* ================================
+   FILTER BUTTONS
+================================ */
+.gallery-filters {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 20px;
+    border-radius: 22px;
+    border: 2px solid #d0e8f2;
+    background: white;
+    color: #555;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.filter-btn:hover {
+    border-color: #1f82a6;
+    color: #1f82a6;
+    background: #f0f9fd;
+}
+
+.filter-btn.active {
+    background: #1f82a6;
+    color: white;
+    border-color: #1f82a6;
+    box-shadow: 0 3px 10px rgba(31, 130, 166, 0.3);
+}
+
+.filter-btn i {
+    font-size: 12px;
+}
+
+/* Result count line */
+.gallery-count {
+    text-align: center;
+    font-size: 13px;
+    color: #999;
+    margin-bottom: 28px;
+}
+
+.gallery-count span {
+    font-weight: 700;
+    color: #1f82a6;
+}
+
+/* ================================
+   GALLERY GRID
+================================ */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* ================================
+   GALLERY ITEM
+================================ */
+.gallery-item {
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+    border: 1px solid #eaf2f7;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.3s ease;
+    cursor: pointer;
+}
+
+.gallery-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 28px rgba(31, 130, 166, 0.15);
+}
+
+/* Hidden state (filtered out) */
+.gallery-item.hidden {
+    display: none;
+}
+
+/* Fade-in animation when items appear */
+.gallery-item.fade-in {
+    animation: galleryFadeIn 0.35s ease forwards;
+}
+
+@keyframes galleryFadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Image wrapper with overlay */
+.gallery-img-wrap {
+    position: relative;
+    overflow: hidden;
+    height: 180px;
+}
+
+.gallery-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease;
+}
+
+.gallery-item:hover .gallery-img-wrap img {
+    transform: scale(1.07);
+}
+
+/* Hover overlay */
+.gallery-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(15, 50, 70, 0.82) 0%, rgba(15, 50, 70, 0.3) 60%, transparent 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 14px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.gallery-item:hover .gallery-overlay {
+    opacity: 1;
+}
+
+.gallery-overlay-cat {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #1f82a6;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    width: fit-content;
+}
+
+/* Per-category overlay badge colors */
+.gi-overlay-budgeting { background: #28a745; }
+.gi-overlay-savings   { background: #e07b00; }
+.gi-overlay-analytics { background: #6f42c1; }
+
+.gallery-overlay p {
+    color: white;
+    font-size: 12px;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* Item info bar below image */
+.gallery-item-info {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 12px 14px;
+}
+
+/* Small category badge in info bar */
+.gi-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.gi-badge-tips      { background: #e0f2fa; color: #1f82a6; }
+.gi-badge-budgeting { background: #e6f7ec; color: #28a745; }
+.gi-badge-savings   { background: #fff3e0; color: #e07b00; }
+.gi-badge-analytics { background: #f0ebfc; color: #6f42c1; }
+
+/* Title text in info bar */
+.gi-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #334;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ================================
+   NO RESULTS MESSAGE
+================================ */
+.gallery-empty {
+    text-align: center;
+    padding: 50px 20px;
+    color: #aaa;
+}
+
+.gallery-empty i {
+    font-size: 42px;
+    color: #cde;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.gallery-empty p {
+    font-size: 15px;
+    color: #aaa;
+}
+
+
+/* ================================
+   GALLERY RESPONSIVE — 900px
+================================ */
+@media (max-width: 900px) {
+    .gallery-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* ================================
+   GALLERY RESPONSIVE — 640px
+================================ */
+@media (max-width: 640px) {
+    .gallery-section { padding: 44px 16px 44px; }
+    .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+    }
+    .gallery-header h2 { font-size: 21px; }
+    .gallery-img-wrap  { height: 150px; }
+}
+
+/* ================================
+   GALLERY RESPONSIVE — 400px
+================================ */
+@media (max-width: 400px) {
+    .gallery-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    .filter-btn {
+        padding: 8px 14px;
+        font-size: 12px;
+    }
+}

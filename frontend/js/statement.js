@@ -7,16 +7,6 @@
 
 
 // ================================
-// LOCALSTORAGE KEYS
-// ================================
-
-const KEY_TRANSACTIONS = "finantra_transactions";
-const KEY_PREFS        = "finantra_preferences";
-const KEY_PROFILE      = "finantra_user_profile";
-const KEY_USER_ID      = "finantra_user_id";
-
-
-// ================================
 // DATE HELPERS
 // ================================
 
@@ -33,18 +23,12 @@ function formatDisplay(dateStr) {
 }
 
 function formatINR_PDF(amount) {
-    return "₹ " + Math.abs(amount).toLocaleString("en-IN", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
-}
-
-function formatINR_PDF(amount) {
     return "Rs. " + Math.abs(amount).toLocaleString("en-IN", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
     });
 }
+
 
 // ================================
 // BUILD CATEGORY SUMMARY DATA
@@ -75,6 +59,7 @@ function buildCategoryData(transactions) {
 
     return { sorted, emojiMap, countMap, total };
 }
+
 
 // ================================
 // RENDER CATEGORY SUMMARY ON SCREEN
@@ -127,6 +112,8 @@ function renderCategorySummary(transactions) {
         list.appendChild(div);
     });
 }
+
+
 // ================================
 // PERIOD PRESETS
 // ================================
@@ -149,7 +136,7 @@ function setPreset(preset, btn) {
     }
 
     else if (preset === "lastmonth") {
-        const last = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const last    = new Date(now.getFullYear(), now.getMonth() - 1, 1);
         const lastEnd = new Date(now.getFullYear(), now.getMonth(), 0);
         from = last.toISOString().split("T")[0];
         to   = lastEnd.toISOString().split("T")[0];
@@ -168,7 +155,6 @@ function setPreset(preset, btn) {
     }
 
     else if (preset === "custom") {
-        // Just let user pick manually
         document.getElementById("fromDate").focus();
         return;
     }
@@ -182,9 +168,9 @@ function setPreset(preset, btn) {
 // GENERATE STATEMENT
 // ================================
 
-function generateStatement() {
-    const fromDate  = document.getElementById("fromDate").value;
-    const toDate    = document.getElementById("toDate").value;
+async function generateStatement() {
+    const fromDate   = document.getElementById("fromDate").value;
+    const toDate     = document.getElementById("toDate").value;
     const typeFilter = document.getElementById("typeFilter").value;
 
     // Validate dates
@@ -212,98 +198,112 @@ function generateStatement() {
         return;
     }
 
-    // Get all transactions
-    const all = JSON.parse(localStorage.getItem(KEY_TRANSACTIONS)) || [];
+    try {
+        // Get all transactions via DataService
+        const all = await DataService.getTransactions();
 
-    // Filter by date range + type
-    let filtered = all.filter(function (t) {
-        const inRange = t.date >= fromDate && t.date <= toDate;
-        const inType  = typeFilter === "all" || t.type === typeFilter;
-        return inRange && inType;
-    });
+        // Filter by date range + type
+        let filtered = all.filter(function (t) {
+            const inRange = t.date >= fromDate && t.date <= toDate;
+            const inType  = typeFilter === "all" || t.type === typeFilter;
+            return inRange && inType;
+        });
 
-    // Sort by date ascending (oldest first for running balance)
-    filtered.sort(function (a, b) {
-        return a.date.localeCompare(b.date) || a.id - b.id;
-    });
+        // Sort by date ascending (oldest first for running balance)
+        filtered.sort(function (a, b) {
+            return a.date.localeCompare(b.date) ||
+                   String(a.id).localeCompare(String(b.id));
+        });
 
-    // Get user info
-    const profile = JSON.parse(localStorage.getItem(KEY_PROFILE)) || {};
-    const prefs   = JSON.parse(localStorage.getItem(KEY_PREFS))   || {};
-    const userId  = localStorage.getItem(KEY_USER_ID) || "FT-XXXX";
+        // Get user info via DataService
+        const profile = await DataService.getProfile();
+        const prefs   = profile.preferences || {};
+        const userId  = profile.userId || localStorage.getItem("finantra_user_id") || "FT-XXXX";
 
-    const startingBalance = parseFloat(prefs.startingBalance) || 0;
+        const startingBalance = parseFloat(prefs.startingBalance) || 0;
 
-    // Calculate opening balance
-    // = starting balance + all transactions BEFORE fromDate
-    const allBeforeFrom = all.filter(function (t) {
-        return t.date < fromDate;
-    });
+        // Calculate opening balance
+        // = starting balance + all transactions BEFORE fromDate
+        const allBeforeFrom = all.filter(function (t) {
+            return t.date < fromDate;
+        });
 
-    let openingBalance = startingBalance;
-    allBeforeFrom.forEach(function (t) {
-        openingBalance += t.type === "Income"
-            ? parseFloat(t.amount)
-            : -parseFloat(t.amount);
-    });
+        let openingBalance = startingBalance;
+        allBeforeFrom.forEach(function (t) {
+            openingBalance += t.type === "Income"
+                ? parseFloat(t.amount)
+                : -parseFloat(t.amount);
+        });
 
-    // Calculate totals
-    let totalCredits = 0;
-    let totalDebits  = 0;
+        // Calculate totals
+        let totalCredits = 0;
+        let totalDebits  = 0;
 
-    filtered.forEach(function (t) {
-        if (t.type === "Income") totalCredits += parseFloat(t.amount);
-        else                     totalDebits  += parseFloat(t.amount);
-    });
+        filtered.forEach(function (t) {
+            if (t.type === "Income") totalCredits += parseFloat(t.amount);
+            else                     totalDebits  += parseFloat(t.amount);
+        });
 
-    const closingBalance = openingBalance + totalCredits - totalDebits;
-    const net            = totalCredits - totalDebits;
+        const closingBalance = openingBalance + totalCredits - totalDebits;
+        const net            = totalCredits - totalDebits;
 
-    // Populate document header
-    document.getElementById("docUserId").textContent   = userId;
-    document.getElementById("docUserName").textContent = profile.name || "FinanTra User";
-    document.getElementById("docPeriod").textContent   =
-        formatDisplay(fromDate) + " — " + formatDisplay(toDate);
-    document.getElementById("docGenDate").textContent  = formatDisplay(getTodayStr());
+        // Populate document header
+        document.getElementById("docUserId").textContent   = userId;
+        document.getElementById("docUserName").textContent = profile.name || "FinanTra User";
+        document.getElementById("docPeriod").textContent   =
+            formatDisplay(fromDate) + " — " + formatDisplay(toDate);
+        document.getElementById("docGenDate").textContent  = formatDisplay(getTodayStr());
 
-    // Populate summary strip
-    document.getElementById("docOpenBal").textContent  = formatINR_PDF(openingBalance);
-    document.getElementById("docCredits").textContent  = formatINR_PDF(totalCredits);
-    document.getElementById("docDebits").textContent   = formatINR_PDF(totalDebits);
-    document.getElementById("docCloseBal").textContent = formatINR_PDF(closingBalance);
+        // Populate summary strip
+        document.getElementById("docOpenBal").textContent  = formatINR_PDF(openingBalance);
+        document.getElementById("docCredits").textContent  = formatINR_PDF(totalCredits);
+        document.getElementById("docDebits").textContent   = formatINR_PDF(totalDebits);
+        document.getElementById("docCloseBal").textContent = formatINR_PDF(closingBalance);
 
-    // Closing balance color
-    const closeEl = document.getElementById("docCloseBal");
-    closeEl.style.color = closingBalance >= 0 ? "#1f82a6" : "#dc3545";
+        // Closing balance color
+        const closeEl = document.getElementById("docCloseBal");
+        closeEl.style.color = closingBalance >= 0 ? "#1f82a6" : "#dc3545";
 
-    // Populate footer
-    document.getElementById("footerCredits").textContent = formatINR_PDF(totalCredits);
-    document.getElementById("footerDebits").textContent  = formatINR_PDF(totalDebits);
+        // Populate footer
+        document.getElementById("footerCredits").textContent = formatINR_PDF(totalCredits);
+        document.getElementById("footerDebits").textContent  = formatINR_PDF(totalDebits);
 
-    const netEl = document.getElementById("footerNet");
-    netEl.textContent = (net >= 0 ? "+ " : "- ") + formatINR_PDF(net);
-    netEl.style.color = net >= 0 ? "#28a745" : "#dc3545";
+        const netEl = document.getElementById("footerNet");
+        netEl.textContent = (net >= 0 ? "+ " : "- ") + formatINR_PDF(net);
+        netEl.style.color = net >= 0 ? "#28a745" : "#dc3545";
 
-    const footerCloseEl = document.getElementById("footerClose");
-    footerCloseEl.textContent = formatINR_PDF(closingBalance);
-    footerCloseEl.style.color = closingBalance >= 0 ? "#1f82a6" : "#dc3545";
+        const footerCloseEl = document.getElementById("footerClose");
+        footerCloseEl.textContent = formatINR_PDF(closingBalance);
+        footerCloseEl.style.color = closingBalance >= 0 ? "#1f82a6" : "#dc3545";
 
-    // Populate transaction table
-    renderTable(filtered, openingBalance);
-    renderCategorySummary(filtered);
+        // Populate transaction table
+        renderTable(filtered, openingBalance);
+        renderCategorySummary(filtered);
 
-    // Show statement preview
-    const preview = document.getElementById("statementPreview");
-    preview.classList.add("visible");
-    preview.scrollIntoView({ behavior: "smooth", block: "start" });
+        // Show statement preview
+        const preview = document.getElementById("statementPreview");
+        preview.classList.add("visible");
+        preview.scrollIntoView({ behavior: "smooth", block: "start" });
 
-    // Store data for PDF generation
-    window._soaData = {
-        fromDate, toDate, userId,
-        userName:       profile.name || "FinanTra User",
-        openingBalance, totalCredits, totalDebits,
-        closingBalance, net, filtered
-    };
+        // Store data for PDF generation
+        window._soaData = {
+            fromDate, toDate, userId,
+            userName:       profile.name || "FinanTra User",
+            openingBalance, totalCredits, totalDebits,
+            closingBalance, net, filtered
+        };
+
+    } catch (err) {
+        console.error("generateStatement error:", err);
+        openModal({
+            icon:         "⚠️",
+            title:        "Error",
+            message:      "Failed to load transactions. Please try again.",
+            confirmText:  "OK",
+            confirmClass: "primary",
+            onConfirm:    function () {}
+        });
+    }
 }
 
 
@@ -376,43 +376,43 @@ function downloadPDF() {
     let y       = 20;
 
     // ── HEADER ──
-doc.setFillColor(31, 130, 166);
-doc.rect(0, 0, pageW, 38, "F");
+    doc.setFillColor(31, 130, 166);
+    doc.rect(0, 0, pageW, 38, "F");
 
-// Logo — convert from img element to base64 via canvas
-try {
-    const logoImg  = document.querySelector(".doc-logo");
-    const canvas   = document.createElement("canvas");
-    canvas.width   = 54;
-    canvas.height  = 54;
-    const ctx      = canvas.getContext("2d");
+    // Logo — convert from img element to base64 via canvas
+    try {
+        const logoImg  = document.querySelector(".doc-logo");
+        const canvas   = document.createElement("canvas");
+        canvas.width   = 54;
+        canvas.height  = 54;
+        const ctx      = canvas.getContext("2d");
 
-    // Clip to circle before drawing
-    ctx.beginPath();
-    ctx.arc(27, 27, 27, 0, Math.PI * 2);
-    ctx.closePath();
-    ctx.clip();
+        // Clip to circle before drawing
+        ctx.beginPath();
+        ctx.arc(27, 27, 27, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
 
-    ctx.drawImage(logoImg, 0, 0, 54, 54);
-    const logoData = canvas.toDataURL("image/png");
-    doc.addImage(logoData, "PNG", 10, 6, 14, 14);
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(20);
-    doc.setFont("helvetica", "bold");
-    doc.text("FinanTra", 27, 16);
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    doc.text("Personal Finance Tracker", 27, 22);
-} catch (e) {
-    // Fallback if logo fails
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(20);
-    doc.setFont("helvetica", "bold");
-    doc.text("FinanTra", 14, 16);
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    doc.text("Personal Finance Tracker", 14, 22);
-}
+        ctx.drawImage(logoImg, 0, 0, 54, 54);
+        const logoData = canvas.toDataURL("image/png");
+        doc.addImage(logoData, "PNG", 10, 6, 14, 14);
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(20);
+        doc.setFont("helvetica", "bold");
+        doc.text("FinanTra", 27, 16);
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        doc.text("Personal Finance Tracker", 27, 22);
+    } catch (e) {
+        // Fallback if logo fails
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(20);
+        doc.setFont("helvetica", "bold");
+        doc.text("FinanTra", 14, 16);
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        doc.text("Personal Finance Tracker", 14, 22);
+    }
 
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
@@ -465,58 +465,57 @@ try {
 
     y += 30;
 
-// ── CATEGORY SUMMARY IN PDF ──
-const { sorted, emojiMap, countMap, total } = buildCategoryData(data.filtered);
+    // ── CATEGORY SUMMARY IN PDF ──
+    const { sorted, emojiMap, countMap, total } = buildCategoryData(data.filtered);
 
-if (sorted.length > 0) {
-    doc.setTextColor(31, 130, 166);
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "bold");
-    doc.text("CATEGORY-WISE SPENDING SUMMARY", 14, y);
-    y += 6;
+    if (sorted.length > 0) {
+        doc.setTextColor(31, 130, 166);
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "bold");
+        doc.text("CATEGORY-WISE SPENDING SUMMARY", 14, y);
+        y += 6;
 
-    const catRows = sorted.map(function (entry) {
-        const [name, amount] = entry;
-        const pct   = total > 0 ? Math.round((amount / total) * 100) : 0;
-        const count = countMap[name];
-        return [name, count + " txn" + (count > 1 ? "s" : ""), formatINR_PDF(amount), pct + "%"];
-    });
+        const catRows = sorted.map(function (entry) {
+            const [name, amount] = entry;
+            const pct   = total > 0 ? Math.round((amount / total) * 100) : 0;
+            const count = countMap[name];
+            return [name, count + " txn" + (count > 1 ? "s" : ""), formatINR_PDF(amount), pct + "%"];
+        });
 
-    doc.autoTable({
-        startY:  y,
-        head:    [["Category", "Transactions", "Amount", "% of Total"]],
-        body:    catRows,
-        theme:   "striped",
-        headStyles: {
-            fillColor: [31, 130, 166],
-            textColor: 255,
-            fontStyle: "bold",
-            fontSize:  8
-        },
-        bodyStyles: {
-            fontSize:  8,
-            textColor: [50, 50, 50]
-        },
-        alternateRowStyles: { fillColor: [245, 251, 253] },
-        columnStyles: {
-            0: { cellWidth: 60 },
-            1: { cellWidth: 35, halign: "center" },
-            2: { cellWidth: 50, textColor: [220, 53, 69], fontStyle: "bold" },
-            3: { cellWidth: 35, halign: "center", textColor: [100, 100, 100] }
-        },
-        foot: [["Total Expense", "", formatINR_PDF(total), "100%"]],
-        footStyles: {
-            fillColor: [240, 248, 251],
-            textColor: [31, 130, 166],
-            fontStyle: "bold",
-            fontSize:  8
-        },
-        margin: { left: 10, right: 10 }
-    });
+        doc.autoTable({
+            startY:  y,
+            head:    [["Category", "Transactions", "Amount", "% of Total"]],
+            body:    catRows,
+            theme:   "striped",
+            headStyles: {
+                fillColor: [31, 130, 166],
+                textColor: 255,
+                fontStyle: "bold",
+                fontSize:  8
+            },
+            bodyStyles: {
+                fontSize:  8,
+                textColor: [50, 50, 50]
+            },
+            alternateRowStyles: { fillColor: [245, 251, 253] },
+            columnStyles: {
+                0: { cellWidth: 60 },
+                1: { cellWidth: 35, halign: "center" },
+                2: { cellWidth: 50, textColor: [220, 53, 69], fontStyle: "bold" },
+                3: { cellWidth: 35, halign: "center", textColor: [100, 100, 100] }
+            },
+            foot: [["Total Expense", "", formatINR_PDF(total), "100%"]],
+            footStyles: {
+                fillColor: [240, 248, 251],
+                textColor: [31, 130, 166],
+                fontStyle: "bold",
+                fontSize:  8
+            },
+            margin: { left: 10, right: 10 }
+        });
 
-    y = doc.lastAutoTable.finalY + 10;
-}
-
+        y = doc.lastAutoTable.finalY + 10;
+    }
 
     // ── TRANSACTION TABLE ──
     if (data.filtered.length === 0) {
@@ -644,7 +643,7 @@ function printStatement() {
 // INIT — Set default period to This Month
 // ================================
 
-(function init() {
+(async function init() {
     // Trigger "This Month" preset on load
     const firstPill = document.querySelector(".preset-pill");
     if (firstPill) setPreset("month", firstPill);

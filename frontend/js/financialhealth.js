@@ -17,22 +17,8 @@ var CAT_COLORS = [
 
 
 // ================================
-// DATA HELPERS
+// DATE HELPERS
 // ================================
-
-function getTransactions() {
-    return JSON.parse(localStorage.getItem("finantra_transactions")) || [];
-}
-
-function getSavingsGoals() {
-    return JSON.parse(localStorage.getItem("finantra_savings_goals")) || [];
-}
-
-function getBudgetData(year, month) {
-    var key  = "finantra_budget_" + year + "_" + String(month + 1).padStart(2, "0");
-    var data = localStorage.getItem(key);
-    return data ? JSON.parse(data) : { cap: 0, categories: [] };
-}
 
 function getPeriodStart(period) {
     var now = new Date();
@@ -69,17 +55,17 @@ function fmtINR(n) {
     return "₹ " + Math.abs(n).toLocaleString("en-IN", { maximumFractionDigits: 0 });
 }
 
-// Previous month's score key
-function getPrevMonthKey() {
+// Previous month key helpers — used by DataService.getFHScore / saveFHScore
+function getPrevMonthYM() {
     var now = new Date();
     var y   = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
-    var m   = now.getMonth() === 0 ? 11 : now.getMonth() - 1;
-    return "finantra_fh_score_" + y + "_" + String(m + 1).padStart(2, "0");
+    var m   = now.getMonth() === 0 ? 12 : now.getMonth(); // 1-indexed
+    return { y: y, m: m };
 }
 
-function getCurrMonthKey() {
+function getCurrMonthYM() {
     var now = new Date();
-    return "finantra_fh_score_" + now.getFullYear() + "_" + String(now.getMonth() + 1).padStart(2, "0");
+    return { y: now.getFullYear(), m: now.getMonth() + 1 }; // 1-indexed
 }
 
 
@@ -93,13 +79,13 @@ var PERIOD_LABELS = {
     "year":    "This Year"
 };
 
-function setPeriod(period, btn) {
+async function setPeriod(period, btn) {
     currentPeriod = period;
     document.querySelectorAll(".period-pill").forEach(function (p) {
         p.classList.remove("active");
     });
     btn.classList.add("active");
-    renderAll();
+    await renderAll();
 }
 
 
@@ -107,7 +93,7 @@ function setPeriod(period, btn) {
 // SCORE CALCULATION
 // ================================
 
-function calcScores(transactions, period) {
+async function calcScores(transactions, period) {
     var data    = filterByPeriod(transactions, period);
     var summary = calcSummary(data);
     var income  = summary.income;
@@ -115,35 +101,29 @@ function calcScores(transactions, period) {
     var savings = summary.savings;
 
     // ── 1. Savings Ratio (40%) ──
-    // Savings rate = savings / income * 100
-    // 0% → 0 pts, 20% → 60 pts, 30% → 80 pts, 50%+ → 100 pts
     var savingsRate = income > 0 ? (savings / income) * 100 : 0;
     var savingsScore;
-    if (income === 0)        savingsScore = 50; // no data, neutral
+    if (income === 0)           savingsScore = 50;
     else if (savingsRate >= 50) savingsScore = 100;
     else if (savingsRate >= 30) savingsScore = 80 + (savingsRate - 30) * 1;
     else if (savingsRate >= 20) savingsScore = 60 + (savingsRate - 20) * 2;
     else if (savingsRate >= 10) savingsScore = 40 + (savingsRate - 10) * 2;
     else if (savingsRate >= 0)  savingsScore = savingsRate * 4;
-    else savingsScore = 0; // negative savings
+    else savingsScore = 0;
     savingsScore = Math.round(Math.max(0, Math.min(100, savingsScore)));
 
     // ── 2. Expense Control (30%) ──
-    // Expense ratio = expense / income * 100
-    // Lower is better. 0% → 100, 50% → 80, 80% → 50, 100%+ → 0
     var expenseRatio = income > 0 ? (expense / income) * 100 : 100;
     var expenseScore;
-    if (income === 0)           expenseScore = 50;
-    else if (expenseRatio <= 50)  expenseScore = 100;
-    else if (expenseRatio <= 70)  expenseScore = 100 - (expenseRatio - 50) * 2.5;
-    else if (expenseRatio <= 90)  expenseScore = 50  - (expenseRatio - 70) * 1.5;
-    else if (expenseRatio <= 100) expenseScore = 20  - (expenseRatio - 90) * 2;
+    if (income === 0)              expenseScore = 50;
+    else if (expenseRatio <= 50)   expenseScore = 100;
+    else if (expenseRatio <= 70)   expenseScore = 100 - (expenseRatio - 50) * 2.5;
+    else if (expenseRatio <= 90)   expenseScore = 50  - (expenseRatio - 70) * 1.5;
+    else if (expenseRatio <= 100)  expenseScore = 20  - (expenseRatio - 90) * 2;
     else expenseScore = 0;
     expenseScore = Math.round(Math.max(0, Math.min(100, expenseScore)));
 
     // ── 3. Income Stability (20%) ──
-    // Based on number of income transactions (consistency)
-    // 0 income txns → 0, 1 → 40, 2–3 → 70, 4+ → 100
     var incomeTxns = data.filter(function (t) { return t.type === "Income"; }).length;
     var incomeScore;
     if      (incomeTxns === 0) incomeScore = 0;
@@ -153,8 +133,8 @@ function calcScores(transactions, period) {
     else                       incomeScore = 100;
 
     // ── 4. Budget Adherence (10%) ──
-    // How many categories are within budget this period
-    var budgetScore = calcBudgetAdherence(period);
+    // await because it fetches budget data via DataService
+    var budgetScore = await calcBudgetAdherence(period, transactions);
 
     // ── Final weighted score ──
     var finalScore = Math.round(
@@ -180,53 +160,60 @@ function calcScores(transactions, period) {
     };
 }
 
-function calcBudgetAdherence(period) {
-    // For budget adherence, use months covered by period
+// transactions passed in — already fetched by renderAll, no second fetch
+async function calcBudgetAdherence(period, transactions) {
     var now    = new Date();
     var months = [];
 
     if (period === "month") {
-        months.push({ y: now.getFullYear(), m: now.getMonth() });
+        months.push({ y: now.getFullYear(), m: now.getMonth() + 1 });
     } else if (period === "3months") {
         for (var i = 0; i < 3; i++) {
             var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-            months.push({ y: d.getFullYear(), m: d.getMonth() });
+            months.push({ y: d.getFullYear(), m: d.getMonth() + 1 }); // 1-indexed
         }
     } else if (period === "year") {
         for (var i = 0; i <= now.getMonth(); i++) {
-            months.push({ y: now.getFullYear(), m: i });
+            months.push({ y: now.getFullYear(), m: i + 1 }); // 1-indexed
         }
     }
 
     var totalCats  = 0;
     var withinCats = 0;
 
-    months.forEach(function (mo) {
-        var budget      = getBudgetData(mo.y, mo.m);
-        var transactions = getTransactions();
-        var prefix      = mo.y + "-" + String(mo.m + 1).padStart(2, "0");
-        var monthTxns   = transactions.filter(function (t) { return t.date && t.date.indexOf(prefix) === 0 && t.type === "Expense"; });
+    for (var mo of months) {
+        var budget = await DataService.getBudget(mo.y, mo.m);
+        var cats   = (budget && budget.categories) ? budget.categories : [];
 
-        budget.categories.forEach(function (cat) {
-            if (cat.limit > 0) {
+        // month prefix for filtering — mo.m is already 1-indexed
+        var prefix = mo.y + "-" + String(mo.m).padStart(2, "0");
+        var monthTxns = transactions.filter(function (t) {
+            return t.date && t.date.indexOf(prefix) === 0 && t.type === "Expense";
+        });
+
+        cats.forEach(function (cat) {
+            // DataService returns categories with "category" field (not "label")
+            var limit = cat.limit || 0;
+            var name  = cat.category || cat.label || "";
+            if (limit > 0) {
                 totalCats++;
                 var spent = monthTxns
-                    .filter(function (t) { return t.category === cat.label; })
+                    .filter(function (t) { return t.category === name; })
                     .reduce(function (s, t) { return s + parseFloat(t.amount); }, 0);
-                if (spent <= cat.limit) withinCats++;
+                if (spent <= limit) withinCats++;
             }
         });
-    });
+    }
 
     if (totalCats === 0) return 70; // no budget data, neutral-ish
     return Math.round((withinCats / totalCats) * 100);
 }
 
 function getScoreBand(score) {
-    if (score >= 80) return { label: "Excellent",       cls: "excellent" };
-    if (score >= 60) return { label: "Good",            cls: "good" };
-    if (score >= 40) return { label: "Needs Improvement", cls: "improve" };
-    return               { label: "Risky",             cls: "risky" };
+    if (score >= 80) return { label: "Excellent",          cls: "excellent" };
+    if (score >= 60) return { label: "Good",               cls: "good"      };
+    if (score >= 40) return { label: "Needs Improvement",  cls: "improve"   };
+    return               { label: "Risky",              cls: "risky"     };
 }
 
 
@@ -234,11 +221,11 @@ function getScoreBand(score) {
 // RENDER GAUGE
 // ================================
 
-function renderGauge(score, band) {
-    var fill       = document.getElementById("fhGaugeFill");
-    var numEl      = document.getElementById("fhScoreNumber");
-    var labelEl    = document.getElementById("fhScoreLabel");
-    var trendEl    = document.getElementById("fhScoreTrend");
+async function renderGauge(score, band) {
+    var fill    = document.getElementById("fhGaugeFill");
+    var numEl   = document.getElementById("fhScoreNumber");
+    var labelEl = document.getElementById("fhScoreLabel");
+    var trendEl = document.getElementById("fhScoreTrend");
 
     // circumference of r=80 circle ≈ 502.65
     var circumference = 2 * Math.PI * 80;
@@ -247,7 +234,7 @@ function renderGauge(score, band) {
     fill.style.strokeDashoffset = offset;
     fill.className = "fh-gauge-fill " + band.cls;
 
-    numEl.textContent  = score;
+    numEl.textContent   = score;
     labelEl.textContent = band.label;
 
     // Trend vs last month (only for "month" period)
@@ -255,24 +242,28 @@ function renderGauge(score, band) {
     trendEl.className   = "fh-score-trend";
 
     if (currentPeriod === "month") {
-        var prevKey  = getPrevMonthKey();
-        var currKey  = getCurrMonthKey();
-        var prevScore = parseInt(localStorage.getItem(prevKey));
+        var curr = getCurrMonthYM();
+        var prev = getPrevMonthYM();
 
-        // Save current score
-        localStorage.setItem(currKey, score);
+        // Save current score via DataService
+        await DataService.saveFHScore(curr.y, curr.m, { score: score });
 
-        if (!isNaN(prevScore)) {
-            var diff = score - prevScore;
-            if (diff > 0) {
-                trendEl.innerHTML = '<i class="fa-solid fa-arrow-trend-up"></i> +' + diff + ' vs last month';
-                trendEl.classList.add("up");
-            } else if (diff < 0) {
-                trendEl.innerHTML = '<i class="fa-solid fa-arrow-trend-down"></i> ' + diff + ' vs last month';
-                trendEl.classList.add("down");
-            } else {
-                trendEl.innerHTML = '<i class="fa-solid fa-minus"></i> Same as last month';
-                trendEl.classList.add("same");
+        // Load previous month score via DataService
+        var prevData = await DataService.getFHScore(prev.y, prev.m);
+        if (prevData && prevData.score !== undefined) {
+            var prevScore = parseInt(prevData.score);
+            if (!isNaN(prevScore)) {
+                var diff = score - prevScore;
+                if (diff > 0) {
+                    trendEl.innerHTML = '<i class="fa-solid fa-arrow-trend-up"></i> +' + diff + ' vs last month';
+                    trendEl.classList.add("up");
+                } else if (diff < 0) {
+                    trendEl.innerHTML = '<i class="fa-solid fa-arrow-trend-down"></i> ' + diff + ' vs last month';
+                    trendEl.classList.add("down");
+                } else {
+                    trendEl.innerHTML = '<i class="fa-solid fa-minus"></i> Same as last month';
+                    trendEl.classList.add("same");
+                }
             }
         }
     }
@@ -325,8 +316,8 @@ function renderSubscores(scores) {
         document.getElementById(item.hintId).textContent  = item.hint;
 
         var fillEl = document.getElementById(item.fillId);
-        fillEl.style.width  = item.score + "%";
-        fillEl.className    = "fh-subscore-fill " + band.cls;
+        fillEl.style.width = item.score + "%";
+        fillEl.className   = "fh-subscore-fill " + band.cls;
     });
 }
 
@@ -379,37 +370,44 @@ function renderIncExp(scores) {
 // RENDER BUDGET SNAPSHOT
 // ================================
 
-function renderBudgetSnapshot() {
+async function renderBudgetSnapshot() {
     var now    = new Date();
-    var budget = getBudgetData(now.getFullYear(), now.getMonth());
-    var el     = document.getElementById("fhBudgetSnapshot");
+    var year   = now.getFullYear();
+    var month  = now.getMonth() + 1; // 1-indexed for DataService
+
+    var budget = await DataService.getBudget(year, month);
+    var cats   = (budget && budget.categories) ? budget.categories : [];
+
+    var el = document.getElementById("fhBudgetSnapshot");
     el.innerHTML = "";
 
-    if (budget.categories.length === 0 && budget.cap === 0) {
+    if (cats.length === 0) {
         el.innerHTML = '<div class="fh-snapshot-empty">No budget set for this month.<br><a href="budgetPlanner.html" style="color:#1f82a6;">Set up Budget Planner →</a></div>';
         return;
     }
 
-    // Get current month spending
-    var prefix = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
-    var txns   = getTransactions().filter(function (t) {
+    // Get current month spending via DataService
+    var allTxns = await DataService.getTransactions();
+    var prefix  = year + "-" + String(month).padStart(2, "0");
+    var txns    = allTxns.filter(function (t) {
         return t.date && t.date.indexOf(prefix) === 0 && t.type === "Expense";
     });
 
     var totalSpent    = txns.reduce(function (s, t) { return s + parseFloat(t.amount); }, 0);
-    var totalBudgeted = budget.categories.reduce(function (s, c) { return s + (c.limit || 0); }, 0);
+    var totalBudgeted = cats.reduce(function (s, c) { return s + (c.limit || 0); }, 0);
     var withinCount   = 0;
 
-    budget.categories.forEach(function (cat) {
-        var spent = txns.filter(function (t) { return t.category === cat.label; })
+    cats.forEach(function (cat) {
+        var name  = cat.category || cat.label || "";
+        var limit = cat.limit || 0;
+        var spent = txns.filter(function (t) { return t.category === name; })
                         .reduce(function (s, t) { return s + parseFloat(t.amount); }, 0);
-        if (spent <= cat.limit) withinCount++;
+        if (spent <= limit) withinCount++;
     });
 
-    var overallPct    = totalBudgeted > 0 ? Math.min(Math.round((totalSpent / totalBudgeted) * 100), 200) : 0;
-    var fillCls       = overallPct >= 100 ? "over" : overallPct >= 75 ? "warn" : "good";
+    var overallPct = totalBudgeted > 0 ? Math.min(Math.round((totalSpent / totalBudgeted) * 100), 200) : 0;
+    var fillCls    = overallPct >= 100 ? "over" : overallPct >= 75 ? "warn" : "good";
 
-    // Overall spend vs budget
     el.innerHTML +=
         '<div class="fh-snap-stat">' +
             '<span class="fh-snap-stat-label"><i class="fa-solid fa-chart-bar"></i> Spent vs Budget</span>' +
@@ -420,11 +418,13 @@ function renderBudgetSnapshot() {
         '</div>' +
         '<div class="fh-snap-stat">' +
             '<span class="fh-snap-stat-label"><i class="fa-solid fa-circle-check"></i> Categories within limit</span>' +
-            '<span class="fh-snap-stat-val">' + withinCount + ' / ' + budget.categories.length + '</span>' +
+            '<span class="fh-snap-stat-val">' + withinCount + ' / ' + cats.length + '</span>' +
         '</div>';
 
-    if (budget.cap > 0) {
-        var capPct    = Math.min(Math.round((totalSpent / budget.cap) * 100), 200);
+    // Monthly cap — check if budget has a cap field
+    var cap = (budget && budget.cap) ? budget.cap : 0;
+    if (cap > 0) {
+        var capPct     = Math.min(Math.round((totalSpent / cap) * 100), 200);
         var capFillCls = capPct >= 100 ? "over" : capPct >= 75 ? "warn" : "good";
         el.innerHTML +=
             '<div class="fh-snap-stat">' +
@@ -442,9 +442,9 @@ function renderBudgetSnapshot() {
 // RENDER GOALS SNAPSHOT
 // ================================
 
-function renderGoalsSnapshot() {
-    var goals   = getSavingsGoals();
-    var el      = document.getElementById("fhGoalsSnapshot");
+async function renderGoalsSnapshot() {
+    var goals = await DataService.getGoals();
+    var el    = document.getElementById("fhGoalsSnapshot");
     el.innerHTML = "";
 
     if (goals.length === 0) {
@@ -481,6 +481,7 @@ function renderGoalsSnapshot() {
 
 // ================================
 // RENDER EXPENSE BREAKDOWN
+// (pure — receives data as param, no async needed)
 // ================================
 
 function renderExpenseBreakdown(transactions) {
@@ -498,7 +499,6 @@ function renderExpenseBreakdown(transactions) {
 
     emptyEl.classList.remove("visible");
 
-    // Build category map
     var catMap   = {};
     var emojiMap = {};
     var total    = 0;
@@ -516,11 +516,11 @@ function renderExpenseBreakdown(transactions) {
     var maxAmt = sorted[0][1];
 
     sorted.forEach(function (entry, idx) {
-        var name    = entry[0];
-        var amount  = entry[1];
-        var barPct  = Math.round((amount / maxAmt) * 100);
+        var name     = entry[0];
+        var amount   = entry[1];
+        var barPct   = Math.round((amount / maxAmt) * 100);
         var sharePct = Math.round((amount / total)  * 100);
-        var isHigh  = sharePct > 30;
+        var isHigh   = sharePct > 30;
 
         var row = document.createElement("div");
         row.className = "fh-exp-row";
@@ -544,7 +544,6 @@ function renderExpenseBreakdown(transactions) {
 
 // ================================
 // GENERATE SMART INSIGHTS
-// Dynamic + fixed tips mixed
 // ================================
 
 function generateInsights(scores, transactions) {
@@ -557,7 +556,6 @@ function generateInsights(scores, transactions) {
 
     // ── DYNAMIC INSIGHTS ──
 
-    // Critical: expenses exceed income
     if (income > 0 && expense > income) {
         insights.push({
             type:  "critical",
@@ -566,7 +564,6 @@ function generateInsights(scores, transactions) {
         });
     }
 
-    // Critical: savings rate below 0
     if (income > 0 && savings < 0) {
         insights.push({
             type:  "critical",
@@ -575,7 +572,6 @@ function generateInsights(scores, transactions) {
         });
     }
 
-    // Warning: savings rate below 10%
     if (income > 0 && savings >= 0 && scores.savingsRate < 10) {
         insights.push({
             type:  "warning",
@@ -584,7 +580,6 @@ function generateInsights(scores, transactions) {
         });
     }
 
-    // Warning: savings rate 10–20%
     if (income > 0 && scores.savingsRate >= 10 && scores.savingsRate < 20) {
         insights.push({
             type:  "warning",
@@ -593,7 +588,6 @@ function generateInsights(scores, transactions) {
         });
     }
 
-    // Positive: great savings rate
     if (income > 0 && scores.savingsRate >= 30) {
         insights.push({
             type:  "positive",
@@ -602,7 +596,6 @@ function generateInsights(scores, transactions) {
         });
     }
 
-    // Check top expense category
     var catMap = {};
     data.filter(function (t) { return t.type === "Expense"; }).forEach(function (t) {
         catMap[t.category] = (catMap[t.category] || 0) + parseFloat(t.amount);
@@ -610,8 +603,8 @@ function generateInsights(scores, transactions) {
 
     var catEntries = Object.entries(catMap).sort(function (a, b) { return b[1] - a[1]; });
     if (catEntries.length > 0 && expense > 0) {
-        var topCat    = catEntries[0];
-        var topShare  = Math.round((topCat[1] / expense) * 100);
+        var topCat   = catEntries[0];
+        var topShare = Math.round((topCat[1] / expense) * 100);
         if (topShare > 35) {
             insights.push({
                 type:  "warning",
@@ -621,7 +614,6 @@ function generateInsights(scores, transactions) {
         }
     }
 
-    // Budget adherence warning
     if (scores.budget < 50) {
         insights.push({
             type:  "warning",
@@ -630,7 +622,6 @@ function generateInsights(scores, transactions) {
         });
     }
 
-    // Income stability
     if (scores.incomeTxns === 0) {
         insights.push({
             type:  "warning",
@@ -639,7 +630,6 @@ function generateInsights(scores, transactions) {
         });
     }
 
-    // Positive: score in excellent band
     if (scores.final >= 80) {
         insights.push({
             type:  "positive",
@@ -648,7 +638,6 @@ function generateInsights(scores, transactions) {
         });
     }
 
-    // No data
     if (data.length === 0) {
         insights.push({
             type:  "warning",
@@ -657,7 +646,7 @@ function generateInsights(scores, transactions) {
         });
     }
 
-    // ── FIXED MOTIVATIONAL TIPS (always shown) ──
+    // ── FIXED MOTIVATIONAL TIPS ──
     var fixedTips = [
         {
             type:  "positive",
@@ -676,11 +665,9 @@ function generateInsights(scores, transactions) {
         }
     ];
 
-    // Add 1 random fixed tip
-    var tip = fixedTips[new Date().getDate() % fixedTips.length];
-    insights.push(tip);
+    insights.push(fixedTips[new Date().getDate() % fixedTips.length]);
 
-    // ── Sort: critical → warning → positive ──
+    // Sort: critical → warning → positive
     var order = { critical: 0, warning: 1, positive: 2 };
     insights.sort(function (a, b) { return order[a.type] - order[b.type]; });
 
@@ -688,13 +675,12 @@ function generateInsights(scores, transactions) {
 }
 
 function renderInsights(scores, transactions) {
-    var insights  = generateInsights(scores, transactions);
-    var listEl    = document.getElementById("fhInsightsList");
-    var emptyEl   = document.getElementById("fhInsightsEmpty");
-    var countEl   = document.getElementById("fhInsightCount");
+    var insights = generateInsights(scores, transactions);
+    var listEl   = document.getElementById("fhInsightsList");
+    var emptyEl  = document.getElementById("fhInsightsEmpty");
+    var countEl  = document.getElementById("fhInsightCount");
 
     listEl.innerHTML = "";
-
     countEl.textContent = insights.length + " insight" + (insights.length !== 1 ? "s" : "");
 
     if (insights.length === 0) {
@@ -704,17 +690,8 @@ function renderInsights(scores, transactions) {
 
     emptyEl.classList.remove("visible");
 
-    var iconMap = {
-        critical: "fa-circle-exclamation",
-        warning:  "fa-triangle-exclamation",
-        positive: "fa-circle-check"
-    };
-
-    var badgeMap = {
-        critical: "Critical",
-        warning:  "Warning",
-        positive: "Positive"
-    };
+    var iconMap  = { critical: "fa-circle-exclamation", warning: "fa-triangle-exclamation", positive: "fa-circle-check" };
+    var badgeMap = { critical: "Critical", warning: "Warning", positive: "Positive" };
 
     insights.forEach(function (ins) {
         var item = document.createElement("div");
@@ -737,22 +714,26 @@ function renderInsights(scores, transactions) {
 // RENDER ALL
 // ================================
 
-function renderAll() {
-    var transactions = getTransactions();
-    var scores       = calcScores(transactions, currentPeriod);
-    var band         = getScoreBand(scores.final);
+async function renderAll() {
+    try {
+        // Single fetch — passed down to all functions that need it
+        var transactions = await DataService.getTransactions();
+        var scores       = await calcScores(transactions, currentPeriod);
+        var band         = getScoreBand(scores.final);
 
-    // Period labels
-    var label = PERIOD_LABELS[currentPeriod] || "";
-    document.getElementById("fhScorePeriodLabel").textContent = label;
+        document.getElementById("fhScorePeriodLabel").textContent = PERIOD_LABELS[currentPeriod] || "";
 
-    renderGauge(scores.final, band);
-    renderSubscores(scores);
-    renderIncExp(scores);
-    renderBudgetSnapshot();
-    renderGoalsSnapshot();
-    renderExpenseBreakdown(transactions);
-    renderInsights(scores, transactions);
+        await renderGauge(scores.final, band);
+        renderSubscores(scores);
+        renderIncExp(scores);
+        await renderBudgetSnapshot();
+        await renderGoalsSnapshot();
+        renderExpenseBreakdown(transactions);
+        renderInsights(scores, transactions);
+
+    } catch (err) {
+        console.error("financialHealth renderAll error:", err);
+    }
 }
 
 
@@ -760,4 +741,6 @@ function renderAll() {
 // INIT
 // ================================
 
-renderAll();
+(async function init() {
+    await renderAll();
+})();

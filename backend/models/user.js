@@ -17,13 +17,14 @@ const userSchema = new mongoose.Schema({
   customExpenseCategories: { type: [String], default: [] }
 }, { timestamps: true });
 
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+// 1. The fixed password hasher (No 'next' bug!)
+userSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-  next();
 });
 
+// 2. The missing login checker!
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };

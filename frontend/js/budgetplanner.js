@@ -34,36 +34,108 @@ var isCurrentMonth = true;
 // STORAGE HELPERS
 // ================================
 
+// Used only for:
+//  1. Cap (no backend field — stays in localStorage always)
+//  2. getSavedBudgetMonths (scans keys — no DataService equivalent)
+
+function getCapKey(year, month) {
+    return "finantra_budget_cap_" + year + "_" + String(month + 1).padStart(2, "0");
+}
+
+// Legacy key used by getSavedBudgetMonths to detect prior-month data
 function getBudgetKey(year, month) {
     return "finantra_budget_" + year + "_" + String(month + 1).padStart(2, "0");
 }
 
-function loadBudgetData(year, month) {
-    var key  = getBudgetKey(year, month);
-    var data = localStorage.getItem(key);
-    if (data) return JSON.parse(data);
-    // Default structure
-    return { cap: 0, categories: [] };
+function loadCap(year, month) {
+    var val = localStorage.getItem(getCapKey(year, month));
+    return val ? parseFloat(val) : 0;
 }
 
-function saveBudgetData(year, month, data) {
-    var key = getBudgetKey(year, month);
-    localStorage.setItem(key, JSON.stringify(data));
+function saveCap(year, month, cap) {
+    localStorage.setItem(getCapKey(year, month), cap);
 }
 
-// Returns all months (year_month strings) that have saved budget data
+// Returns months that have saved budget data.
+// Checks both the legacy key (guest mode) and the new cap key (logged-in mode).
+// For logged-in users prev-month detection is best-effort via cap keys only
+// because we can't enumerate backend data synchronously.
 function getSavedBudgetMonths() {
     var months = [];
+    var seen   = {};
     for (var i = 0; i < localStorage.length; i++) {
         var key = localStorage.key(i);
-        if (key && key.indexOf("finantra_budget_") === 0) {
-            var parts = key.replace("finantra_budget_", "").split("_");
-            if (parts.length === 2) {
-                months.push({ year: parseInt(parts[0]), month: parseInt(parts[1]) - 1 });
+        // Match legacy guest key OR new cap key
+        var match =
+            (key && key.indexOf("finantra_budget_") === 0 && key.indexOf("finantra_budget_cap_") === -1)
+                ? key.replace("finantra_budget_", "").split("_")
+            : (key && key.indexOf("finantra_budget_cap_") === 0)
+                ? key.replace("finantra_budget_cap_", "").split("_")
+            : null;
+
+        if (match && match.length === 2) {
+            var mk = match[0] + "_" + match[1];
+            if (!seen[mk]) {
+                seen[mk] = true;
+                months.push({ year: parseInt(match[0]), month: parseInt(match[1]) - 1 });
             }
         }
     }
     return months;
+}
+
+// ================================
+// DATASERVICE BUDGET HELPERS
+// ================================
+// DataService.getBudget returns:
+//   { year, month, categories: [{ category, emoji, limit }] }
+// Internally we use { label, emoji, limit } — so we normalise on load
+// and denormalise on save.
+
+function normaliseCats(rawCats) {
+    // rawCats may be undefined (new month) or [] or [{ category, emoji, limit }]
+    if (!rawCats) return [];
+    return rawCats.map(function (c) {
+        return { label: c.category || c.label || "", emoji: c.emoji || "📦", limit: c.limit || 0 };
+    });
+}
+
+function denormaliseCats(cats) {
+    return cats.map(function (c) {
+        return { category: c.label, emoji: c.emoji, limit: c.limit };
+    });
+}
+
+async function loadBudgetData(year, month) {
+    try {
+        // DataService.getBudget uses 1-indexed month internally
+        var raw = await DataService.getBudget(year, month + 1);
+        var cap = loadCap(year, month);
+        return {
+            cap:        cap,
+            categories: normaliseCats(raw && raw.categories ? raw.categories : [])
+        };
+    } catch (err) {
+        console.error("loadBudgetData error:", err);
+        return { cap: loadCap(year, month), categories: [] };
+    }
+}
+
+async function saveBudgetData(year, month, data) {
+    try {
+        // Persist cap locally (no backend field)
+        saveCap(year, month, data.cap || 0);
+        // Persist categories via DataService (1-indexed month)
+        await DataService.saveBudget(year, month + 1, denormaliseCats(data.categories));
+        // Also write a sentinel key so getSavedBudgetMonths can detect this month
+        // (only needed for guest fallback — logged-in path works via cap key)
+        if (DataService.isGuest()) {
+            var key = getBudgetKey(year, month);
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+    } catch (err) {
+        console.error("saveBudgetData error:", err);
+    }
 }
 
 
@@ -71,12 +143,8 @@ function getSavedBudgetMonths() {
 // TRANSACTION HELPERS
 // ================================
 
-function getTransactions() {
-    return JSON.parse(localStorage.getItem("finantra_transactions")) || [];
-}
-
-function getMonthTransactions(year, month) {
-    var all = getTransactions();
+async function getMonthTransactions(year, month) {
+    var all    = await DataService.getTransactions();
     var prefix = year + "-" + String(month + 1).padStart(2, "0");
     return all.filter(function (t) {
         return t.date && t.date.indexOf(prefix) === 0;
@@ -84,8 +152,8 @@ function getMonthTransactions(year, month) {
 }
 
 // Build map: category → total spent (expenses only) for given month
-function buildSpendingMap(year, month) {
-    var txns = getMonthTransactions(year, month);
+async function buildSpendingMap(year, month) {
+    var txns = await getMonthTransactions(year, month);
     var map  = {};
     txns.forEach(function (t) {
         if (t.type === "Expense") {
@@ -96,8 +164,8 @@ function buildSpendingMap(year, month) {
 }
 
 // Total income for month
-function getMonthIncome(year, month) {
-    var txns = getMonthTransactions(year, month);
+async function getMonthIncome(year, month) {
+    var txns  = await getMonthTransactions(year, month);
     var total = 0;
     txns.forEach(function (t) {
         if (t.type === "Income") total += parseFloat(t.amount);
@@ -106,7 +174,7 @@ function getMonthIncome(year, month) {
 }
 
 // All expense categories found in transactions (defaults + customs + used ones in txns)
-function getAllKnownExpenseCategories() {
+async function getAllKnownExpenseCategories() {
     var cats = {};
 
     // 1 — defaults
@@ -114,19 +182,23 @@ function getAllKnownExpenseCategories() {
         cats[c.label] = c.emoji;
     });
 
-    // 2 — custom expense categories
+    // 2 — custom expense categories (always localStorage)
     var customs = JSON.parse(localStorage.getItem("finantra_custom_expense")) || [];
     customs.forEach(function (c) {
         cats[c.label] = c.emoji;
     });
 
     // 3 — any expense category found in transactions not already listed
-    var txns = getTransactions();
-    txns.forEach(function (t) {
-        if (t.type === "Expense" && !cats[t.category]) {
-            cats[t.category] = t.emoji || "📦";
-        }
-    });
+    try {
+        var txns = await DataService.getTransactions();
+        txns.forEach(function (t) {
+            if (t.type === "Expense" && !cats[t.category]) {
+                cats[t.category] = t.emoji || "📦";
+            }
+        });
+    } catch (err) {
+        console.error("getAllKnownExpenseCategories error:", err);
+    }
 
     return cats; // { label: emoji }
 }
@@ -177,8 +249,8 @@ var bpBulkClose     = document.getElementById("bpBulkClose");
 var bpBulkCancel    = document.getElementById("bpBulkCancel");
 var bpBulkSave      = document.getElementById("bpBulkSave");
 
-var bpUnbudgetedCard = document.getElementById("bpUnbudgetedCard");
-var bpUnbudgetedList = document.getElementById("bpUnbudgetedList");
+var bpUnbudgetedCard  = document.getElementById("bpUnbudgetedCard");
+var bpUnbudgetedList  = document.getElementById("bpUnbudgetedList");
 var bpUnbudgetedEmpty = document.getElementById("bpUnbudgetedEmpty");
 
 var bpResetOverlay  = document.getElementById("bpResetOverlay");
@@ -236,7 +308,6 @@ function renderMonthLabel() {
     var prevY = viewMonth === 0 ? viewYear - 1 : viewYear;
     var prevM = viewMonth === 0 ? 11 : viewMonth - 1;
     var hasPrev = saved.some(function (s) { return s.year === prevY && s.month === prevM; });
-    // Also allow prev if current month has no data but prev does
     bpPrevBtn.disabled = !hasPrev && !isCurrentMonth;
 }
 
@@ -257,10 +328,10 @@ bpNextBtn.addEventListener("click", function () {
 // SUMMARY CARDS
 // ================================
 
-function renderSummaryCards(data, spendingMap) {
-    var income  = getMonthIncome(viewYear, viewMonth);
-    var spent   = Object.values(spendingMap).reduce(function (a, b) { return a + b; }, 0);
-    var budgeted = data.categories.reduce(function (s, c) { return s + (c.limit || 0); }, 0);
+async function renderSummaryCards(data, spendingMap) {
+    var income    = await getMonthIncome(viewYear, viewMonth);
+    var spent     = Object.values(spendingMap).reduce(function (a, b) { return a + b; }, 0);
+    var budgeted  = data.categories.reduce(function (s, c) { return s + (c.limit || 0); }, 0);
     var remaining = budgeted - spent;
 
     bpTotalIncome.textContent  = fmtINR(income);
@@ -279,7 +350,6 @@ function renderCapSection(data, spendingMap) {
     var cap   = data.cap || 0;
     var spent = Object.values(spendingMap).reduce(function (a, b) { return a + b; }, 0);
 
-    // Show current cap in input if set
     bpCapInput.value = cap > 0 ? cap : "";
 
     if (cap > 0) {
@@ -293,7 +363,6 @@ function renderCapSection(data, spendingMap) {
         bpCapPct.textContent   = pct + "%";
         bpCapLeft.textContent  = "Left: " + fmtINR(cap - spent);
 
-        // Alert
         bpCapAlert.className = "bp-alert";
         if (pct >= 100) {
             bpCapAlert.classList.add("visible", "danger");
@@ -311,17 +380,21 @@ function renderCapSection(data, spendingMap) {
     }
 }
 
-bpCapSaveBtn.addEventListener("click", function () {
+bpCapSaveBtn.addEventListener("click", async function () {
     var val = parseFloat(bpCapInput.value);
     if (isNaN(val) || val < 0) {
         bpCapInput.style.borderColor = "#dc3545";
         setTimeout(function () { bpCapInput.style.borderColor = ""; }, 1500);
         return;
     }
-    var data  = loadBudgetData(viewYear, viewMonth);
-    data.cap  = val;
-    saveBudgetData(viewYear, viewMonth, data);
-    renderPage();
+    try {
+        var data = await loadBudgetData(viewYear, viewMonth);
+        data.cap = val;
+        await saveBudgetData(viewYear, viewMonth, data);
+        renderPage();
+    } catch (err) {
+        console.error("Cap save error:", err);
+    }
 });
 
 bpCapInput.addEventListener("keydown", function (e) {
@@ -333,9 +406,8 @@ bpCapInput.addEventListener("keydown", function (e) {
 // DAILY GUIDANCE
 // ================================
 
-function renderDailyGuidance(data, spendingMap) {
-    var now   = new Date();
-    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+async function renderDailyGuidance(data, spendingMap) {
+    var now = new Date();
 
     if (!isCurrentMonth) {
         bpDailyAmount.textContent = "N/A";
@@ -345,31 +417,30 @@ function renderDailyGuidance(data, spendingMap) {
         return;
     }
 
-    // Days left including today
     var lastDay    = new Date(viewYear, viewMonth + 1, 0).getDate();
     var daysLeft   = lastDay - now.getDate() + 1;
     var daysElapsed = now.getDate();
 
-    // Total spent this month
     var spent = Object.values(spendingMap).reduce(function (a, b) { return a + b; }, 0);
 
     // Spent today
-    var todayStr = now.toISOString().split("T")[0];
-    var txns     = getTransactions();
+    var todayStr   = now.toISOString().split("T")[0];
     var todaySpent = 0;
-    txns.forEach(function (t) {
-        if (t.type === "Expense" && t.date === todayStr) {
-            todaySpent += parseFloat(t.amount);
-        }
-    });
+    try {
+        var txns = await DataService.getTransactions();
+        txns.forEach(function (t) {
+            if (t.type === "Expense" && t.date === todayStr) {
+                todaySpent += parseFloat(t.amount);
+            }
+        });
+    } catch (err) {
+        console.error("renderDailyGuidance txn error:", err);
+    }
 
-    // Cap-based daily guidance
     var cap       = data.cap || 0;
     var remaining = cap > 0 ? Math.max(cap - spent, 0) : 0;
     var daily     = cap > 0 ? Math.round(remaining / daysLeft) : 0;
-
-    // Avg daily spend so far
-    var avg = daysElapsed > 0 ? Math.round(spent / daysElapsed) : 0;
+    var avg       = daysElapsed > 0 ? Math.round(spent / daysElapsed) : 0;
 
     bpDaysLeft.textContent    = daysLeft + " days";
     bpSpentToday.textContent  = fmtINR(todaySpent);
@@ -431,7 +502,6 @@ function renderCategoryRows(data, spendingMap) {
                 '<span class="bp-cat-spent-info">Spent: ' + fmtINR(spent) + (limit > 0 ? ' / ' + fmtINR(limit) : '') + '</span>' +
             '</div>';
 
-        // Progress bar (only if limit set)
         if (limit > 0) {
             var fillCls = cls === "safe" ? "" : cls;
             row.innerHTML +=
@@ -446,7 +516,6 @@ function renderCategoryRows(data, spendingMap) {
                 '</div>';
         }
 
-        // Enter key on inline input
         bpCatList.appendChild(row);
         setTimeout(function () {
             var inp = document.getElementById("bpInlineInput_" + idx);
@@ -472,35 +541,49 @@ function hideInlineEdit(idx) {
     document.getElementById("bpInlineEdit_" + idx).classList.remove("visible");
 }
 
-function saveInlineLimit(idx) {
-    var inp  = document.getElementById("bpInlineInput_" + idx);
-    var val  = parseFloat(inp.value);
+async function saveInlineLimit(idx) {
+    var inp = document.getElementById("bpInlineInput_" + idx);
+    var val = parseFloat(inp.value);
     if (isNaN(val) || val < 0) {
         inp.style.borderColor = "#dc3545";
         setTimeout(function () { inp.style.borderColor = ""; }, 1200);
         return;
     }
-    var data = loadBudgetData(viewYear, viewMonth);
-    data.categories[idx].limit = val;
-    saveBudgetData(viewYear, viewMonth, data);
-    renderPage();
+    try {
+        var data = await loadBudgetData(viewYear, viewMonth);
+        data.categories[idx].limit = val;
+        await saveBudgetData(viewYear, viewMonth, data);
+        renderPage();
+    } catch (err) {
+        console.error("saveInlineLimit error:", err);
+    }
 }
 
-function removeCatRow(idx) {
-    var data = loadBudgetData(viewYear, viewMonth);
-    var cat  = data.categories[idx];
-    openModal({
-        icon:         "🗑️",
-        title:        "Remove Category?",
-        message:      'Remove <strong>' + cat.emoji + ' ' + cat.label + '</strong> from this month\'s budget?<br><br>Your transactions won\'t be affected.',
-        confirmText:  "Remove",
-        confirmClass: "",
-        onConfirm: function () {
-            data.categories.splice(idx, 1);
-            saveBudgetData(viewYear, viewMonth, data);
-            renderPage();
-        }
-    });
+async function removeCatRow(idx) {
+    try {
+        var data = await loadBudgetData(viewYear, viewMonth);
+        var cat  = data.categories[idx];
+        openModal({
+            icon:         "🗑️",
+            title:        "Remove Category?",
+            message:      'Remove <strong>' + cat.emoji + ' ' + cat.label + '</strong> from this month\'s budget?<br><br>Your transactions won\'t be affected.',
+            confirmText:  "Remove",
+            confirmClass: "",
+            onConfirm: async function () {
+                try {
+                    // Re-fetch to avoid stale state if modal delayed
+                    var freshData = await loadBudgetData(viewYear, viewMonth);
+                    freshData.categories.splice(idx, 1);
+                    await saveBudgetData(viewYear, viewMonth, freshData);
+                    renderPage();
+                } catch (err) {
+                    console.error("removeCatRow save error:", err);
+                }
+            }
+        });
+    } catch (err) {
+        console.error("removeCatRow load error:", err);
+    }
 }
 
 
@@ -508,14 +591,14 @@ function removeCatRow(idx) {
 // ADD CATEGORY PANEL
 // ================================
 
-function populateCatSelect(data) {
-    var allCats = getAllKnownExpenseCategories();
+async function populateCatSelect(data) {
+    var allCats = await getAllKnownExpenseCategories();
     var added   = data.categories.map(function (c) { return c.label; });
 
     bpCatSelect.innerHTML = '<option value="">— Select a category —</option>';
 
     Object.keys(allCats).forEach(function (label) {
-        if (added.indexOf(label) !== -1) return; // already added
+        if (added.indexOf(label) !== -1) return;
         var opt = document.createElement("option");
         opt.value       = label;
         opt.textContent = allCats[label] + "  " + label;
@@ -523,15 +606,19 @@ function populateCatSelect(data) {
     });
 }
 
-bpAddCatBtn.addEventListener("click", function () {
-    var data = loadBudgetData(viewYear, viewMonth);
-    populateCatSelect(data);
-    bpAddCatPanel.classList.toggle("visible");
-    bpAddCatError.classList.remove("visible");
-    bpCatLimitInput.value = "";
-    bpCatSelect.value = "";
-    if (bpAddCatPanel.classList.contains("visible")) {
-        bpCatSelect.focus();
+bpAddCatBtn.addEventListener("click", async function () {
+    try {
+        var data = await loadBudgetData(viewYear, viewMonth);
+        await populateCatSelect(data);
+        bpAddCatPanel.classList.toggle("visible");
+        bpAddCatError.classList.remove("visible");
+        bpCatLimitInput.value = "";
+        bpCatSelect.value = "";
+        if (bpAddCatPanel.classList.contains("visible")) {
+            bpCatSelect.focus();
+        }
+    } catch (err) {
+        console.error("bpAddCatBtn error:", err);
     }
 });
 
@@ -539,7 +626,7 @@ bpAddCatCancel.addEventListener("click", function () {
     bpAddCatPanel.classList.remove("visible");
 });
 
-bpAddCatConfirm.addEventListener("click", function () {
+bpAddCatConfirm.addEventListener("click", async function () {
     var label = bpCatSelect.value;
     var limit = parseFloat(bpCatLimitInput.value);
 
@@ -556,15 +643,19 @@ bpAddCatConfirm.addEventListener("click", function () {
         return;
     }
 
-    var allCats = getAllKnownExpenseCategories();
-    var emoji   = allCats[label] || "📦";
+    try {
+        var allCats = await getAllKnownExpenseCategories();
+        var emoji   = allCats[label] || "📦";
 
-    var data = loadBudgetData(viewYear, viewMonth);
-    data.categories.push({ label: label, emoji: emoji, limit: limit });
-    saveBudgetData(viewYear, viewMonth, data);
+        var data = await loadBudgetData(viewYear, viewMonth);
+        data.categories.push({ label: label, emoji: emoji, limit: limit });
+        await saveBudgetData(viewYear, viewMonth, data);
 
-    bpAddCatPanel.classList.remove("visible");
-    renderPage();
+        bpAddCatPanel.classList.remove("visible");
+        renderPage();
+    } catch (err) {
+        console.error("bpAddCatConfirm error:", err);
+    }
 });
 
 bpCatLimitInput.addEventListener("keydown", function (e) {
@@ -576,20 +667,24 @@ bpCatLimitInput.addEventListener("keydown", function (e) {
 // UNBUDGETED CATEGORIES
 // ================================
 
-function renderUnbudgeted(data, spendingMap) {
+async function renderUnbudgeted(data, spendingMap) {
     var budgetedLabels = data.categories.map(function (c) { return c.label; });
     var unbudgeted     = [];
 
-    Object.keys(spendingMap).forEach(function (label) {
-        if (budgetedLabels.indexOf(label) === -1 && spendingMap[label] > 0) {
-            var allCats = getAllKnownExpenseCategories();
-            unbudgeted.push({
-                label: label,
-                emoji: allCats[label] || "📦",
-                spent: spendingMap[label]
-            });
-        }
-    });
+    try {
+        var allCats = await getAllKnownExpenseCategories();
+        Object.keys(spendingMap).forEach(function (label) {
+            if (budgetedLabels.indexOf(label) === -1 && spendingMap[label] > 0) {
+                unbudgeted.push({
+                    label: label,
+                    emoji: allCats[label] || "📦",
+                    spent: spendingMap[label]
+                });
+            }
+        });
+    } catch (err) {
+        console.error("renderUnbudgeted error:", err);
+    }
 
     bpUnbudgetedList.innerHTML = "";
 
@@ -614,13 +709,17 @@ function renderUnbudgeted(data, spendingMap) {
     });
 }
 
-function quickAddFromUnbudgeted(label) {
-    var data = loadBudgetData(viewYear, viewMonth);
-    populateCatSelect(data);
-    bpAddCatPanel.classList.add("visible");
-    bpCatSelect.value = label;
-    bpCatLimitInput.focus();
-    bpAddCatPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+async function quickAddFromUnbudgeted(label) {
+    try {
+        var data = await loadBudgetData(viewYear, viewMonth);
+        await populateCatSelect(data);
+        bpAddCatPanel.classList.add("visible");
+        bpCatSelect.value = label;
+        bpCatLimitInput.focus();
+        bpAddCatPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    } catch (err) {
+        console.error("quickAddFromUnbudgeted error:", err);
+    }
 }
 
 
@@ -628,37 +727,41 @@ function quickAddFromUnbudgeted(label) {
 // BULK EDIT MODAL
 // ================================
 
-bpBulkEditBtn.addEventListener("click", function () {
-    var data = loadBudgetData(viewYear, viewMonth);
-    if (data.categories.length === 0) {
-        openModal({
-            icon:        "ℹ️",
-            title:       "No Categories Yet",
-            message:     "Add some category budgets first, then use Bulk Edit to update them all at once.",
-            confirmText: "Got it",
-            confirmClass: "primary",
-            onConfirm:   function () {}
+bpBulkEditBtn.addEventListener("click", async function () {
+    try {
+        var data = await loadBudgetData(viewYear, viewMonth);
+        if (data.categories.length === 0) {
+            openModal({
+                icon:         "ℹ️",
+                title:        "No Categories Yet",
+                message:      "Add some category budgets first, then use Bulk Edit to update them all at once.",
+                confirmText:  "Got it",
+                confirmClass: "primary",
+                onConfirm:    function () {}
+            });
+            return;
+        }
+
+        bpBulkBody.innerHTML = "";
+        data.categories.forEach(function (cat, idx) {
+            var row = document.createElement("div");
+            row.className = "bp-bulk-row";
+            row.innerHTML =
+                '<div class="bp-bulk-cat-name">' +
+                    '<span>' + cat.emoji + '</span>' + cat.label +
+                '</div>' +
+                '<div class="bp-bulk-input-wrap">' +
+                    '<span>₹</span>' +
+                    '<input type="number" class="bp-bulk-input" id="bpBulkIn_' + idx + '"' +
+                        ' value="' + (cat.limit || "") + '" placeholder="0" min="0" step="100" />' +
+                '</div>';
+            bpBulkBody.appendChild(row);
         });
-        return;
+
+        bpBulkOverlay.classList.add("active");
+    } catch (err) {
+        console.error("bpBulkEditBtn error:", err);
     }
-
-    bpBulkBody.innerHTML = "";
-    data.categories.forEach(function (cat, idx) {
-        var row = document.createElement("div");
-        row.className = "bp-bulk-row";
-        row.innerHTML =
-            '<div class="bp-bulk-cat-name">' +
-                '<span>' + cat.emoji + '</span>' + cat.label +
-            '</div>' +
-            '<div class="bp-bulk-input-wrap">' +
-                '<span>₹</span>' +
-                '<input type="number" class="bp-bulk-input" id="bpBulkIn_' + idx + '"' +
-                    ' value="' + (cat.limit || "") + '" placeholder="0" min="0" step="100" />' +
-            '</div>';
-        bpBulkBody.appendChild(row);
-    });
-
-    bpBulkOverlay.classList.add("active");
 });
 
 function closeBulkModal() {
@@ -672,18 +775,22 @@ bpBulkOverlay.addEventListener("click", function (e) {
     if (e.target === bpBulkOverlay) closeBulkModal();
 });
 
-bpBulkSave.addEventListener("click", function () {
-    var data = loadBudgetData(viewYear, viewMonth);
-    data.categories.forEach(function (cat, idx) {
-        var inp = document.getElementById("bpBulkIn_" + idx);
-        if (inp) {
-            var val = parseFloat(inp.value);
-            cat.limit = isNaN(val) || val < 0 ? 0 : val;
-        }
-    });
-    saveBudgetData(viewYear, viewMonth, data);
-    closeBulkModal();
-    renderPage();
+bpBulkSave.addEventListener("click", async function () {
+    try {
+        var data = await loadBudgetData(viewYear, viewMonth);
+        data.categories.forEach(function (cat, idx) {
+            var inp = document.getElementById("bpBulkIn_" + idx);
+            if (inp) {
+                var val = parseFloat(inp.value);
+                cat.limit = isNaN(val) || val < 0 ? 0 : val;
+            }
+        });
+        await saveBudgetData(viewYear, viewMonth, data);
+        closeBulkModal();
+        renderPage();
+    } catch (err) {
+        console.error("bpBulkSave error:", err);
+    }
 });
 
 
@@ -693,24 +800,35 @@ bpBulkSave.addEventListener("click", function () {
 // budget data but previous month does
 // ================================
 
-function checkNewMonth() {
+async function checkNewMonth() {
     if (!isCurrentMonth) return;
 
-    var key  = getBudgetKey(viewYear, viewMonth);
-    var data = localStorage.getItem(key);
+    // Check if current month already has categories saved
+    try {
+        var curData = await DataService.getBudget(viewYear, viewMonth + 1);
+        if (curData && curData.categories && curData.categories.length > 0) return;
+    } catch (err) {
+        // If fetch fails, check legacy localStorage key
+        var legacyKey = getBudgetKey(viewYear, viewMonth);
+        if (localStorage.getItem(legacyKey)) return;
+    }
 
-    // Already has data for current month — no reset needed
-    if (data) return;
-
-    // Check if previous month has budget data
+    // Check previous month
     var prevY = viewMonth === 0 ? viewYear - 1 : viewYear;
     var prevM = viewMonth === 0 ? 11 : viewMonth - 1;
-    var prevData = localStorage.getItem(getBudgetKey(prevY, prevM));
 
-    if (!prevData) return; // No previous data either — first time user
+    var prevData = null;
+    try {
+        prevData = await DataService.getBudget(prevY, prevM + 1);
+    } catch (err) {
+        // Fall back to legacy localStorage key
+        var legacyPrev = localStorage.getItem(getBudgetKey(prevY, prevM));
+        if (legacyPrev) {
+            try { prevData = JSON.parse(legacyPrev); } catch (_) {}
+        }
+    }
 
-    var parsed = JSON.parse(prevData);
-    if (!parsed || parsed.categories.length === 0) return;
+    if (!prevData || !prevData.categories || prevData.categories.length === 0) return;
 
     // Show reset dialog
     bpResetMsg.textContent = "It's " + MONTH_NAMES[viewMonth] + "! What would you like to do with your budgets?";
@@ -718,29 +836,34 @@ function checkNewMonth() {
     bpResetOverlay.classList.add("active");
 }
 
-bpResetKeep.addEventListener("click", function () {
-    // Copy previous month's category limits to current month
+bpResetKeep.addEventListener("click", async function () {
     var prevY = viewMonth === 0 ? viewYear - 1 : viewYear;
     var prevM = viewMonth === 0 ? 11 : viewMonth - 1;
-    var prevData = loadBudgetData(prevY, prevM);
 
-    var newData = {
-        cap:        prevData.cap || 0,
-        categories: prevData.categories.map(function (c) {
-            return { label: c.label, emoji: c.emoji, limit: c.limit };
-        })
-    };
-
-    saveBudgetData(viewYear, viewMonth, newData);
-    bpResetOverlay.classList.remove("active");
-    renderPage();
+    try {
+        var prevData = await loadBudgetData(prevY, prevM);
+        var newData  = {
+            cap:        prevData.cap || 0,
+            categories: prevData.categories.map(function (c) {
+                return { label: c.label, emoji: c.emoji, limit: c.limit };
+            })
+        };
+        await saveBudgetData(viewYear, viewMonth, newData);
+        bpResetOverlay.classList.remove("active");
+        renderPage();
+    } catch (err) {
+        console.error("bpResetKeep error:", err);
+    }
 });
 
-bpResetFresh.addEventListener("click", function () {
-    // Save empty data for current month
-    saveBudgetData(viewYear, viewMonth, { cap: 0, categories: [] });
-    bpResetOverlay.classList.remove("active");
-    renderPage();
+bpResetFresh.addEventListener("click", async function () {
+    try {
+        await saveBudgetData(viewYear, viewMonth, { cap: 0, categories: [] });
+        bpResetOverlay.classList.remove("active");
+        renderPage();
+    } catch (err) {
+        console.error("bpResetFresh error:", err);
+    }
 });
 
 
@@ -748,17 +871,21 @@ bpResetFresh.addEventListener("click", function () {
 // MAIN RENDER
 // ================================
 
-function renderPage() {
+async function renderPage() {
     renderMonthLabel();
 
-    var data        = loadBudgetData(viewYear, viewMonth);
-    var spendingMap = buildSpendingMap(viewYear, viewMonth);
+    try {
+        var data        = await loadBudgetData(viewYear, viewMonth);
+        var spendingMap = await buildSpendingMap(viewYear, viewMonth);
 
-    renderSummaryCards(data, spendingMap);
-    renderCapSection(data, spendingMap);
-    renderDailyGuidance(data, spendingMap);
-    renderCategoryRows(data, spendingMap);
-    renderUnbudgeted(data, spendingMap);
+        await renderSummaryCards(data, spendingMap);
+        renderCapSection(data, spendingMap);
+        await renderDailyGuidance(data, spendingMap);
+        renderCategoryRows(data, spendingMap);
+        await renderUnbudgeted(data, spendingMap);
+    } catch (err) {
+        console.error("renderPage error:", err);
+    }
 }
 
 
@@ -766,7 +893,7 @@ function renderPage() {
 // INIT
 // ================================
 
-(function init() {
-    renderPage();
-    checkNewMonth();
+(async function init() {
+    await renderPage();
+    await checkNewMonth();
 })();

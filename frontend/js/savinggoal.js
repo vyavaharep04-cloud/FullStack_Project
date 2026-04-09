@@ -8,8 +8,6 @@
 // CONSTANTS
 // ================================
 
-var STORAGE_KEY = "finantra_savings_goals";
-
 var EMOJI_OPTIONS = [
     "🏠", "✈️", "💻", "🚗", "📱", "🎓", "💍", "🏖️",
     "🎸", "💪", "🌍", "🛒", "📸", "🏋️", "🎯", "💰"
@@ -19,19 +17,6 @@ var MONTH_NAMES = [
     "Jan","Feb","Mar","Apr","May","Jun",
     "Jul","Aug","Sep","Oct","Nov","Dec"
 ];
-
-
-// ================================
-// STORAGE HELPERS
-// ================================
-
-function loadGoals() {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-}
-
-function saveGoals(goals) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(goals));
-}
 
 
 // ================================
@@ -95,7 +80,6 @@ function calcAutoStatus(goal) {
     var elapsedMs = now - created;
     var timeElapsedPct = totalMs > 0 ? Math.min((elapsedMs / totalMs) * 100, 100) : 100;
 
-    // Expected % saved by now
     var expectedPct = timeElapsedPct;
     var diff        = pct - expectedPct;
 
@@ -138,8 +122,15 @@ function isAchieved(goal) {
 // RENDER ALL GOALS
 // ================================
 
-function renderAll() {
-    var goals    = loadGoals();
+async function renderAll() {
+    var goals;
+    try {
+        goals = await DataService.getGoals();
+    } catch (err) {
+        console.error("Failed to load goals:", err);
+        goals = [];
+    }
+
     var active   = goals.filter(function (g) { return !isAchieved(g); });
     var achieved = goals.filter(function (g) { return isAchieved(g); });
 
@@ -148,7 +139,6 @@ function renderAll() {
     var listEl = document.getElementById("sgGoalsList");
     listEl.innerHTML = "";
 
-    // Empty state
     if (active.length === 0) {
         document.getElementById("sgEmpty").classList.add("visible");
     } else {
@@ -158,7 +148,6 @@ function renderAll() {
         });
     }
 
-    // Achieved section
     var achievedSection = document.getElementById("sgAchievedSection");
     var achievedList    = document.getElementById("sgAchievedList");
     var achievedCount   = document.getElementById("sgAchievedCount");
@@ -184,7 +173,7 @@ function buildGoalCard(goal, activeIdx, totalActive, isAchievedCard) {
     var card    = document.createElement("div");
     var pCls    = "priority-" + (goal.priority || "medium").toLowerCase();
     card.className = "sg-goal-card " + pCls + (isAchievedCard ? " achieved" : "");
-    card.dataset.id = goal.id;
+    card.dataset.id = String(goal.id);
 
     var target   = goal.targetAmount;
     var saved    = goal.savedAmount;
@@ -195,7 +184,6 @@ function buildGoalCard(goal, activeIdx, totalActive, isAchievedCard) {
     var monthly  = mLeft > 0 ? Math.ceil(remain / mLeft) : remain;
     var timeInfo = timeLeftLabel(goal.deadline);
 
-    // Expected saved by now (for comparison bar)
     var created        = new Date(goal.createdAt);
     var deadline       = new Date(goal.deadline);
     var now            = new Date();
@@ -203,10 +191,8 @@ function buildGoalCard(goal, activeIdx, totalActive, isAchievedCard) {
     var elapsedMs      = now - created;
     var expectedPct    = totalMs > 0 ? Math.min(Math.round((elapsedMs / totalMs) * 100), 100) : 100;
 
-    // Progress fill class
     var fillCls = pct >= 100 ? "complete" : pct >= 75 ? "warn" : "";
 
-    // Status badge
     var statusMap = {
         "on-track": '<span class="sg-badge on-track"><i class="fa-solid fa-circle-check"></i> On Track</span>',
         "behind":   '<span class="sg-badge behind"><i class="fa-solid fa-circle-exclamation"></i> Behind Schedule</span>',
@@ -220,23 +206,23 @@ function buildGoalCard(goal, activeIdx, totalActive, isAchievedCard) {
         "Low":    '<span class="sg-badge low">🟢 Low Priority</span>'
     };
 
-    // Order buttons (only for active goals)
+    var goalIdStr = String(goal.id);
+
     var orderBtns = "";
     if (!isAchievedCard) {
         orderBtns =
             '<div class="sg-card-order-btns">' +
-                '<button class="sg-order-btn" title="Move up" onclick="moveGoal(\'' + goal.id + '\', -1)"' +
+                '<button class="sg-order-btn" title="Move up" onclick="moveGoal(\'' + goalIdStr + '\', -1)"' +
                     (activeIdx === 0 ? " disabled" : "") + '>' +
                     '<i class="fa-solid fa-chevron-up"></i>' +
                 '</button>' +
-                '<button class="sg-order-btn" title="Move down" onclick="moveGoal(\'' + goal.id + '\', 1)"' +
+                '<button class="sg-order-btn" title="Move down" onclick="moveGoal(\'' + goalIdStr + '\', 1)"' +
                     (activeIdx === totalActive - 1 ? " disabled" : "") + '>' +
                     '<i class="fa-solid fa-chevron-down"></i>' +
                 '</button>' +
             '</div>';
     }
 
-    // Last 3 contributions
     var contribs    = goal.contributions || [];
     var last3       = contribs.slice(-3).reverse();
     var contribHTML = "";
@@ -256,14 +242,13 @@ function buildGoalCard(goal, activeIdx, totalActive, isAchievedCard) {
         });
         if (contribs.length > 3) {
             contribHTML +=
-                '<button class="sg-view-all-link" onclick="openHistoryModal(\'' + goal.id + '\')">' +
+                '<button class="sg-view-all-link" onclick="openHistoryModal(\'' + goalIdStr + '\')">' +
                     'View all ' + contribs.length + ' contributions' +
                 '</button>';
         }
         contribHTML += '</div>';
     }
 
-    // Achieved overlay
     var achievedHTML = "";
     if (isAchievedCard) {
         achievedHTML =
@@ -273,38 +258,36 @@ function buildGoalCard(goal, activeIdx, totalActive, isAchievedCard) {
             '</div>';
     }
 
-    // Action buttons
     var actionBtns = "";
     if (!isAchievedCard) {
         actionBtns =
             '<div class="sg-card-actions">' +
-                '<button class="sg-card-btn sg-btn-primary" onclick="openContribModal(\'' + goal.id + '\')">' +
+                '<button class="sg-card-btn sg-btn-primary" onclick="openContribModal(\'' + goalIdStr + '\')">' +
                     '<i class="fa-solid fa-plus"></i> Add Money' +
                 '</button>' +
-                '<button class="sg-card-btn sg-btn-outline" onclick="openHistoryModal(\'' + goal.id + '\')">' +
+                '<button class="sg-card-btn sg-btn-outline" onclick="openHistoryModal(\'' + goalIdStr + '\')">' +
                     '<i class="fa-solid fa-clock-rotate-left"></i> History' +
                 '</button>' +
-                '<button class="sg-card-btn sg-btn-outline" onclick="openEditModal(\'' + goal.id + '\')">' +
+                '<button class="sg-card-btn sg-btn-outline" onclick="openEditModal(\'' + goalIdStr + '\')">' +
                     '<i class="fa-solid fa-pen"></i> Edit' +
                 '</button>' +
-                '<button class="sg-card-btn sg-btn-danger" onclick="deleteGoal(\'' + goal.id + '\')">' +
+                '<button class="sg-card-btn sg-btn-danger" onclick="deleteGoal(\'' + goalIdStr + '\')">' +
                     '<i class="fa-solid fa-trash-can"></i> Delete' +
                 '</button>' +
             '</div>';
     } else {
         actionBtns =
             '<div class="sg-card-actions">' +
-                '<button class="sg-card-btn sg-btn-outline" onclick="openHistoryModal(\'' + goal.id + '\')">' +
+                '<button class="sg-card-btn sg-btn-outline" onclick="openHistoryModal(\'' + goalIdStr + '\')">' +
                     '<i class="fa-solid fa-clock-rotate-left"></i> History' +
                 '</button>' +
-                '<button class="sg-card-btn sg-btn-danger" onclick="deleteGoal(\'' + goal.id + '\')">' +
+                '<button class="sg-card-btn sg-btn-danger" onclick="deleteGoal(\'' + goalIdStr + '\')">' +
                     '<i class="fa-solid fa-trash-can"></i> Delete' +
                 '</button>' +
             '</div>';
     }
 
     card.innerHTML =
-        // Top row
         '<div class="sg-card-top">' +
             '<span class="sg-card-emoji">' + (goal.emoji || "🎯") + '</span>' +
             '<div class="sg-card-title-block">' +
@@ -317,10 +300,8 @@ function buildGoalCard(goal, activeIdx, totalActive, isAchievedCard) {
             orderBtns +
         '</div>' +
 
-        // Achieved overlay
         achievedHTML +
 
-        // Stats
         '<div class="sg-card-stats">' +
             '<div class="sg-stat">' +
                 '<span class="sg-stat-label">Target</span>' +
@@ -340,7 +321,6 @@ function buildGoalCard(goal, activeIdx, totalActive, isAchievedCard) {
             '</div>' +
         '</div>' +
 
-        // Progress bar
         '<div class="sg-card-progress">' +
             '<div class="sg-progress-header">' +
                 '<span class="sg-progress-label">Progress</span>' +
@@ -349,7 +329,6 @@ function buildGoalCard(goal, activeIdx, totalActive, isAchievedCard) {
             '<div class="sg-progress-bar">' +
                 '<div class="sg-progress-fill ' + fillCls + '" style="width:' + pct + '%"></div>' +
             '</div>' +
-            // Expected vs actual indicator (only for active goals)
             (!isAchievedCard && expectedPct > 0 ?
                 '<div class="sg-expected-row">' +
                     '<span>Actual: ' + pct + '%</span>' +
@@ -361,7 +340,6 @@ function buildGoalCard(goal, activeIdx, totalActive, isAchievedCard) {
             : '') +
         '</div>' +
 
-        // Meta: deadline + suggestion
         '<div class="sg-card-meta">' +
             '<span class="sg-meta-item' + (timeInfo.overdue ? " overdue" : "") + '">' +
                 '<i class="fa-solid fa-calendar-days"></i>' +
@@ -373,7 +351,6 @@ function buildGoalCard(goal, activeIdx, totalActive, isAchievedCard) {
             '</span>' +
         '</div>' +
 
-        // Monthly suggestion
         (!isAchievedCard && mLeft > 0 ?
             '<div class="sg-suggestion-box">' +
                 '<i class="fa-solid fa-lightbulb"></i>' +
@@ -382,10 +359,8 @@ function buildGoalCard(goal, activeIdx, totalActive, isAchievedCard) {
             '</div>'
         : '') +
 
-        // Recent contributions
         contribHTML +
 
-        // Action buttons
         actionBtns;
 
     return card;
@@ -394,26 +369,88 @@ function buildGoalCard(goal, activeIdx, totalActive, isAchievedCard) {
 
 // ================================
 // MOVE GOAL (order)
+// Guest: swap in localStorage array
+// Logged-in: swap then updateGoal for both
 // ================================
 
-function moveGoal(id, direction) {
-    var goals  = loadGoals();
+async function moveGoal(id, direction) {
+    var goals;
+    try {
+        goals = await DataService.getGoals();
+    } catch (err) {
+        console.error("Failed to load goals for reorder:", err);
+        return;
+    }
+
     var active = goals.filter(function (g) { return !isAchieved(g); });
-    var idx    = active.findIndex(function (g) { return g.id === id; });
+    var idx    = active.findIndex(function (g) { return String(g.id) === String(id); });
     var newIdx = idx + direction;
 
     if (newIdx < 0 || newIdx >= active.length) return;
 
-    // Swap in the full goals array
-    var aPos = goals.findIndex(function (g) { return g.id === active[idx].id; });
-    var bPos = goals.findIndex(function (g) { return g.id === active[newIdx].id; });
+    // Find positions in full array
+    var aPos = goals.findIndex(function (g) { return String(g.id) === String(active[idx].id); });
+    var bPos = goals.findIndex(function (g) { return String(g.id) === String(active[newIdx].id); });
 
-    var tmp      = goals[aPos];
-    goals[aPos]  = goals[bPos];
-    goals[bPos]  = tmp;
+    // Swap
+    var tmp     = goals[aPos];
+    goals[aPos] = goals[bPos];
+    goals[bPos] = tmp;
 
-    saveGoals(goals);
+    // For logged-in users: backend has no order field, so just re-render optimistically.
+    // For guest users: DataService falls back to localStorage automatically via updateGoal.
+    // We update both swapped goals to persist any order-tracking fields if needed.
+    try {
+        if (!DataService.isGuest()) {
+            // No dedicated order field in schema — optimistic UI only for logged-in.
+            // Re-render with the locally swapped array directly.
+            renderAllFromGoals(goals);
+            return;
+        } else {
+            // Guest: update both via DataService to persist to localStorage
+            await DataService.updateGoal(String(goals[aPos].id), goals[aPos]);
+            await DataService.updateGoal(String(goals[bPos].id), goals[bPos]);
+        }
+    } catch (err) {
+        console.error("Failed to persist goal order:", err);
+    }
+
     renderAll();
+}
+
+// Helper: render from an already-loaded goals array (avoids extra fetch)
+function renderAllFromGoals(goals) {
+    var active   = goals.filter(function (g) { return !isAchieved(g); });
+    var achieved = goals.filter(function (g) { return isAchieved(g); });
+
+    renderSummary(goals);
+
+    var listEl = document.getElementById("sgGoalsList");
+    listEl.innerHTML = "";
+
+    if (active.length === 0) {
+        document.getElementById("sgEmpty").classList.add("visible");
+    } else {
+        document.getElementById("sgEmpty").classList.remove("visible");
+        active.forEach(function (goal, i) {
+            listEl.appendChild(buildGoalCard(goal, i, active.length, false));
+        });
+    }
+
+    var achievedSection = document.getElementById("sgAchievedSection");
+    var achievedList    = document.getElementById("sgAchievedList");
+    var achievedCount   = document.getElementById("sgAchievedCount");
+
+    if (achieved.length > 0) {
+        achievedSection.classList.add("visible");
+        achievedCount.textContent = achieved.length;
+        achievedList.innerHTML    = "";
+        achieved.forEach(function (goal) {
+            achievedList.appendChild(buildGoalCard(goal, -1, -1, true));
+        });
+    } else {
+        achievedSection.classList.remove("visible");
+    }
 }
 
 
@@ -421,9 +458,16 @@ function moveGoal(id, direction) {
 // DELETE GOAL
 // ================================
 
-function deleteGoal(id) {
-    var goals = loadGoals();
-    var goal  = goals.find(function (g) { return g.id === id; });
+async function deleteGoal(id) {
+    var goals;
+    try {
+        goals = await DataService.getGoals();
+    } catch (err) {
+        console.error("Failed to load goals for delete:", err);
+        return;
+    }
+
+    var goal = goals.find(function (g) { return String(g.id) === String(id); });
     if (!goal) return;
 
     openModal({
@@ -432,10 +476,13 @@ function deleteGoal(id) {
         message:      'Delete <strong>' + (goal.emoji || "🎯") + ' ' + goal.goalName + '</strong>?<br><br>All contribution history will be lost.',
         confirmText:  "Delete",
         confirmClass: "",
-        onConfirm: function () {
-            var updated = goals.filter(function (g) { return g.id !== id; });
-            saveGoals(updated);
-            renderAll();
+        onConfirm: async function () {
+            try {
+                await DataService.deleteGoal(String(id));
+                renderAll();
+            } catch (err) {
+                console.error("Failed to delete goal:", err);
+            }
         }
     });
 }
@@ -445,8 +492,8 @@ function deleteGoal(id) {
 // CREATE / EDIT GOAL MODAL
 // ================================
 
-var editingGoalId = null;
-var selectedEmoji = "🎯";
+var editingGoalId    = null;
+var selectedEmoji    = "🎯";
 var selectedPriority = "Medium";
 var selectedStatus   = "auto";
 
@@ -482,7 +529,6 @@ function openCreateModal() {
     document.getElementById("sgStartAmount").value  = "";
     document.getElementById("sgCustomEmoji").value  = "";
 
-    // Default deadline = 6 months from now
     var d = new Date();
     d.setMonth(d.getMonth() + 6);
     document.getElementById("sgDeadline").value = d.toISOString().split("T")[0];
@@ -496,12 +542,19 @@ function openCreateModal() {
     document.getElementById("sgGoalName").focus();
 }
 
-function openEditModal(id) {
-    var goals = loadGoals();
-    var goal  = goals.find(function (g) { return g.id === id; });
+async function openEditModal(id) {
+    var goals;
+    try {
+        goals = await DataService.getGoals();
+    } catch (err) {
+        console.error("Failed to load goals for edit:", err);
+        return;
+    }
+
+    var goal = goals.find(function (g) { return String(g.id) === String(id); });
     if (!goal) return;
 
-    editingGoalId    = id;
+    editingGoalId    = String(goal.id);
     selectedEmoji    = goal.emoji    || "🎯";
     selectedPriority = goal.priority || "Medium";
     selectedStatus   = goal.statusOverride || "auto";
@@ -550,7 +603,7 @@ function clearGoalErrors() {
     });
 }
 
-function saveGoalModal() {
+async function saveGoalModal() {
     var name     = document.getElementById("sgGoalName").value.trim();
     var target   = parseFloat(document.getElementById("sgTargetAmount").value);
     var startAmt = parseFloat(document.getElementById("sgStartAmount").value) || 0;
@@ -578,13 +631,10 @@ function saveGoalModal() {
     }
     if (!valid) return;
 
-    var goals = loadGoals();
-
-    if (editingGoalId) {
-        // Edit existing
-        goals = goals.map(function (g) {
-            if (g.id !== editingGoalId) return g;
-            return Object.assign({}, g, {
+    try {
+        if (editingGoalId) {
+            // Edit: only update editable fields — never overwrite savedAmount or contributions
+            await DataService.updateGoal(editingGoalId, {
                 goalName:       name,
                 targetAmount:   target,
                 deadline:       deadline,
@@ -592,34 +642,35 @@ function saveGoalModal() {
                 priority:       selectedPriority,
                 statusOverride: selectedStatus
             });
-        });
-    } else {
-        // Create new
-        var contribs = [];
-        if (startAmt > 0) {
-            contribs.push({
-                id:     Date.now(),
-                amount: startAmt,
-                date:   new Date().toISOString().split("T")[0],
-                note:   "Starting amount"
-            });
+        } else {
+            // Create new
+            var contribs = [];
+            if (startAmt > 0) {
+                contribs.push({
+                    id:     Date.now(),
+                    amount: startAmt,
+                    date:   new Date().toISOString().split("T")[0],
+                    note:   "Starting amount"
+                });
+            }
+            var newGoal = {
+                goalName:       name,
+                targetAmount:   target,
+                savedAmount:    startAmt,
+                deadline:       deadline,
+                emoji:          emoji,
+                priority:       selectedPriority,
+                statusOverride: selectedStatus,
+                createdAt:      new Date().toISOString().split("T")[0],
+                contributions:  contribs
+            };
+            await DataService.addGoal(newGoal);
         }
-        var newGoal = {
-            id:             String(Date.now()),
-            goalName:       name,
-            targetAmount:   target,
-            savedAmount:    startAmt,
-            deadline:       deadline,
-            emoji:          emoji,
-            priority:       selectedPriority,
-            statusOverride: selectedStatus,
-            createdAt:      new Date().toISOString().split("T")[0],
-            contributions:  contribs
-        };
-        goals.push(newGoal);
+    } catch (err) {
+        console.error("Failed to save goal:", err);
+        return;
     }
 
-    saveGoals(goals);
     closeGoalModal();
     renderAll();
 }
@@ -631,10 +682,18 @@ function saveGoalModal() {
 
 var contribGoalId = null;
 
-function openContribModal(id) {
-    contribGoalId = id;
-    var goals = loadGoals();
-    var goal  = goals.find(function (g) { return g.id === id; });
+async function openContribModal(id) {
+    contribGoalId = String(id);
+
+    var goals;
+    try {
+        goals = await DataService.getGoals();
+    } catch (err) {
+        console.error("Failed to load goals for contribution:", err);
+        return;
+    }
+
+    var goal = goals.find(function (g) { return String(g.id) === String(id); });
     if (!goal) return;
 
     document.getElementById("sgContribTitle").textContent = "Add to: " + goal.goalName;
@@ -657,7 +716,7 @@ function closeContribModal() {
     contribGoalId = null;
 }
 
-function saveContribution() {
+async function saveContribution() {
     var amount = parseFloat(document.getElementById("sgContribAmount").value);
     var date   = document.getElementById("sgContribDate").value;
     var note   = document.getElementById("sgContribNote").value.trim();
@@ -670,23 +729,20 @@ function saveContribution() {
         return;
     }
 
-    var goals = loadGoals();
-    goals = goals.map(function (g) {
-        if (g.id !== contribGoalId) return g;
-        var contribs = g.contributions || [];
-        contribs.push({
-            id:     Date.now(),
-            amount: amount,
-            date:   date || new Date().toISOString().split("T")[0],
-            note:   note || "Contribution"
-        });
-        return Object.assign({}, g, {
-            savedAmount:   g.savedAmount + amount,
-            contributions: contribs
-        });
-    });
+    var contrib = {
+        id:     Date.now(),
+        amount: amount,
+        date:   date || new Date().toISOString().split("T")[0],
+        note:   note || "Contribution"
+    };
 
-    saveGoals(goals);
+    try {
+        await DataService.addContribution(contribGoalId, contrib);
+    } catch (err) {
+        console.error("Failed to save contribution:", err);
+        return;
+    }
+
     closeContribModal();
     renderAll();
 }
@@ -696,9 +752,16 @@ function saveContribution() {
 // HISTORY MODAL
 // ================================
 
-function openHistoryModal(id) {
-    var goals = loadGoals();
-    var goal  = goals.find(function (g) { return g.id === id; });
+async function openHistoryModal(id) {
+    var goals;
+    try {
+        goals = await DataService.getGoals();
+    } catch (err) {
+        console.error("Failed to load goals for history:", err);
+        return;
+    }
+
+    var goal = goals.find(function (g) { return String(g.id) === String(id); });
     if (!goal) return;
 
     document.getElementById("sgHistoryTitle").textContent =
@@ -711,10 +774,10 @@ function openHistoryModal(id) {
     listEl.innerHTML = "";
 
     if (contribs.length === 0) {
-        listEl.style.display   = "none";
+        listEl.style.display = "none";
         emptyEl.classList.add("visible");
     } else {
-        listEl.style.display   = "";
+        listEl.style.display = "";
         emptyEl.classList.remove("visible");
         contribs.forEach(function (c) {
             var item = document.createElement("div");
@@ -754,11 +817,9 @@ document.getElementById("sgAchievedToggle").addEventListener("click", function (
 // EVENT LISTENERS
 // ================================
 
-// Add goal buttons
 document.getElementById("sgAddGoalBtn").addEventListener("click", openCreateModal);
 document.getElementById("sgEmptyAddBtn").addEventListener("click", openCreateModal);
 
-// Goal modal
 document.getElementById("sgModalClose").addEventListener("click",  closeGoalModal);
 document.getElementById("sgModalCancel").addEventListener("click", closeGoalModal);
 document.getElementById("sgModalSave").addEventListener("click",   saveGoalModal);
@@ -767,19 +828,16 @@ document.getElementById("sgGoalModalOverlay").addEventListener("click", function
     if (e.target === this) closeGoalModal();
 });
 
-// Priority buttons
 document.getElementById("sgPriorityRow").addEventListener("click", function (e) {
     var btn = e.target.closest(".sg-priority-btn");
     if (btn) setPriorityActive(btn.dataset.priority);
 });
 
-// Status buttons
 document.getElementById("sgStatusRow").addEventListener("click", function (e) {
     var btn = e.target.closest(".sg-status-btn");
     if (btn) setStatusActive(btn.dataset.status);
 });
 
-// Contribution modal
 document.getElementById("sgContribClose").addEventListener("click",  closeContribModal);
 document.getElementById("sgContribCancel").addEventListener("click", closeContribModal);
 document.getElementById("sgContribSave").addEventListener("click",   saveContribution);
@@ -792,7 +850,6 @@ document.getElementById("sgContribAmount").addEventListener("keydown", function 
     if (e.key === "Enter") saveContribution();
 });
 
-// History modal
 document.getElementById("sgHistoryClose").addEventListener("click",  closeHistoryModal);
 document.getElementById("sgHistoryClose2").addEventListener("click", closeHistoryModal);
 
@@ -800,12 +857,10 @@ document.getElementById("sgHistoryModalOverlay").addEventListener("click", funct
     if (e.target === this) closeHistoryModal();
 });
 
-// Enter key on goal form
 document.getElementById("sgGoalName").addEventListener("keydown", function (e) {
     if (e.key === "Enter") saveGoalModal();
 });
 
-// Escape closes any open modal
 document.addEventListener("keydown", function (e) {
     if (e.key !== "Escape") return;
     closeGoalModal();
@@ -818,4 +873,6 @@ document.addEventListener("keydown", function (e) {
 // INIT
 // ================================
 
-renderAll();
+(async function () {
+    await renderAll();
+})();
