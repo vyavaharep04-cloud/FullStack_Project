@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Financial Health - FinanTra</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="image/FinanTra_logo (2).png" type="image/png">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/financialhealth.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div class="layout">
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+
+        <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="sidebar-header">
+            <div class="logo-circle">
+                <img src="image/FinanTra_logo (2).png" alt="Logo">
+            </div>
+            <div class="brand-text">
+                <h2>Finan<span>Tra</span></h2>
+                <p>Welcome, User</p>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Finance Core</p>
+            <a href="dashboard.html">
+                <i class="fa-solid fa-house"></i>
+                <span class="link-text">Dashboard</span>
+            </a>
+            <a href="addTransaction.html">
+                <i class="fa-solid fa-plus-circle"></i>
+                <span class="link-text">Add Transaction</span>
+            </a>
+            <a href="transactions.html">
+                <i class="fa-solid fa-list"></i>
+                <span class="link-text">Transactions</span>
+            </a>
+            <a href="analytics.html">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span class="link-text">Analytics</span>
+            </a>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Smart Tools</p>
+            <a href="budgetPlanner.html">
+                <i class="fa-solid fa-wallet"></i>
+                <span class="link-text">Budget Planner</span>
+            </a>
+            <a href="savinggoal.html">
+                <i class="fa-solid fa-piggy-bank"></i>
+                <span class="link-text">Savings Goal Planner</span>
+            </a>
+            <a href="financialHealth.html" class="active">
+                <i class="fa-solid fa-heart-pulse"></i>
+                <span class="link-text">Financial Health</span>
+            </a>
+            <a href="currencyConverter.html">
+                <i class="fa-solid fa-coins"></i>
+                <span class="link-text">Currency Converter</span>
+            </a>
+            <a href="statement.html">
+                <i class="fa-solid fa-file-invoice"></i>
+                <span class="link-text">SOA Statement</span>
+            </a>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Account Info</p>
+            <a href="profile.html">
+                <i class="fa-solid fa-user"></i>
+                <span class="link-text">Profile</span>
+            </a>
+            <a href="login.html" class="signout-link">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span class="link-text">Sign Out</span>
+            </a>
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main" id="mainContent">
+
+        <!-- TOP BAR -->
+        <div class="top-bar">
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="page-header-text">
+                <h1>Financial Health</h1>
+                <p class="subtitle">Your complete financial wellbeing report</p>
+            </div>
+        </div>
+
+
+        <!-- PERIOD SELECTOR -->
+        <div class="period-bar">
+            <span class="period-label">
+                <i class="fa-solid fa-calendar-days"></i> Period:
+            </span>
+            <div class="period-pills">
+                <button class="period-pill active" onclick="setPeriod('month', this)">This Month</button>
+                <button class="period-pill" onclick="setPeriod('3months', this)">Last 3 Months</button>
+                <button class="period-pill" onclick="setPeriod('year', this)">This Year</button>
+            </div>
+        </div>
+
+
+        <!-- ROW 1: SCORE + SUB-SCORES -->
+        <div class="fh-top-row">
+
+            <!-- Score gauge -->
+            <div class="chart-card fh-score-card">
+                <div class="chart-card-header">
+                    <h3><i class="fa-solid fa-heart-pulse"></i> Financial Health Score</h3>
+                    <span class="chart-subtitle" id="fhScorePeriodLabel">This Month</span>
+                </div>
+
+                <div class="fh-gauge-wrap">
+                    <!-- SVG Circular Gauge -->
+                    <svg class="fh-gauge-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Track -->
+                        <circle class="fh-gauge-track" cx="100" cy="100" r="80"
+                                fill="none" stroke-width="16"/>
+                        <!-- Fill -->
+                        <circle class="fh-gauge-fill" id="fhGaugeFill" cx="100" cy="100" r="80"
+                                fill="none" stroke-width="16"
+                                stroke-dasharray="502" stroke-dashoffset="502"
+                                stroke-linecap="round"
+                                transform="rotate(-90 100 100)"/>
+                    </svg>
+
+                    <!-- Score text in center -->
+                    <div class="fh-gauge-center">
+                        <span class="fh-score-number" id="fhScoreNumber">—</span>
+                        <span class="fh-score-label" id="fhScoreLabel">Calculating...</span>
+                        <span class="fh-score-trend" id="fhScoreTrend"></span>
+                    </div>
+                </div>
+
+                <!-- Band legend -->
+                <div class="fh-band-legend">
+                    <span class="fh-band excellent">80+ Excellent</span>
+                    <span class="fh-band good">60 Good</span>
+                    <span class="fh-band improve">40 Needs Work</span>
+                    <span class="fh-band risky">&lt;40 Risky</span>
+                </div>
+            </div>
+
+            <!-- Sub-scores -->
+            <div class="chart-card fh-subscores-card">
+                <div class="chart-card-header">
+                    <h3><i class="fa-solid fa-sliders"></i> Score Breakdown</h3>
+                    <span class="chart-subtitle">What drives your score</span>
+                </div>
+
+                <div class="fh-subscores-list" id="fhSubscoresList">
+
+                    <div class="fh-subscore-row">
+                        <div class="fh-subscore-top">
+                            <span class="fh-subscore-name">
+                                <i class="fa-solid fa-piggy-bank"></i> Savings Ratio
+                            </span>
+                            <span class="fh-subscore-weight">40%</span>
+                            <span class="fh-subscore-val" id="fhSavingsScore">—</span>
+                        </div>
+                        <div class="fh-subscore-bar">
+                            <div class="fh-subscore-fill" id="fhSavingsFill"></div>
+                        </div>
+                        <p class="fh-subscore-hint" id="fhSavingsHint"></p>
+                    </div>
+
+                    <div class="fh-subscore-row">
+                        <div class="fh-subscore-top">
+                            <span class="fh-subscore-name">
+                                <i class="fa-solid fa-chart-line"></i> Expense Control
+                            </span>
+                            <span class="fh-subscore-weight">30%</span>
+                            <span class="fh-subscore-val" id="fhExpenseScore">—</span>
+                        </div>
+                        <div class="fh-subscore-bar">
+                            <div class="fh-subscore-fill" id="fhExpenseFill"></div>
+                        </div>
+                        <p class="fh-subscore-hint" id="fhExpenseHint"></p>
+                    </div>
+
+                    <div class="fh-subscore-row">
+                        <div class="fh-subscore-top">
+                            <span class="fh-subscore-name">
+                                <i class="fa-solid fa-arrow-trend-up"></i> Income Stability
+                            </span>
+                            <span class="fh-subscore-weight">20%</span>
+                            <span class="fh-subscore-val" id="fhIncomeScore">—</span>
+                        </div>
+                        <div class="fh-subscore-bar">
+                            <div class="fh-subscore-fill" id="fhIncomeFill"></div>
+                        </div>
+                        <p class="fh-subscore-hint" id="fhIncomeHint"></p>
+                    </div>
+
+                    <div class="fh-subscore-row">
+                        <div class="fh-subscore-top">
+                            <span class="fh-subscore-name">
+                                <i class="fa-solid fa-wallet"></i> Budget Adherence
+                            </span>
+                            <span class="fh-subscore-weight">10%</span>
+                            <span class="fh-subscore-val" id="fhBudgetScore">—</span>
+                        </div>
+                        <div class="fh-subscore-bar">
+                            <div class="fh-subscore-fill" id="fhBudgetFill"></div>
+                        </div>
+                        <p class="fh-subscore-hint" id="fhBudgetHint"></p>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- ROW 2: INCOME VS EXPENSES -->
+        <div class="chart-card fh-inc-exp-card">
+            <div class="chart-card-header">
+                <h3><i class="fa-solid fa-scale-balanced"></i> Income vs Expenses</h3>
+                <span class="chart-subtitle" id="fhIncExpLabel">This Month</span>
+            </div>
+
+            <div class="fh-inc-exp-body">
+
+                <div class="fh-inc-exp-stats">
+                    <div class="fh-ie-stat income-stat">
+                        <div class="fh-ie-icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                        <div class="fh-ie-info">
+                            <span>Total Income</span>
+                            <strong id="fhIncome">₹ 0</strong>
+                        </div>
+                    </div>
+                    <div class="fh-ie-vs">VS</div>
+                    <div class="fh-ie-stat expense-stat">
+                        <div class="fh-ie-icon"><i class="fa-solid fa-arrow-trend-down"></i></div>
+                        <div class="fh-ie-info">
+                            <span>Total Expenses</span>
+                            <strong id="fhExpense">₹ 0</strong>
+                        </div>
+                    </div>
+                    <div class="fh-ie-stat balance-stat">
+                        <div class="fh-ie-icon"><i class="fa-solid fa-piggy-bank"></i></div>
+                        <div class="fh-ie-info">
+                            <span>Net Savings</span>
+                            <strong id="fhBalance">₹ 0</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual bar comparison -->
+                <div class="fh-ie-bars">
+                    <div class="fh-ie-bar-row">
+                        <span class="fh-ie-bar-label">Income</span>
+                        <div class="fh-ie-bar-track">
+                            <div class="fh-ie-bar-fill income-fill" id="fhIncomeFill2"></div>
+                        </div>
+                        <span class="fh-ie-bar-pct" id="fhIncomePct">100%</span>
+                    </div>
+                    <div class="fh-ie-bar-row">
+                        <span class="fh-ie-bar-label">Expenses</span>
+                        <div class="fh-ie-bar-track">
+                            <div class="fh-ie-bar-fill expense-fill" id="fhExpenseFill2"></div>
+                        </div>
+                        <span class="fh-ie-bar-pct" id="fhExpensePct">0%</span>
+                    </div>
+                </div>
+
+                <!-- Insight line -->
+                <div class="fh-ie-insight" id="fhIeInsight"></div>
+
+            </div>
+        </div>
+
+
+        <!-- ROW 3: SNAPSHOTS (Budget + Goals) -->
+        <div class="fh-snapshot-row">
+
+            <!-- Budget Planner Snapshot -->
+            <div class="chart-card fh-snapshot-card">
+                <div class="chart-card-header">
+                    <h3><i class="fa-solid fa-wallet"></i> Budget Snapshot</h3>
+                    <a href="budgetPlanner.html" class="fh-view-link">View Planner →</a>
+                </div>
+                <div class="fh-snapshot-body" id="fhBudgetSnapshot">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Savings Goals Snapshot -->
+            <div class="chart-card fh-snapshot-card">
+                <div class="chart-card-header">
+                    <h3><i class="fa-solid fa-piggy-bank"></i> Goals Snapshot</h3>
+                    <a href="savinggoal.html" class="fh-view-link">View Goals →</a>
+                </div>
+                <div class="fh-snapshot-body" id="fhGoalsSnapshot">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- ROW 4: EXPENSE BREAKDOWN (CSS bars) -->
+        <div class="chart-card">
+            <div class="chart-card-header">
+                <h3><i class="fa-solid fa-chart-bar"></i> Expense Breakdown</h3>
+                <span class="chart-subtitle">Top spending categories</span>
+            </div>
+
+            <div class="fh-expense-breakdown" id="fhExpenseBreakdown">
+                <!-- Populated by JS -->
+            </div>
+
+            <div class="fh-empty" id="fhBreakdownEmpty">
+                <i class="fa-solid fa-chart-bar"></i>
+                <p>No expense data yet</p>
+                <span>Add transactions to see your breakdown</span>
+            </div>
+        </div>
+
+
+        <!-- ROW 5: SMART INSIGHTS -->
+        <div class="chart-card">
+            <div class="chart-card-header">
+                <h3><i class="fa-solid fa-lightbulb"></i> Smart Insights</h3>
+                <span class="chart-subtitle" id="fhInsightCount">0 insights</span>
+            </div>
+
+            <div class="fh-insights-list" id="fhInsightsList">
+                <!-- Populated by JS -->
+            </div>
+
+            <div class="fh-empty" id="fhInsightsEmpty">
+                <i class="fa-solid fa-lightbulb"></i>
+                <p>No insights yet</p>
+                <span>Add transactions to get smart insights</span>
+            </div>
+        </div>
+
+
+        <!-- SHARED MODAL (Assignment 6) -->
+        <div class="modal-overlay" id="modalOverlay">
+            <div class="modal-box" id="sharedModal">
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <span class="modal-icon" id="modalIcon">⚠️</span>
+                <h3 class="modal-title" id="modalTitle">Are you sure?</h3>
+                <p class="modal-message" id="modalMessage"></p>
+                <div class="modal-actions">
+                    <button class="modal-cancel-btn" onclick="closeModal()">Cancel</button>
+                    <button class="modal-confirm-btn" id="modalConfirmBtn" onclick="confirmModal()">Confirm</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+<script src="js/dataService.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/financialhealth.js"></script>
+
+</body>
+</html>

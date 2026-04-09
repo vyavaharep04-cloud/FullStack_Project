@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - FinanTra</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="icon" href="image/FinanTra_logo (2).png" type="image/png">
+</head>
+<body>
+
+<div class="layout">
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+
+        <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="sidebar-header">
+            <div class="logo-circle">
+                <img src="image/FinanTra_logo (2).png" alt="Logo">
+            </div>
+            <div class="brand-text">
+                <h2>Finan<span>Tra</span></h2>
+                <p>Welcome, User</p>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Finance Core</p>
+            <a href="dashboard.html" class="active">
+                <i class="fa-solid fa-house"></i>
+                <span class="link-text">Dashboard</span>
+            </a>
+            <a href="addTransaction.html">
+                <i class="fa-solid fa-plus-circle"></i>
+                <span class="link-text">Add Transaction</span>
+            </a>
+            <a href="transactions.html">
+                <i class="fa-solid fa-list"></i>
+                <span class="link-text">Transactions</span>
+            </a>
+            <a href="analytics.html">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span class="link-text">Analytics</span>
+            </a>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Smart Tools</p>
+            <a href="budgetPlanner.html">
+                <i class="fa-solid fa-wallet"></i>
+                <span class="link-text">Budget Planner</span>
+            </a>
+            <a href="savinggoal.html">
+                <i class="fa-solid fa-piggy-bank"></i>
+                <span class="link-text">Savings Goal Planner</span>
+            </a>
+            <a href="financialHealth.html">
+                <i class="fa-solid fa-heart-pulse"></i>
+                <span class="link-text">Financial Health</span>
+            </a>
+            <a href="currencyConverter.html">
+                <i class="fa-solid fa-coins"></i>
+                <span class="link-text">Currency Converter</span>
+            </a>
+            <a href="statement.html">
+                <i class="fa-solid fa-file-invoice"></i>
+                <span class="link-text">SOA Statement</span>
+            </a>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Account Info</p>
+            <a href="profile.html">
+                <i class="fa-solid fa-user"></i>
+                <span class="link-text">Profile</span>
+            </a>
+            <a href="login.html" class="signout-link">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span class="link-text">Sign Out</span>
+            </a>
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main" id="mainContent">
+
+        <!-- TOP BAR -->
+        <div class="top-bar">
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="filters">
+                <button class="filter active" onclick="setFilter(this, 'monthly')">Monthly</button>
+                <button class="filter" onclick="setFilter(this, 'weekly')">Weekly</button>
+                <button class="filter" onclick="setFilter(this, 'yearly')">Yearly</button>
+            </div>
+            <button class="add-btn" onclick="window.location.href='addTransaction.html'">
+                <i class="fa-solid fa-plus"></i> Add Transaction
+            </button>
+        </div>
+
+        <!-- SUMMARY CARDS -->
+        <div class="summary">
+            <div class="card">
+                <h3><i class="fa-solid fa-arrow-trend-up card-icon income-icon"></i> Total Income</h3>
+                <p class="income" id="cardIncome">₹ 0</p>
+            </div>
+            <div class="card">
+                <h3><i class="fa-solid fa-arrow-trend-down card-icon expense-icon"></i> Total Expenses</h3>
+                <p class="expense" id="cardExpense">₹ 0</p>
+            </div>
+            <div class="card">
+                <h3><i class="fa-solid fa-piggy-bank card-icon savings-icon"></i> Net Savings</h3>
+                <p id="cardSavings">₹ 0</p>
+            </div>
+            <div class="card">
+                <h3><i class="fa-solid fa-percent card-icon rate-icon"></i> Savings Rate</h3>
+                <p id="cardRate">0%</p>
+            </div>
+        </div>
+
+        <!-- CHARTS -->
+        <div class="charts">
+            <div class="chart-box">
+                <div class="chart-box-header">
+                    <h3 id="pieChartTitle">Expense Breakdown</h3>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-box">
+                <div class="chart-box-header">
+                    <h3 id="barChartTitle">Expense Overview</h3>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- RECENT TRANSACTIONS -->
+        <div class="transactions">
+            <div class="transactions-header">
+                <h3>Recent Transactions</h3>
+                <a href="transactions.html" class="view-all-btn">View All →</a>
+            </div>
+            <table id="recentTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="recentTbody"></tbody>
+            </table>
+
+            <!-- Empty state -->
+            <div id="noTransactions" style="display:none; text-align:center; padding:30px; color:#aaa;">
+                <i class="fa-solid fa-receipt" style="font-size:32px; margin-bottom:10px; display:block;"></i>
+                <p style="font-size:14px; margin-bottom:10px;">No transactions yet.</p>
+                <a href="addTransaction.html" style="color:#1f82a6; font-size:13px; font-weight:600;">
+                    + Add your first transaction
+                </a>
+            </div>
+        </div>
+
+    </main>
+</div>
+<script src="js/dataService.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

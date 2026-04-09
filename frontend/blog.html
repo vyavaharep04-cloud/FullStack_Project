@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- SEO Meta Tags -->
+<title>Finance Insights | FinanTra — Personal Finance Tips & Guides</title>
+<meta name="description" content="Read practical finance tips, budgeting guides, and money management advice from the FinanTra team. Learn how to track expenses, build savings, and improve financial health.">
+<meta name="keywords" content="personal finance, budgeting tips, money management, expense tracking, savings, FinanTra, financial health">
+<meta name="author" content="FinanTra Team">
+<meta name="robots" content="index, follow">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Finance Insights | FinanTra">
+<meta property="og:description" content="Practical finance tips to manage money, track expenses and improve financial health.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="image/FinanTra_logo (2).png">
+
+<!-- Favicon -->
+<link rel="icon" href="image/FinanTra_logo (2).png" type="image/png">
+
+<!-- Shared navbar styles -->
+<link rel="stylesheet" href="css/landing1.css">
+<!-- Page specific styles -->
+<link rel="stylesheet" href="css/blog.css">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+    <div class="logo-area">
+        <img src="image/FinanTra_logo (2).png" class="logo" alt="FinanTra Logo">
+        <h2 class="brand">Finan<span>Tra</span></h2>
+    </div>
+    <nav class="nav-links" id="navLinks">
+        <a href="landing1.html">Home</a>
+        <a href="landing1.html#features">Features</a>
+        <a href="landing1.html#how">How it Works</a>
+        <a href="landing1.html#insights">Insights</a>
+        <a href="landing1.html#about">About</a>
+        <a href="landing1.html#contact">Contact</a>
+        <a href="login.html" class="login-btn">Login</a>
+    </nav>
+    <div class="menu-btn" id="menuBtn" onclick="toggleMenu()">☰</div>
+</header>
+
+
+<!-- BLOG HERO -->
+<section class="blog-hero">
+    <div class="blog-hero-content">
+        <span class="blog-hero-tag">
+            <i class="fa-solid fa-newspaper"></i> Finance Insights
+        </span>
+        <h1>Smart Money Tips for Everyone</h1>
+        <p>
+            Practical guides on budgeting, saving, and managing your
+            finances — written to help you take control of your money.
+        </p>
+        <div class="blog-hero-stats">
+            <span><i class="fa-solid fa-book-open"></i> 4 Articles</span>
+            <span><i class="fa-solid fa-users"></i> By FinanTra Team</span>
+            <span><i class="fa-solid fa-calendar"></i> 2026</span>
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================
+     ASSIGNMENT 8 — IMAGE GALLERY WITH CATEGORY FILTER
+================================ -->
+<section class="gallery-section" id="gallery">
+
+    <div class="gallery-header">
+        <span class="gallery-label">
+            <i class="fa-solid fa-images"></i> Finance Gallery
+        </span>
+        <h2>Visual Finance Insights</h2>
+        <p>Browse curated visuals across money management topics. Use the filters to explore by category.</p>
+    </div>
+
+    <!-- FILTER BUTTONS -->
+    <div class="gallery-filters" id="galleryFilters">
+        <button class="filter-btn active" data-filter="all" onclick="filterGallery('all', this)">
+            <i class="fa-solid fa-border-all"></i> All
+        </button>
+        <button class="filter-btn" data-filter="tips" onclick="filterGallery('tips', this)">
+            <i class="fa-solid fa-lightbulb"></i> Tips
+        </button>
+        <button class="filter-btn" data-filter="budgeting" onclick="filterGallery('budgeting', this)">
+            <i class="fa-solid fa-wallet"></i> Budgeting
+        </button>
+        <button class="filter-btn" data-filter="savings" onclick="filterGallery('savings', this)">
+            <i class="fa-solid fa-shield-halved"></i> Savings
+        </button>
+        <button class="filter-btn" data-filter="analytics" onclick="filterGallery('analytics', this)">
+            <i class="fa-solid fa-chart-line"></i> Analytics
+        </button>
+    </div>
+
+    <!-- RESULTS COUNT -->
+    <div class="gallery-count" id="galleryCount">
+        Showing <span id="visibleCount">12</span> of 12 images
+    </div>
+
+    <!-- IMAGE GRID -->
+    <div class="gallery-grid" id="galleryGrid">
+
+        <!-- TIPS (4 images) -->
+        <div class="gallery-item" data-category="tips">
+            <div class="gallery-img-wrap">
+                <img src="https://bsmedia.business-standard.com/_media/bs/img/article/2023-08/07/full/1691423166-0846.jpg"
+                     alt="Money management tips — coins in a plant pot" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat"><i class="fa-solid fa-lightbulb"></i> Tips</span>
+                    <p>Track every rupee you spend</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-tips"><i class="fa-solid fa-lightbulb"></i> Tips</span>
+                <span class="gi-title">Track Every Rupee</span>
+            </div>
+        </div>
+
+        <div class="gallery-item" data-category="tips">
+            <div class="gallery-img-wrap">
+                <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&q=80"
+                     alt="50-30-20 budgeting rule concept" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat"><i class="fa-solid fa-lightbulb"></i> Tips</span>
+                    <p>The 50-30-20 rule for smart budgeting</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-tips"><i class="fa-solid fa-lightbulb"></i> Tips</span>
+                <span class="gi-title">The 50-30-20 Rule</span>
+            </div>
+        </div>
+
+        <div class="gallery-item" data-category="tips">
+            <div class="gallery-img-wrap">
+                <img src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=600&q=80"
+                     alt="Pay yourself first — savings habit" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat"><i class="fa-solid fa-lightbulb"></i> Tips</span>
+                    <p>Pay yourself first every month</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-tips"><i class="fa-solid fa-lightbulb"></i> Tips</span>
+                <span class="gi-title">Pay Yourself First</span>
+            </div>
+        </div>
+
+        <div class="gallery-item" data-category="tips">
+            <div class="gallery-img-wrap">
+                <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=600&q=80"
+                     alt="Weekly financial review checklist" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat"><i class="fa-solid fa-lightbulb"></i> Tips</span>
+                    <p>Review your finances every week</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-tips"><i class="fa-solid fa-lightbulb"></i> Tips</span>
+                <span class="gi-title">Weekly Review Habit</span>
+            </div>
+        </div>
+
+        <!-- BUDGETING (3 images) -->
+        <div class="gallery-item" data-category="budgeting">
+            <div class="gallery-img-wrap">
+                <img src="https://thumbs.dreamstime.com/b/personal-finance-icon-set-such-as-cashflow-management-spending-plan-vector-illustration-52702518.jpg?w=768"
+                     alt="Budget planning concept — cashflow management icons" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat gi-overlay-budgeting"><i class="fa-solid fa-wallet"></i> Budgeting</span>
+                    <p>Assign every rupee a purpose</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-budgeting"><i class="fa-solid fa-wallet"></i> Budgeting</span>
+                <span class="gi-title">Cashflow Planning</span>
+            </div>
+        </div>
+
+        <div class="gallery-item" data-category="budgeting">
+            <div class="gallery-img-wrap">
+                <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&q=80"
+                     alt="Budget spreadsheet on laptop" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat gi-overlay-budgeting"><i class="fa-solid fa-wallet"></i> Budgeting</span>
+                    <p>Category-wise spending limits</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-budgeting"><i class="fa-solid fa-wallet"></i> Budgeting</span>
+                <span class="gi-title">Category Limits</span>
+            </div>
+        </div>
+
+        <div class="gallery-item" data-category="budgeting">
+            <div class="gallery-img-wrap">
+                <img src="https://images.unsplash.com/photo-1601597111158-2fceff292cdc?w=600&q=80"
+                     alt="Monthly budget planning with notebook and pen" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat gi-overlay-budgeting"><i class="fa-solid fa-wallet"></i> Budgeting</span>
+                    <p>Plan your monthly expenses ahead</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-budgeting"><i class="fa-solid fa-wallet"></i> Budgeting</span>
+                <span class="gi-title">Monthly Planning</span>
+            </div>
+        </div>
+
+        <!-- SAVINGS (3 images) -->
+        <div class="gallery-item" data-category="savings">
+            <div class="gallery-img-wrap">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqjD7k3FNd9Q9dr1ecseh5usXMyl1Fy9FFeQ&s"
+                     alt="Emergency fund savings jar with coins" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat gi-overlay-savings"><i class="fa-solid fa-shield-halved"></i> Savings</span>
+                    <p>Build a 3–6 month emergency fund</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-savings"><i class="fa-solid fa-shield-halved"></i> Savings</span>
+                <span class="gi-title">Emergency Fund</span>
+            </div>
+        </div>
+
+        <div class="gallery-item" data-category="savings">
+            <div class="gallery-img-wrap">
+                <img src="https://images.unsplash.com/photo-1518458028785-8fbcd101ebb9?w=600&q=80"
+                     alt="Savings goal progress tracking" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat gi-overlay-savings"><i class="fa-solid fa-shield-halved"></i> Savings</span>
+                    <p>Set and track your savings goals</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-savings"><i class="fa-solid fa-shield-halved"></i> Savings</span>
+                <span class="gi-title">Savings Goals</span>
+            </div>
+        </div>
+
+        <div class="gallery-item" data-category="savings">
+            <div class="gallery-img-wrap">
+                <img src="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=600&q=80"
+                     alt="Piggy bank savings concept" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat gi-overlay-savings"><i class="fa-solid fa-shield-halved"></i> Savings</span>
+                    <p>Small savings add up over time</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-savings"><i class="fa-solid fa-shield-halved"></i> Savings</span>
+                <span class="gi-title">Consistent Saving</span>
+            </div>
+        </div>
+
+        <!-- ANALYTICS (2 images) -->
+        <div class="gallery-item" data-category="analytics">
+            <div class="gallery-img-wrap">
+                <img src="https://moneypatrol.com/moneytalk/wp-content/uploads/2023/06/budget185.png"
+                     alt="Expense tracking on phone and laptop — analytics dashboard" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat gi-overlay-analytics"><i class="fa-solid fa-chart-line"></i> Analytics</span>
+                    <p>Visualize your spending patterns</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-analytics"><i class="fa-solid fa-chart-line"></i> Analytics</span>
+                <span class="gi-title">Spending Dashboard</span>
+            </div>
+        </div>
+
+        <div class="gallery-item" data-category="analytics">
+            <div class="gallery-img-wrap">
+                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80"
+                     alt="Data analytics charts for personal finance" loading="lazy">
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-cat gi-overlay-analytics"><i class="fa-solid fa-chart-line"></i> Analytics</span>
+                    <p>Compare your month-over-month trends</p>
+                </div>
+            </div>
+            <div class="gallery-item-info">
+                <span class="gi-badge gi-badge-analytics"><i class="fa-solid fa-chart-line"></i> Analytics</span>
+                <span class="gi-title">Monthly Trends</span>
+            </div>
+        </div>
+
+    </div><!-- /gallery-grid -->
+
+    <!-- NO RESULTS MESSAGE (hidden by default) -->
+    <div class="gallery-empty" id="galleryEmpty" style="display:none;">
+        <i class="fa-solid fa-images"></i>
+        <p>No images found for this category.</p>
+    </div>
+
+</section>
+<!-- END ASSIGNMENT 8 -->
+
+
+<!-- BLOG POSTS -->
+<main class="blog-container" id="blog-articles">
+
+
+    <!-- ================================
+         ARTICLE 1
+    ================================ -->
+    <article class="blog-card" id="article-1" itemscope itemtype="https://schema.org/Article">
+
+        <!-- CARD PREVIEW -->
+        <div class="blog-card-preview">
+
+            <div class="blog-image-wrap">
+                <img
+                    src="https://bsmedia.business-standard.com/_media/bs/img/article/2023-08/07/full/1691423166-0846.jpg"
+                    alt="Coins growing in a plant pot representing money management tips"
+                    class="blog-image"
+                    itemprop="image"
+                    loading="lazy"
+                >
+                <span class="blog-category-badge">
+                    <i class="fa-solid fa-lightbulb"></i> Tips
+                </span>
+            </div>
+
+            <div class="blog-content">
+                <div class="blog-meta-row">
+                    <span class="blog-meta"><i class="fa-solid fa-user-pen"></i> FinanTra Team</span>
+                    <span class="blog-meta"><i class="fa-regular fa-calendar"></i> <time datetime="2026-01">January 2026</time></span>
+                    <span class="blog-meta"><i class="fa-regular fa-clock"></i> 4 min read</span>
+                </div>
+
+                <h2 itemprop="headline">5 Smart Tips to Manage Your Money</h2>
+
+                <p class="blog-preview-text" itemprop="description">
+                    Managing money effectively is one of the most important life skills.
+                    Tracking your income and expenses allows you to understand where your
+                    money goes and helps you make smarter financial decisions.
+                </p>
+
+                <div class="blog-card-footer">
+                    <button class="read-more-btn" onclick="toggleArticle('article-1', this)">
+                        Read More <i class="fa-solid fa-chevron-down btn-arrow"></i>
+                    </button>
+                    <div class="blog-tags">
+                        <span class="blog-tag">💰 Money</span>
+                        <span class="blog-tag">📊 Tracking</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- FULL ARTICLE CONTENT (hidden by default) -->
+        <div class="blog-full-content" id="content-article-1">
+
+            <div class="article-body">
+
+                <p>Money management is not just about saving — it is about making intentional decisions with every rupee you earn. Most people struggle not because they don't earn enough, but because they lack a clear system to manage what they have. Here are five practical tips to get started.</p>
+
+                <h3>1. Track Every Rupee You Spend</h3>
+                <p>The first step to financial control is awareness. Most people are shocked when they see where their money actually goes. Start by recording every expense — no matter how small. Even a ₹20 chai adds up over a month.</p>
+
+                <h3>2. Set a Monthly Budget</h3>
+                <p>A budget is not a restriction — it is a plan. Divide your income into three buckets: essentials (rent, food, bills), savings, and personal spending. The popular 50-30-20 rule suggests 50% for needs, 30% for wants, and 20% for savings.</p>
+
+                <h3>3. Pay Yourself First</h3>
+                <p>Before paying any bills or spending on anything, transfer a fixed amount to your savings account. This ensures you save consistently rather than saving whatever is left at month end — which is usually nothing.</p>
+
+                <h3>4. Avoid Impulse Purchases</h3>
+                <p>Before buying anything that is not in your plan, wait 24 hours. This simple pause eliminates most impulse purchases. Ask yourself — do I need this, or do I just want it right now?</p>
+
+                <h3>5. Review Your Finances Weekly</h3>
+                <p>Spend 10 minutes every week reviewing your income and expenses. Are you on track? Did you overspend in any category? Weekly reviews help you catch problems early before they become month-end surprises.</p>
+
+                <ul class="article-list">
+                    <li>Use an expense tracker like FinanTra to automate recording</li>
+                    <li>Set spending limits per category each month</li>
+                    <li>Celebrate small wins — saving ₹500 extra is progress</li>
+                    <li>Involve your family in financial planning for better results</li>
+                </ul>
+
+                <!-- KEY TAKEAWAYS BOX -->
+                <div class="key-takeaways">
+                    <div class="takeaways-header">
+                        <i class="fa-solid fa-lightbulb"></i> Key Takeaways
+                    </div>
+                    <ul>
+                        <li><i class="fa-solid fa-circle-check"></i> Track every expense — awareness is the first step</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Follow the 50-30-20 rule for budgeting</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Save before you spend, not after</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Review your finances at least once a week</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Use FinanTra to make tracking effortless</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+    </article>
+
+
+    <!-- ================================
+         ARTICLE 2
+    ================================ -->
+    <article class="blog-card" id="article-2" itemscope itemtype="https://schema.org/Article">
+
+        <div class="blog-card-preview">
+
+            <div class="blog-image-wrap">
+                <img
+                    src="https://thumbs.dreamstime.com/b/personal-finance-icon-set-such-as-cashflow-management-spending-plan-vector-illustration-52702518.jpg?w=768"
+                    alt="Budget planning notebook with calculator and glasses"
+                    class="blog-image"
+                    itemprop="image"
+                    loading="lazy"
+                >
+                <span class="blog-category-badge badge-green">
+                    <i class="fa-solid fa-wallet"></i> Budgeting
+                </span>
+            </div>
+
+            <div class="blog-content">
+                <div class="blog-meta-row">
+                    <span class="blog-meta"><i class="fa-solid fa-user-pen"></i> FinanTra Team</span>
+                    <span class="blog-meta"><i class="fa-regular fa-calendar"></i> <time datetime="2026-02">February 2026</time></span>
+                    <span class="blog-meta"><i class="fa-regular fa-clock"></i> 4 min read</span>
+                </div>
+
+                <h2 itemprop="headline">Why Budgeting is Important</h2>
+
+                <p class="blog-preview-text" itemprop="description">
+                    Budgeting helps you control spending and prioritize financial goals.
+                    Without a proper budget, it becomes difficult to track where money
+                    is being spent each month.
+                </p>
+
+                <div class="blog-card-footer">
+                    <button class="read-more-btn" onclick="toggleArticle('article-2', this)">
+                        Read More <i class="fa-solid fa-chevron-down btn-arrow"></i>
+                    </button>
+                    <div class="blog-tags">
+                        <span class="blog-tag">📅 Budget</span>
+                        <span class="blog-tag">🎯 Goals</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- FULL ARTICLE CONTENT -->
+        <div class="blog-full-content" id="content-article-2">
+
+            <div class="article-body">
+
+                <p>A budget is arguably the most powerful financial tool available to anyone — and it costs nothing to create. Yet most people avoid budgeting because they associate it with restriction. The truth is, a budget gives you freedom — freedom to spend without guilt because you know your bills are covered and your savings are growing.</p>
+
+                <h3>Why Most People Fail Without a Budget</h3>
+                <p>Without a budget, spending is driven by emotion and availability rather than intention. You spend because money is in your account, not because the purchase was planned. This leads to a pattern where people run out of money before month end and wonder where it all went.</p>
+
+                <h3>Benefits of Budgeting</h3>
+                <ul class="article-list">
+                    <li>You always know how much you can afford to spend in any category</li>
+                    <li>You stop living paycheck to paycheck and start building a buffer</li>
+                    <li>Financial stress reduces significantly when you have a plan</li>
+                    <li>You reach financial goals — savings, travel, investment — faster</li>
+                    <li>You make conscious spending decisions instead of reactive ones</li>
+                </ul>
+
+                <h3>How to Start a Budget Today</h3>
+                <p>Start simple. List your monthly income. Then list your fixed expenses — rent, electricity, phone bill. Whatever remains is your flexible budget for food, shopping, entertainment, and savings. The key is to assign every rupee a purpose before the month begins, not after.</p>
+
+                <p>Use FinanTra's Budget Planner to set category-wise limits and track how much you have left in each category throughout the month. When you approach a limit, FinanTra alerts you so you can adjust before overspending.</p>
+
+                <!-- KEY TAKEAWAYS BOX -->
+                <div class="key-takeaways">
+                    <div class="takeaways-header">
+                        <i class="fa-solid fa-lightbulb"></i> Key Takeaways
+                    </div>
+                    <ul>
+                        <li><i class="fa-solid fa-circle-check"></i> A budget gives freedom, not restriction</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Assign every rupee a purpose before month starts</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Budgeting reduces financial stress significantly</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Start simple — income minus fixed expenses equals flexible budget</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Use FinanTra Budget Planner to stay within limits</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+    </article>
+
+
+    <!-- ================================
+         ARTICLE 3
+    ================================ -->
+    <article class="blog-card" id="article-3" itemscope itemtype="https://schema.org/Article">
+
+        <div class="blog-card-preview">
+
+            <div class="blog-image-wrap">
+                <img
+                    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqjD7k3FNd9Q9dr1ecseh5usXMyl1Fy9FFeQ&s"
+                    alt="Emergency fund savings jar with coins representing financial security"
+                    class="blog-image"
+                    itemprop="image"
+                    loading="lazy"
+                >
+                <span class="blog-category-badge badge-orange">
+                    <i class="fa-solid fa-shield-halved"></i> Savings
+                </span>
+            </div>
+
+            <div class="blog-content">
+                <div class="blog-meta-row">
+                    <span class="blog-meta"><i class="fa-solid fa-user-pen"></i> FinanTra Team</span>
+                    <span class="blog-meta"><i class="fa-regular fa-calendar"></i> <time datetime="2026-03">March 2026</time></span>
+                    <span class="blog-meta"><i class="fa-regular fa-clock"></i> 5 min read</span>
+                </div>
+
+                <h2 itemprop="headline">Building an Emergency Fund</h2>
+
+                <p class="blog-preview-text" itemprop="description">
+                    An emergency fund protects you from unexpected financial problems
+                    such as medical expenses, job loss, or urgent repairs that can
+                    otherwise derail your financial plans.
+                </p>
+
+                <div class="blog-card-footer">
+                    <button class="read-more-btn" onclick="toggleArticle('article-3', this)">
+                        Read More <i class="fa-solid fa-chevron-down btn-arrow"></i>
+                    </button>
+                    <div class="blog-tags">
+                        <span class="blog-tag">🛡️ Emergency</span>
+                        <span class="blog-tag">💵 Savings</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- FULL ARTICLE CONTENT -->
+        <div class="blog-full-content" id="content-article-3">
+
+            <div class="article-body">
+
+                <p>Life is unpredictable. A medical emergency, sudden job loss, car breakdown, or urgent home repair can arrive without warning and completely derail your finances. An emergency fund is your financial cushion — the buffer that prevents one bad event from turning into a debt spiral.</p>
+
+                <h3>Why an Emergency Fund is Non-Negotiable</h3>
+                <p>Without an emergency fund, any unexpected expense forces you to either borrow money, use a credit card, or liquidate investments at the wrong time. All of these options cost you more in the long run. An emergency fund means you handle crises with confidence rather than panic.</p>
+
+                <h3>What Counts as a True Emergency?</h3>
+                <ul class="article-list">
+                    <li>Medical expenses not covered by insurance</li>
+                    <li>Job loss or sudden income disruption</li>
+                    <li>Urgent home or vehicle repairs</li>
+                    <li>Emergency travel for family situations</li>
+                    <li>Essential appliance breakdown (fridge, water heater)</li>
+                </ul>
+
+                <p>Note — a sale, a vacation, or a new phone is not an emergency. Keep your emergency fund only for genuine unexpected needs.</p>
+
+                <h3>How Much Should You Save?</h3>
+                <p>Financial experts recommend saving 3 to 6 months of your essential living expenses. Start small — even ₹5,000 in an emergency fund is better than nothing. Set a monthly savings goal and automate it so it happens without willpower.</p>
+
+                <h3>How to Build It Consistently</h3>
+                <p>Open a separate savings account dedicated only to emergencies. Transfer a fixed amount every month — even ₹500 to ₹1,000 — and do not touch it unless it is a real emergency. Track your progress with FinanTra's savings tracker to stay motivated.</p>
+
+                <!-- KEY TAKEAWAYS BOX -->
+                <div class="key-takeaways">
+                    <div class="takeaways-header">
+                        <i class="fa-solid fa-lightbulb"></i> Key Takeaways
+                    </div>
+                    <ul>
+                        <li><i class="fa-solid fa-circle-check"></i> Emergency fund prevents debt during crisis situations</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Target 3 to 6 months of essential living expenses</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Start with any amount — even ₹1,000 matters</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Keep it in a separate account — don't mix with daily savings</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Only use it for genuine unexpected emergencies</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+    </article>
+
+
+    <!-- ================================
+         ARTICLE 4
+    ================================ -->
+    <article class="blog-card" id="article-4" itemscope itemtype="https://schema.org/Article">
+
+        <div class="blog-card-preview">
+
+            <div class="blog-image-wrap">
+                <img
+                    src="https://moneypatrol.com/moneytalk/wp-content/uploads/2023/06/budget185.png"
+                    alt="Person tracking expenses on phone and laptop for financial management"
+                    class="blog-image"
+                    itemprop="image"
+                    loading="lazy"
+                >
+                <span class="blog-category-badge badge-purple">
+                    <i class="fa-solid fa-chart-line"></i> Analytics
+                </span>
+            </div>
+
+            <div class="blog-content">
+                <div class="blog-meta-row">
+                    <span class="blog-meta"><i class="fa-solid fa-user-pen"></i> FinanTra Team</span>
+                    <span class="blog-meta"><i class="fa-regular fa-calendar"></i> <time datetime="2026-03">March 2026</time></span>
+                    <span class="blog-meta"><i class="fa-regular fa-clock"></i> 4 min read</span>
+                </div>
+
+                <h2 itemprop="headline">How to Track Expenses Like a Pro</h2>
+
+                <p class="blog-preview-text" itemprop="description">
+                    Expense tracking is the foundation of good financial health.
+                    Knowing exactly where your money goes every month is the
+                    first step toward making meaningful improvements.
+                </p>
+
+                <div class="blog-card-footer">
+                    <button class="read-more-btn" onclick="toggleArticle('article-4', this)">
+                        Read More <i class="fa-solid fa-chevron-down btn-arrow"></i>
+                    </button>
+                    <div class="blog-tags">
+                        <span class="blog-tag">📈 Analytics</span>
+                        <span class="blog-tag">🔍 Tracking</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- FULL ARTICLE CONTENT -->
+        <div class="blog-full-content" id="content-article-4">
+
+            <div class="article-body">
+
+                <p>Tracking expenses sounds tedious — but it is the single most impactful financial habit you can build. Once you know exactly where every rupee goes, you gain the power to change your financial story. The problem is most people track inconsistently or stop after a week. Here is how to do it properly.</p>
+
+                <h3>Common Mistakes People Make</h3>
+                <ul class="article-list">
+                    <li>Recording expenses only at month end from memory — inaccurate and incomplete</li>
+                    <li>Tracking big expenses but ignoring small daily ones like snacks and auto fares</li>
+                    <li>Using too complicated a system and giving up after a few days</li>
+                    <li>Not categorizing expenses — raw numbers tell you little</li>
+                    <li>Tracking but never reviewing — data without analysis is useless</li>
+                </ul>
+
+                <h3>Best Practices for Expense Tracking</h3>
+                <ul class="article-list">
+                    <li>Record expenses immediately — right after spending, not later</li>
+                    <li>Categorize every expense — food, transport, bills, entertainment</li>
+                    <li>Review your spending weekly, not just monthly</li>
+                    <li>Look for patterns — which category consistently overshoots?</li>
+                    <li>Set category-wise limits and track progress against them</li>
+                </ul>
+
+                <h3>How FinanTra Makes Tracking Effortless</h3>
+                <p>FinanTra is designed to make expense tracking fast and visual. Add a transaction in seconds with category, payment method, and notes. The analytics dashboard then automatically shows you pie charts of spending by category and bar charts comparing weeks and months.</p>
+
+                <p>The monthly comparison tool helps you see whether you are improving over time. Are you spending less on dining out compared to last month? Is your savings rate going up? FinanTra answers these questions visually so you do not have to do manual calculations.</p>
+
+                <!-- KEY TAKEAWAYS BOX -->
+                <div class="key-takeaways">
+                    <div class="takeaways-header">
+                        <i class="fa-solid fa-lightbulb"></i> Key Takeaways
+                    </div>
+                    <ul>
+                        <li><i class="fa-solid fa-circle-check"></i> Record expenses immediately — not from memory later</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Always categorize — raw numbers are not useful alone</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Review weekly to catch overspending early</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Look for patterns across months to improve habits</li>
+                        <li><i class="fa-solid fa-circle-check"></i> Use FinanTra's dashboard to visualize and understand your data</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+    </article>
+
+
+</main>
+
+
+<!-- CTA SECTION -->
+<section class="blog-cta">
+    <div class="blog-cta-card">
+        <i class="fa-solid fa-rocket cta-icon"></i>
+        <h3>Ready to take control of your finances?</h3>
+        <p>Start tracking your income and expenses with FinanTra today — completely free.</p>
+        <div class="cta-buttons">
+            <a href="createAcc.html" class="cta-primary">
+                <i class="fa-solid fa-user-plus"></i> Get Started Free
+            </a>
+            <a href="landing.html" class="cta-secondary">
+                <i class="fa-solid fa-house"></i> Back to Home
+            </a>
+        </div>
+    </div>
+</section>
+
+
+<!-- FOOTER -->
+<footer class="footer">
+    <p>© 2026 FinanTra | Track • Save • Grow</p>
+</footer>
+
+<script src="js/landing1.js"></script>
+<script src="js/blog.js"></script>
+
+</body>
+</html>

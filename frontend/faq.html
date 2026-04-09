@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FAQ - FinanTra</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="image/FinanTra_logo (2).png" type="image/png">
+    <link rel="stylesheet" href="css/landing1.css">
+    <link rel="stylesheet" href="css/faq.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <header class="navbar">
+        <div class="logo-area">
+            <img src="image/FinanTra_logo (2).png" class="logo" alt="FinanTra Logo">
+            <h2 class="brand">Finan<span>Tra</span></h2>
+        </div>
+        <nav class="nav-links" id="navLinks">
+            <a href="landing1.html">Home</a>
+            <a href="landing1.html#features">Features</a>
+            <a href="landing1.html#how">How it Works</a>
+            <a href="landing1.html#insights">Insights</a>
+            <a href="landing1.html#about">About</a>
+            <a href="landing1.html#contact">Contact</a>
+            <a href="login.html" class="login-btn">Login</a>
+        </nav>
+        <div class="menu-btn" id="menuBtn" onclick="toggleMenu()">☰</div>
+    </header>
+
+
+    <!-- FAQ HERO -->
+    <section class="faq-hero">
+        <h1>Frequently Asked Questions</h1>
+        <p>Find answers to common questions about using FinanTra.</p>
+
+        <!-- SEARCH BAR -->
+        <div class="faq-search">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input
+                type="text"
+                id="faqSearch"
+                placeholder="Search questions..."
+                oninput="filterBySearch()"
+            >
+        </div>
+    </section>
+
+
+    <!-- CATEGORY FILTER PILLS -->
+    <section class="faq-filters">
+        <button class="faq-pill active" onclick="filterCategory('all', this)">
+            <i class="fa-solid fa-border-all"></i> All
+        </button>
+        <button class="faq-pill" onclick="filterCategory('general', this)">
+            <i class="fa-solid fa-circle-info"></i> General
+        </button>
+        <button class="faq-pill" onclick="filterCategory('account', this)">
+            <i class="fa-solid fa-user-circle"></i> Account
+        </button>
+        <button class="faq-pill" onclick="filterCategory('features', this)">
+            <i class="fa-solid fa-star"></i> Features
+        </button>
+        <button class="faq-pill" onclick="filterCategory('security', this)">
+            <i class="fa-solid fa-shield-halved"></i> Security
+        </button>
+    </section>
+
+
+    <!-- FAQ SECTIONS -->
+    <section class="faq-main">
+
+        <!-- NO RESULTS MESSAGE -->
+        <div class="no-results" id="noResults">
+            <i class="fa-solid fa-face-frown"></i>
+            <p>No questions found. Try a different search.</p>
+        </div>
+
+        <!-- GENERAL -->
+        <div class="faq-section" id="section-general" data-category="general">
+            <h2 class="faq-section-title">
+                <i class="fa-solid fa-circle-info"></i> General
+            </h2>
+
+            <div class="faq-item" data-question="What is FinanTra">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>What is FinanTra?</span>
+                    <i class="fa-solid fa-chevron-down faq-arrow"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>FinanTra is a personal finance management web application that helps users track income, monitor expenses, and analyze financial habits. It provides simple tools to help individuals make smarter financial decisions.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-question="Is FinanTra free to use">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>Is FinanTra free to use?</span>
+                    <i class="fa-solid fa-chevron-down faq-arrow"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Yes, FinanTra is completely free for users to track their personal finances and manage transactions. All core features including expense tracking, analytics, and budgeting tools are available at no cost.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-question="Who is FinanTra designed for">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>Who is FinanTra designed for?</span>
+                    <i class="fa-solid fa-chevron-down faq-arrow"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>FinanTra is designed for anyone who wants to take control of their finances — students, working professionals, or anyone looking to develop better financial habits. No finance expertise is required.</p>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- ACCOUNT -->
+        <div class="faq-section" id="section-account" data-category="account">
+            <h2 class="faq-section-title">
+                <i class="fa-solid fa-user-circle"></i> Account
+            </h2>
+
+            <div class="faq-item" data-question="Can I use FinanTra without creating an account">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>Can I use FinanTra without creating an account?</span>
+                    <i class="fa-solid fa-chevron-down faq-arrow"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Yes. Users can explore FinanTra using the guest option and view the dashboard. However, some features such as saving transactions and downloading reports require an account to store data securely.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-question="How do I reset my password">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>How do I reset my password?</span>
+                    <i class="fa-solid fa-chevron-down faq-arrow"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>You can reset your password by clicking the "Forgot Password" link on the login page. Enter your registered email address and a password reset link will be sent to you.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-question="Can I use FinanTra on mobile">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>Can I use FinanTra on mobile?</span>
+                    <i class="fa-solid fa-chevron-down faq-arrow"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Yes. FinanTra is fully responsive and works on all screen sizes including mobile phones and tablets. The interface automatically adjusts for the best experience on your device.</p>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- FEATURES -->
+        <div class="faq-section" id="section-features" data-category="features">
+            <h2 class="faq-section-title">
+                <i class="fa-solid fa-star"></i> Features
+            </h2>
+
+            <div class="faq-item" data-question="What features does FinanTra provide">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>What features does FinanTra provide?</span>
+                    <i class="fa-solid fa-chevron-down faq-arrow"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>FinanTra provides a range of tools including:</p>
+                    <ul>
+                        <li>💳 Expense and income tracking with categories</li>
+                        <li>📊 Analytics dashboard with charts</li>
+                        <li>📅 Budget Planner to set monthly limits</li>
+                        <li>📈 Financial Health score</li>
+                        <li>📄 SOA Statement download</li>
+                        <li>💱 Currency Converter</li>
+                        <li>📆 Monthly Comparison tool</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="faq-item" data-question="How does the analytics dashboard work">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>How does the analytics dashboard work?</span>
+                    <i class="fa-solid fa-chevron-down faq-arrow"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>The analytics dashboard shows your financial data through visual charts. You can switch between Weekly, Monthly, and Yearly views. The pie chart shows expense breakdown by category while the bar chart compares income vs expenses over time.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-question="What is the SOA Statement feature">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>What is the SOA Statement feature?</span>
+                    <i class="fa-solid fa-chevron-down faq-arrow"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>SOA stands for Statement of Account. This feature allows you to generate and download a detailed summary of all your transactions for a selected time period, similar to a bank statement. It helps you keep records of your financial activity.</p>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- SECURITY -->
+        <div class="faq-section" id="section-security" data-category="security">
+            <h2 class="faq-section-title">
+                <i class="fa-solid fa-shield-halved"></i> Security
+            </h2>
+
+            <div class="faq-item" data-question="Is my financial data secure">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>Is my financial data secure?</span>
+                    <i class="fa-solid fa-chevron-down faq-arrow"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>FinanTra is designed to keep your financial data private and secure. User data is stored only for the purpose of providing the service and is not shared with third parties.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-question="Where is my data stored">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>Where is my data stored?</span>
+                    <i class="fa-solid fa-chevron-down faq-arrow"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Currently, FinanTra stores transaction data locally in your browser using localStorage. This means your data stays on your device. When the backend is fully integrated, data will be stored securely on a server with MongoDB.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-question="Can other users see my data">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>Can other users see my data?</span>
+                    <i class="fa-solid fa-chevron-down faq-arrow"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>No. Each user's financial data is private and accessible only to them. Other users cannot view your transactions, categories, or account information. Your data belongs only to you.</p>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- STILL NEED HELP -->
+    <section class="faq-help">
+        <div class="faq-help-card">
+            <i class="fa-solid fa-headset help-icon"></i>
+            <h3>Still have questions?</h3>
+            <p>Can't find what you're looking for? Reach out to us directly.</p>
+            <a href="landing1.html#contact" class="help-btn">
+                <i class="fa-solid fa-envelope"></i> Contact Us
+            </a>
+        </div>
+    </section>
+
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <p>© 2026 FinanTra | Track • Save • Grow</p>
+    </footer>
+
+    <script src="js/landing1.js"></script>
+    <script src="js/faq.js"></script>
+
+</body>
+</html>

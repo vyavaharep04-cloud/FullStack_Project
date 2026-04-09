@@ -1,0 +1,22 @@
+<svg 
+  xmlns="http://www.w3.org/2000/svg" 
+  viewBox="0 0 500 300"
+  preserveAspectRatio="xMidYMid meet">
+
+  <polyline
+    points="
+      20,260
+      80,190
+      140,210
+      200,130
+      260,160
+      320,100
+      380,120
+      440,60
+    "
+    fill="none"
+    stroke="rgba(0,150,136,0.35)"
+    stroke-width="6"
+    stroke-linecap="round"
+    stroke-linejoin="round" />
+</svg>

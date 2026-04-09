@@ -1,0 +1,45 @@
+<svg width="560" height="360" viewBox="0 0 560 360" xmlns="http://www.w3.org/2000/svg">
+
+<!-- Background -->
+
+<rect width="560" height="360" rx="20" fill="#e9f7fb"/>
+
+<!-- Main Dashboard -->
+
+<rect x="80" y="70" width="400" height="230" rx="16" fill="#ffffff" stroke="#d9e7ec"/>
+
+<!-- Balance Card -->
+
+<rect x="100" y="90" width="360" height="60" rx="12" fill="#eaf9fc"/>
+<text x="120" y="115" font-size="15" fill="#1f82a6">Total Balance</text>
+<text x="120" y="140" font-size="26" font-weight="bold" fill="#0f91b5">₹52,400</text>
+
+<!-- Income Chart Card -->
+
+<rect x="100" y="170" width="160" height="90" rx="10" fill="#f6fcfe"/>
+<text x="110" y="190" font-size="13" fill="#1f82a6">Income</text>
+
+<polyline 
+points="110,240 135,220 160,225 185,200 210,210 240,195"
+fill="none"
+stroke="#0f91b5"
+stroke-width="3"
+/>
+
+<!-- Expense Chart Card -->
+
+<rect x="280" y="170" width="180" height="90" rx="10" fill="#f6fcfe"/>
+<text x="290" y="190" font-size="13" fill="#1f82a6">Expenses</text>
+
+<rect x="300" y="220" width="16" height="30" fill="#0f91b5"/>
+<rect x="330" y="205" width="16" height="45" fill="#0f91b5"/>
+<rect x="360" y="215" width="16" height="35" fill="#0f91b5"/>
+<rect x="390" y="195" width="16" height="55" fill="#0f91b5"/>
+
+<!-- Floating Small Card -->
+
+<rect x="360" y="40" width="140" height="60" rx="12" fill="#ffffff" stroke="#d9e7ec"/>
+<text x="380" y="70" font-size="14" fill="#1f82a6">Savings</text>
+<text x="380" y="90" font-size="18" fill="#28a745">+12%</text>
+
+</svg>

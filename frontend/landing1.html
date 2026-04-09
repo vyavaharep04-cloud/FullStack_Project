@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinanTra - Personal Finance Tracker</title>
+  <link rel="stylesheet" href="css/landing1.css">
+  <link rel="icon" href="image/FinanTra_logo (2).png" type="image/png">
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="logo-area">
+      <img src="image/FinanTra_logo (2).png" class="logo" alt="FinanTra Logo">
+      <h2 class="brand">Finan<span>Tra</span></h2>
+    </div>
+
+    <nav class="nav-links" id="navLinks">
+      <a href="#home">Home</a>
+      <a href="#features">Features</a>
+      <a href="#how">How it Works</a>
+      <a href="#insights">Insights</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+      <a href="login.html" class="login-btn">Login</a>
+    </nav>
+
+    <div class="menu-btn" id="menuBtn" onclick="toggleMenu()">☰</div>
+  </header>
+
+
+  <!-- HERO SECTION -->
+  <section class="hero" id="home">
+    <div class="hero-text">
+      <h1>Manage Your Money Smartly with FinanTra</h1>
+      <p>Track income, manage expenses, and understand your financial habits with the FinanTra personal finance tracker.</p>
+      <div class="hero-buttons">
+        <a href="createAcc.html" class="primary-btn">Get Started</a>
+        <a href="login.html" class="secondary-btn">Login</a>
+      </div>
+    </div>
+    <div class="hero-image">
+      <img src="image/finantra.svg" alt="Finance Dashboard Preview">
+    </div>
+  </section>
+
+
+  <!-- FEATURES -->
+  <section class="features" id="features">
+    <h2 class="section-title">Features</h2>
+    <div class="features-grid">
+
+      <div class="feature-card">
+        <div class="feature-icon">💳</div>
+        <h3>Expense Tracking</h3>
+        <p>Track daily income and expenses with categorized transactions.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Analytics Dashboard</h3>
+        <p>Visualize spending patterns using charts and financial insights.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📅</div>
+        <h3>Budget Planner</h3>
+        <p>Set monthly budgets and monitor spending effectively.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📈</div>
+        <h3>Financial Health</h3>
+        <p>Understand your financial behavior and improve savings.</p>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- HOW IT WORKS -->
+  <section class="how-it-works" id="how">
+    <h2 class="section-title">How FinanTra Works</h2>
+    <div class="steps-container">
+
+      <div class="step">
+        <div class="step-icon">➕</div>
+        <h3>Add Transactions</h3>
+        <p>Record your income and expenses quickly using simple forms.</p>
+      </div>
+
+      <div class="arrow">➜</div>
+
+      <div class="step">
+        <div class="step-icon">📊</div>
+        <h3>Analyze Spending</h3>
+        <p>View charts and analytics to understand where your money goes.</p>
+      </div>
+
+      <div class="arrow">➜</div>
+
+      <div class="step">
+        <div class="step-icon">📈</div>
+        <h3>Improve Financial Health</h3>
+        <p>Plan budgets and track your financial progress effectively.</p>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- INSIGHTS -->
+  <section class="insights" id="insights">
+    <h2 class="section-title">Financial Insights</h2>
+    <div class="insights-container">
+
+      <div class="insight-card">
+        <div class="insight-icon">📰</div>
+        <h3>Finance Blog</h3>
+        <p>Read helpful articles about saving money, budgeting, and financial planning.</p>
+        <a href="blog.html" class="insight-btn">Read Articles</a>
+      </div>
+
+      <div class="insight-card">
+        <div class="insight-icon">❓</div>
+        <h3>FAQ & Help</h3>
+        <p>Find answers to common questions about using FinanTra and managing finances.</p>
+        <a href="faq.html" class="insight-btn">View FAQ</a>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ABOUT -->
+  <section class="about" id="about">
+    <h2 class="section-title">About FinanTra</h2>
+    <p class="about-intro">
+      FinanTra is a personal finance management web application designed to help users track their income,
+      monitor expenses, and understand their financial habits. The platform provides simple tools like
+      transaction tracking, analytics dashboards, and budgeting features to help individuals make smarter
+      financial decisions.
+    </p>
+
+    <div class="about-grid">
+
+      <div class="about-card">
+        <h3>Problem</h3>
+        <p>Many people struggle to manage their finances effectively because they lack a clear view of their income, spending patterns, and savings. Without proper tracking tools, financial planning becomes difficult.</p>
+      </div>
+
+      <div class="about-card">
+        <h3>Our Solution</h3>
+        <p>FinanTra provides a simple and intuitive platform where users can record transactions, analyze spending patterns through visual dashboards, and plan their budgets effectively.</p>
+      </div>
+
+      <div class="about-card">
+        <h3>Technology</h3>
+        <p>Frontend built with HTML, CSS, and JavaScript for an interactive UI. Backend integration with Node.js and MongoDB is planned for full-stack functionality.</p>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- CONTACT -->
+  <section class="contact" id="contact">
+    <h2 class="section-title">Contact</h2>
+    <form class="contact-form" id="contactForm">
+      <input type="text" id="contactName" placeholder="Your Name" required>
+      <input type="email" id="contactEmail" placeholder="Your Email" required>
+      <textarea id="contactMessage" placeholder="Your Message" rows="5"></textarea>
+      <div class="char-counter">
+      <span id="charCount">0</span> / 300 characters
+      </div>
+      <button type="submit">Send Message</button>
+    </form>
+  </section>
+
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>© 2026 FinanTra | Track • Save • Grow</p>
+  </footer>
+
+  <script src="js/landing1.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Transactions - FinanTra</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="image/FinanTra_logo (2).png" type="image/png">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/transactions.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div class="layout">
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+
+        <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="sidebar-header">
+            <div class="logo-circle">
+                <img src="image/FinanTra_logo (2).png" alt="Logo">
+            </div>
+            <div class="brand-text">
+                <h2>Finan<span>Tra</span></h2>
+                <p>Welcome, User</p>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Finance Core</p>
+            <a href="dashboard.html">
+                <i class="fa-solid fa-house"></i>
+                <span class="link-text">Dashboard</span>
+            </a>
+            <a href="addTransaction.html">
+                <i class="fa-solid fa-plus-circle"></i>
+                <span class="link-text">Add Transaction</span>
+            </a>
+            <a href="transactions.html" class="active">
+                <i class="fa-solid fa-list"></i>
+                <span class="link-text">Transactions</span>
+            </a>
+            <a href="analytics.html">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span class="link-text">Analytics</span>
+            </a>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Smart Tools</p>
+            <a href="budgetPlanner.html">
+                <i class="fa-solid fa-wallet"></i>
+                <span class="link-text">Budget Planner</span>
+            </a>
+            <a href="savinggoal.html">
+                <i class="fa-solid fa-piggy-bank"></i>
+                <span class="link-text">Savings Goal Planner</span>
+            </a>
+            <a href="financialHealth.html">
+                <i class="fa-solid fa-heart-pulse"></i>
+                <span class="link-text">Financial Health</span>
+            </a>
+            <a href="currencyConverter.html">
+                <i class="fa-solid fa-coins"></i>
+                <span class="link-text">Currency Converter</span>
+            </a>
+            <a href="statement.html">
+                <i class="fa-solid fa-file-invoice"></i>
+                <span class="link-text">SOA Statement</span>
+            </a>
+        </div>
+
+        <div class="nav-group">
+            <p class="group-title">Account Info</p>
+            <a href="profile.html">
+                <i class="fa-solid fa-user"></i>
+                <span class="link-text">Profile</span>
+            </a>
+            <a href="login.html" class="signout-link">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span class="link-text">Sign Out</span>
+            </a>
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main" id="mainContent">
+
+        <!-- TOP BAR -->
+        <div class="top-bar">
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="page-header-text">
+                <h1>Transactions</h1>
+                <p class="subtitle">Your complete financial history</p>
+            </div>
+            <a href="addTransaction.html" class="add-new-btn">
+                <i class="fa-solid fa-plus"></i> Add New
+            </a>
+        </div>
+
+
+        <!-- SUMMARY CARDS -->
+        <div class="txn-summary">
+            <div class="txn-summary-card income-card">
+                <div class="summary-icon">
+                    <i class="fa-solid fa-arrow-trend-up"></i>
+                </div>
+                <div class="summary-info">
+                    <span>Total Income</span>
+                    <strong id="summaryIncome">₹ 0</strong>
+                </div>
+            </div>
+            <div class="txn-summary-card expense-card">
+                <div class="summary-icon">
+                    <i class="fa-solid fa-arrow-trend-down"></i>
+                </div>
+                <div class="summary-info">
+                    <span>Total Expenses</span>
+                    <strong id="summaryExpense">₹ 0</strong>
+                </div>
+            </div>
+            <div class="txn-summary-card net-card">
+                <div class="summary-icon">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                </div>
+                <div class="summary-info">
+                    <span>Net Balance</span>
+                    <strong id="summaryNet">₹ 0</strong>
+                </div>
+            </div>
+            <div class="txn-summary-card count-card">
+                <div class="summary-icon">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+                <div class="summary-info">
+                    <span>Transactions</span>
+                    <strong id="summaryCount">0</strong>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- CONTROLS BAR -->
+        <div class="controls-bar">
+
+            <!-- Search -->
+            <div class="search-wrap">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search category or notes..."
+                    oninput="applyFilters()"
+                >
+            </div>
+
+            <!-- Type Filter -->
+            <select id="typeFilter" onchange="applyFilters()" class="filter-select">
+                <option value="all">All Types</option>
+                <option value="Income">Income</option>
+                <option value="Expense">Expense</option>
+            </select>
+
+            <!-- Date Filter -->
+            <select id="dateFilter" onchange="applyFilters()" class="filter-select">
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month" selected>This Month</option>
+            </select>
+
+            <!-- Sort -->
+            <select id="sortSelect" onchange="applyFilters()" class="filter-select">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="amount-high">Amount ↓ High</option>
+                <option value="amount-low">Amount ↑ Low</option>
+            </select>
+
+        </div>
+
+
+        <!-- TRANSACTION LIST -->
+        <div class="txn-list" id="txnList"></div>
+
+
+        <!-- LOAD MORE BUTTON -->
+        <div class="load-more-wrap" id="loadMoreWrap">
+            <button class="load-more-btn" id="loadMoreBtn" onclick="loadMore()">
+                <i class="fa-solid fa-chevron-down"></i> Load More
+            </button>
+        </div>
+
+
+        <!-- EMPTY STATE -->
+        <div class="empty-state" id="emptyState">
+            <i class="fa-solid fa-receipt empty-icon"></i>
+            <h3>No transactions found</h3>
+            <p id="emptyStateMsg">Try adjusting your filters or add a new transaction.</p>
+            <a href="addTransaction.html" class="empty-add-btn">
+                <i class="fa-solid fa-plus"></i> Add Transaction
+            </a>
+        </div>
+
+
+        <!-- UNDO DELETE SNACKBAR (shown briefly after delete) -->
+        <div class="delete-confirm-bar" id="deleteConfirmBar">
+            <i class="fa-solid fa-trash-can"></i>
+            <span id="deleteConfirmText">Transaction deleted</span>
+        </div>
+
+    </main>
+    <!-- SHARED MODAL — Assignment 6 -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box" id="sharedModal">
+        <button class="modal-close" onclick="closeModal()">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <span class="modal-icon" id="modalIcon">⚠️</span>
+        <h3 class="modal-title" id="modalTitle">Are you sure?</h3>
+        <div class="modal-message" id="modalMessage"></div>
+        <div class="modal-actions">
+            <button class="modal-cancel-btn" onclick="closeModal()">Cancel</button>
+            <button class="modal-confirm-btn" id="modalConfirmBtn" onclick="confirmModal()">Confirm</button>
+        </div>
+    </div>
+</div>
+</div>
+<script src="js/dataService.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/transactions.js"></script>
+
+</body>
+</html>
