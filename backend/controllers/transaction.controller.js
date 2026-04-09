@@ -1,4 +1,4 @@
-import Transaction from '../models/transaction.js';
+import Transaction from '../models/Transaction.js';
 
 // GET /api/transactions
 // Returns all transactions for the logged-in user, newest first
