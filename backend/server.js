@@ -65,7 +65,10 @@ const app = express();
 
 // --- MIDDLEWARE ---
 // Allowing all origins for easy deployment to Vercel
-app.use(cors());
+app.use(cors({
+  origin: "https://full-stack-project-4ekfnbl7m-vyavaharep04-clouds-projects.vercel.app",
+  credentials: true
+}));
 app.use(express.json());
 
 console.log("--- Environment Check ---");
