@@ -4,8 +4,8 @@
 // ============================================================
 
 const USE_BACKEND = true; // KEEP THIS TRUE!
-const BASE_URL    = 'http://localhost:3000/api';
-
+// const BASE_URL    = 'http://localhost:3000/api';
+const BASE_URL    = 'https://fullstack-project-d7l0.onrender.com/api'; // ✅ Correct for the internet
 // ------------------------------------------------------------
 //  Auth & Guest Helpers
 // ------------------------------------------------------------
