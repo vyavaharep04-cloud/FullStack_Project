@@ -382,7 +382,7 @@ async function renderBudgetSnapshot() {
     el.innerHTML = "";
 
     if (cats.length === 0) {
-        el.innerHTML = '<div class="fh-snapshot-empty">No budget set for this month.<br><a href="budgetPlanner.html" style="color:#1f82a6;">Set up Budget Planner →</a></div>';
+        el.innerHTML = '<div class="fh-snapshot-empty">No budget set for this month.<br><a href="budgetplanner.html" style="color:#1f82a6;">Set up Budget Planner →</a></div>';
         return;
     }
 
