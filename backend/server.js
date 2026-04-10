@@ -68,7 +68,9 @@ const app = express();
 app.use(cors({
   origin: [
     "https://full-stack-project-ashy-nine.vercel.app",
+     "https://finantra.vercel.app",
     "https://full-stack-project-4ekfnbl7m-vyavaharep04-clouds-projects.vercel.app"
+    
   ],
   credentials: true
 }));
